@@ -1,0 +1,3 @@
+{
+  "extends": "@autolab/config/tsconfig.base.json"
+}
