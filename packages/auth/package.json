@@ -13,6 +13,7 @@
   "dependencies": {
     "@autolab/db": "workspace:*",
     "@autolab/env": "workspace:*",
+    "@better-auth/core": "catalog:",
     "@polar-sh/better-auth": "catalog:",
     "@polar-sh/sdk": "^0.47.1",
     "better-auth": "catalog:",

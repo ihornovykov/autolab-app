@@ -5,62 +5,52 @@ import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from "@tanst
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { createMiddleware } from "@tanstack/react-start";
 import { evlogErrorHandler } from "evlog/nitro/v3";
+import { ThemeProvider } from "next-themes";
 
-import type { orpc } from "@/utils/orpc";
+import type { orpc } from "@/shared/api/orpc";
+import { DialogHost } from "@/shared/ui/dialog-host";
+import { SheetHost } from "@/shared/ui/sheet-host";
 
-import Header from "../components/header";
+import appCss from "@/shared/styles/index.css?url";
 
-import appCss from "../index.css?url";
-export interface RouterAppContext {
+export type RouterAppContext = {
   orpc: typeof orpc;
   queryClient: QueryClient;
-}
+};
+
+const RootDocument = () => (
+  <html lang="uk" suppressHydrationWarning>
+    <head>
+      <HeadContent />
+    </head>
+    <body>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <Outlet />
+        <DialogHost />
+        <SheetHost />
+        <Toaster richColors position="bottom-right" />
+        <TanStackRouterDevtools position="bottom-left" />
+        <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />
+      </ThemeProvider>
+      <Scripts />
+    </body>
+  </html>
+);
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   server: {
     middleware: [createMiddleware().server(evlogErrorHandler)],
   },
-
   head: () => ({
     meta: [
-      {
-        charSet: "utf-8",
-      },
-      {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1",
-      },
-      {
-        title: "My App",
-      },
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "Autolab" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: "/favicon.ico" },
     ],
   }),
-
   component: RootDocument,
 });
-
-function RootDocument() {
-  return (
-    <html lang="en" className="dark">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <div className="grid h-svh grid-rows-[auto_1fr]">
-          <Header />
-          <Outlet />
-        </div>
-        <Toaster richColors />
-        <TanStackRouterDevtools position="bottom-left" />
-        <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />
-        <Scripts />
-      </body>
-    </html>
-  );
-}

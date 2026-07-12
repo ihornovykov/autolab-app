@@ -1,19 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 
-import SignInForm from "@/components/sign-in-form";
-import SignUpForm from "@/components/sign-up-form";
+import { LoginView } from "@/views/auth/login-view";
 
 export const Route = createFileRoute("/login")({
-  component: RouteComponent,
+  component: LoginView,
 });
-
-function RouteComponent() {
-  const [showSignIn, setShowSignIn] = useState(false);
-
-  return showSignIn ? (
-    <SignInForm onSwitchToSignUp={() => setShowSignIn(false)} />
-  ) : (
-    <SignUpForm onSwitchToSignIn={() => setShowSignIn(true)} />
-  );
-}

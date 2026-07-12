@@ -1,0 +1,19 @@
+---
+description: Shared API client conventions for the web app
+globs: apps/web/src/shared/api/**/*
+alwaysApply: false
+---
+
+# Shared API (`apps/web/src/shared/api`)
+
+- Configure the oRPC client and TanStack Query utils in `shared/api/orpc.ts`.
+- Import from `@/shared/api/orpc` — never duplicate client setup in features or views.
+
+```ts
+import { orpc } from "@/shared/api/orpc";
+
+const healthCheck = useQuery(orpc.healthCheck.queryOptions());
+```
+
+- Feature-specific query wrappers (if needed) live under `features/<domain>/lib/`, not in `shared/api`.
+- Do not call `fetch` directly for app API calls; use the oRPC client.

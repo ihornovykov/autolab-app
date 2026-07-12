@@ -1,0 +1,57 @@
+---
+description: Conventions for oRPC routers and server modules
+globs: packages/api/**/*
+alwaysApply: false
+---
+
+## Typing inputs and outputs
+
+- **Always define named types for inputs and outputs** in the domain `validation.ts` module.
+- Use clear names like `UpdateUserInput`, `UpdateUserOutput`.
+
+```ts
+// ✅ GOOD – domains/user/routes.ts
+export type UpdateUserOutput = UserOutput;
+
+export const userRoutes = {
+  updateUser: protectedProcedure
+    .input(updateUserInputSchema)
+    .output(updateUserOutputSchema)
+    .handler(async ({ context, input }): Promise<UpdateUserOutput> => {
+      return updateUserService(context, input);
+    }),
+};
+```
+
+```ts
+// ❌ AVOID – unnamed inline return types
+.handler(async ({ context, input }) => {
+  return { /* untyped */ };
+});
+```
+
+## Route naming
+
+- **Domain folders** use resource names (`user`, `billing`, `health`).
+- **Procedures** use action verbs (`getUserById`, `listUsers`, `updateUser`).
+
+## Error handling
+
+- **Always throw `ORPCError`** from `@orpc/server`.
+
+```ts
+import { ORPCError } from "@orpc/server";
+
+throw new ORPCError("NOT_FOUND", {
+  message: "User not found",
+});
+```
+
+## Separation of concerns
+
+- **`routes.ts`** — procedure wiring only.
+- **`services.ts`** — business rules and persistence.
+- **`utils.ts`** — mapping and formatting.
+- **`validation.ts`** — Zod schemas (prefer drizzle-zod for DB entities).
+
+Do not put SQL, heavy logic, or large Zod schemas inline in `routes.ts`.

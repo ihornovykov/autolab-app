@@ -11,3 +11,7 @@ export async function createContext({ req }: { req: Request }) {
 }
 
 export type Context = Awaited<ReturnType<typeof createContext>>;
+
+export type AuthenticatedContext = Context & {
+  session: NonNullable<Context["session"]>;
+};

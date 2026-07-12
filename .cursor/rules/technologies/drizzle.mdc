@@ -1,0 +1,135 @@
+---
+description: Conventions for Drizzle schema, migrations, seeds, and Zod inference
+alwaysApply: true
+---
+
+## Naming, casing, and mapping
+
+- **Use camelCase in TypeScript schema definitions, snake_case in PostgreSQL**.
+- **Map columns explicitly** when the DB name differs from the TS property:
+
+```ts
+// ✅ GOOD – camelCase fields mapped to snake_case columns
+export const users = pgTable("users", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+```
+
+```ts
+// ❌ AVOID – leaking camelCase directly to the DB without mapping
+export const users = pgTable("users", {
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+```
+
+## Timestamp conventions
+
+- **Standardize timestamps as `createdAt` and `updatedAt` in TS**, mapped to `created_at` and `updated_at` in SQL.
+- **Always use `.defaultNow()` and `.$onUpdate(() => new Date())`** on `updatedAt`:
+
+```ts
+export const posts = pgTable("posts", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+```
+
+## Indexes and uniqueness
+
+- **Always declare explicit indexes and unique constraints** in the table callback.
+- **Name composite indexes** so they are easy to reference in migrations and DB tooling.
+
+```ts
+export const users = pgTable(
+  "users",
+  {
+    id: text("id").primaryKey(),
+    email: text("email").notNull().unique(),
+    orgId: text("org_id").notNull(),
+  },
+  (table) => [index("idx_users_org_id").on(table.orgId)],
+);
+```
+
+## Relations and many-to-many
+
+- **Prefer Drizzle `relations()` for simple many-to-many** when the join table has no extra columns.
+- **Use explicit join tables** when you need metadata or timestamps on the association:
+
+```ts
+export const userRoles = pgTable(
+  "user_roles",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    roleId: text("role_id")
+      .notNull()
+      .references(() => roles.id, { onDelete: "cascade" }),
+    assignedAt: timestamp("assigned_at").defaultNow().notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.roleId] })],
+);
+```
+
+## Enums
+
+- **Prefer `pgEnum` over free-form strings** for constrained domains (status, role, provider, etc.).
+- **Use SCREAMING_SNAKE_CASE enum values** and map to snake_case in SQL when needed.
+
+```ts
+export const userStatus = pgEnum("user_status", ["ACTIVE", "INACTIVE", "SUSPENDED"]);
+
+export const users = pgTable("users", {
+  status: userStatus("status").default("ACTIVE").notNull(),
+});
+```
+
+## Migrations
+
+- **Use Drizzle Kit for schema changes** (`drizzle-kit generate` + `drizzle-kit migrate`).
+- **Do not use `drizzle-kit push` for production** – it can drift from controlled, reviewed migrations.
+- **Keep migration names descriptive and use snake_case** (e.g. `add_user_status_enum`, `add_organization_indexes`).
+- **Avoid editing historical migrations** once applied to any shared environment; add new migrations instead.
+
+## Seeds
+
+- **Use idempotent seed scripts** that can be safely re-run.
+- **Prefer upsert/onConflictDoUpdate over blind inserts** for reference data (roles, feature flags, default orgs).
+- **Group seeding by domain** (users, roles, orgs) to keep scripts readable.
+
+```ts
+await db
+  .insert(roles)
+  .values({ id: "admin", name: "admin" })
+  .onConflictDoUpdate({
+    target: roles.name,
+    set: { name: "admin" },
+  });
+```
+
+## Zod schemas from Drizzle
+
+- **Derive validation schemas from Drizzle tables with `drizzle-zod`** in `packages/db/src/validation/`, one file per domain (e.g. `validation/auth.ts`).
+- Keep Drizzle table definitions in `packages/db/src/schema/` (e.g. `schema/auth.ts`).
+- **Extend or pick fields in API domain `validation.ts` files** instead of duplicating column shapes by hand.
+
+```ts
+// packages/db/src/validation/auth.ts
+import { createSelectSchema } from "drizzle-zod";
+import { users } from "../schema/auth";
+
+export const userSelectSchema = createSelectSchema(users);
+export type User = z.infer<typeof userSelectSchema>;
+```

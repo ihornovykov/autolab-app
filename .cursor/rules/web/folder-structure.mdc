@@ -1,0 +1,86 @@
+---
+description: Preferred folder structure and placement of logic for the web app
+alwaysApply: true
+---
+
+# Web app folder structure (FSD, no barrels)
+
+This project uses **Feature-Sliced Design** in `apps/web/src` with **direct imports only** — no `index.ts` barrel files.
+
+## Top-level layout
+
+```txt
+apps/web/src/
+  routes/          # TanStack Router file routes (thin wiring only)
+  shared/          # Cross-cutting infrastructure and UI primitives
+  features/        # Domain slices (auth, home, dashboard, …)
+  views/           # Page-level composition components
+  router.tsx       # Router factory
+```
+
+## Routes (`src/routes/**`)
+
+- TanStack Router file routes live here (including `api/` and layout routes).
+- Route files define `Route` with `createFileRoute` / `createRootRouteWithContext` only.
+- **Delegate UI to `views`**, data/auth guards to `features` or `shared`.
+- Do not put business logic, forms, or large JSX blocks in route files.
+
+```tsx
+// ✅ GOOD – routes/login.tsx
+import { createFileRoute } from "@tanstack/react-router";
+import { LoginView } from "@/views/auth/login-view";
+
+export const Route = createFileRoute("/login")({
+  component: LoginView,
+});
+```
+
+## Shared (`src/shared/**`)
+
+Move reusable, cross-domain code here:
+
+- `shared/api/` — oRPC client, query client setup, TanStack Query utils.
+- `shared/lib/` — auth client, small pure helpers, server-fn helpers when shared.
+- `shared/middleware/` — generic middleware (auth, logging hooks).
+- `shared/ui/` — app shell pieces (header, loader) and local wrappers around `@autolab/ui`.
+- `shared/styles/` — global CSS (`index.css`).
+
+**Do not** add domain-specific forms or page layouts to `shared`.
+
+## Features (`src/features/<domain>/**`)
+
+Each domain gets its own folder with **segments** (no barrel exports):
+
+- `ui/` — presentational / interactive components (`sign-in-form.tsx`, `user-menu.tsx`).
+- `lib/` — constants, validation, hooks, server functions for that domain.
+- `model/` — optional local types/state when not shared.
+
+Examples: `features/auth/`, `features/home/`, `features/dashboard/`.
+
+When the same helper appears in 2+ features, promote it to `shared/lib/` or `shared/ui/`.
+
+## Views (`src/views/<domain>/**`)
+
+Page containers that wire features together:
+
+- Naming: `<name>-view.tsx` exporting `<Name>View` (e.g. `home-view.tsx` → `HomeView`).
+- Views orchestrate features + shared UI; keep domain logic in `features`.
+- One view per primary route/page when practical.
+
+## Backend API (`packages/api`)
+
+All backend logic lives in `@autolab/api`, not in the web app. See `technologies/rpc/server-structure.mdc`.
+
+## Imports
+
+- Use `@/*` path alias with **explicit file paths**:
+  - `@/shared/api/orpc`
+  - `@/features/auth/ui/sign-in-form`
+  - `@/views/home/home-view`
+- **Never** import from folder barrels (`@/features/auth`, `@/shared/lib`) — those folders must not contain `index.ts` re-export files.
+
+## What not to do
+
+- No `src/app/` Next-style folder — routing is `src/routes/`.
+- No `src/components/`, `src/lib/`, `src/utils/` at the root — use `shared/` or `features/`.
+- No barrel `index.ts` files in FSD layers.

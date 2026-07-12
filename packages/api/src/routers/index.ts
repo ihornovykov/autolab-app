@@ -1,17 +1,25 @@
-import type { RouterClient } from "@orpc/server";
-
-import { protectedProcedure, publicProcedure } from "../index";
+import { bookingRoutes } from "../domains/booking/routes";
+import { clientRoutes } from "../domains/client/routes";
+import { employeeRoutes } from "../domains/employee/routes";
+import { healthRoutes } from "../domains/health/routes";
+import { organizationRoutes } from "../domains/organization/routes";
+import { profileRoutes } from "../domains/profile/routes";
+import { searchRoutes } from "../domains/search/routes";
+import { serviceRoutes } from "../domains/service/routes";
+import { userRoutes } from "../domains/user/routes";
+import { vehicleRoutes } from "../domains/vehicle/routes";
 
 export const appRouter = {
-  healthCheck: publicProcedure.handler(() => {
-    return "OK";
-  }),
-  privateData: protectedProcedure.handler(({ context }) => {
-    return {
-      message: "This is private",
-      user: context.session?.user,
-    };
-  }),
+  health: healthRoutes,
+  user: userRoutes,
+  profile: profileRoutes,
+  organization: organizationRoutes,
+  employee: employeeRoutes,
+  service: serviceRoutes,
+  client: clientRoutes,
+  vehicle: vehicleRoutes,
+  booking: bookingRoutes,
+  search: searchRoutes,
 };
+
 export type AppRouter = typeof appRouter;
-export type AppRouterClient = RouterClient<typeof appRouter>;

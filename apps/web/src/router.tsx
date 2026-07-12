@@ -1,9 +1,9 @@
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 
-import Loader from "./components/loader";
+import { createQueryClient, orpc } from "@/shared/api/orpc";
+
 import { routeTree } from "./routeTree.gen";
-import { createQueryClient, orpc } from "./utils/orpc";
 
 export const getRouter = () => {
   const queryClient = createQueryClient();
@@ -13,7 +13,6 @@ export const getRouter = () => {
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
     context: { orpc, queryClient },
-    defaultPendingComponent: () => <Loader />,
     defaultNotFoundComponent: () => <div>Not Found</div>,
   });
 

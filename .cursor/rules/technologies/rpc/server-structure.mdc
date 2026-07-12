@@ -1,0 +1,80 @@
+---
+description: oRPC API package structure and domain conventions
+globs: packages/api/**/*
+alwaysApply: false
+---
+
+# `@autolab/api` structure
+
+All backend business logic lives in `packages/api`. The web app consumes it via oRPC; it does not define server routers locally.
+
+## Layout
+
+```txt
+packages/api/src/
+  index.ts              # o instance, publicProcedure, protectedProcedure
+  context.ts            # createContext (auth, db, request scope)
+  routers/
+    index.ts            # appRouter — composes domain routes only
+  domains/
+    <domain>/
+      routes.ts         # oRPC procedures for the domain
+      services.ts       # business logic, DB access, orchestration
+      utils.ts          # pure mappers/helpers
+      validation.ts     # Zod inputs/outputs (extend drizzle-zod schemas)
+```
+
+## Domain modules
+
+Each domain folder owns one bounded context (e.g. `health`, `user`, `billing`).
+
+| File | Responsibility |
+|------|----------------|
+| `routes.ts` | Procedure definitions only — wire validation, call services, map errors |
+| `services.ts` | Business logic and database calls |
+| `utils.ts` | Pure mapping/formatting (DB row → API output) |
+| `validation.ts` | Input/output Zod schemas and `z.infer` type exports |
+
+## Validation
+
+- Define **named input/output types** in `validation.ts`.
+- **Base DB shapes on drizzle-zod** from `@autolab/db`; pick/extend for API boundaries.
+- Procedures must use `.input()` / `.output()` when schemas exist.
+
+```ts
+// domains/user/validation.ts
+import { z } from "zod";
+import { userPublicSchema } from "@autolab/db/validation/auth";
+
+export const privateDataOutputSchema = z.object({
+  message: z.string(),
+  user: userPublicSchema.nullish(),
+});
+export type PrivateDataOutput = z.infer<typeof privateDataOutputSchema>;
+```
+
+## Router composition
+
+- `routers/index.ts` merges domain route objects into `appRouter`.
+- Keep the root router thin — no business logic at the root.
+
+```ts
+import { healthRoutes } from "../domains/health/routes";
+import { userRoutes } from "../domains/user/routes";
+
+export const appRouter = {
+  ...healthRoutes,
+  ...userRoutes,
+};
+```
+
+## Adding a domain
+
+1. Create `packages/api/src/domains/<domain>/`.
+2. Add `validation.ts`, `services.ts`, `utils.ts` as needed.
+3. Add `routes.ts` using shared procedures from `../.. /index`.
+4. Register exports in `routers/index.ts`.
+
+## Errors
+
+- Throw **`ORPCError`** from `@orpc/server`, not plain `Error`.

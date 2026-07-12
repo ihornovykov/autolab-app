@@ -5,6 +5,12 @@
     ".": {
       "default": "./src/index.ts"
     },
+    "./schema/auth": {
+      "default": "./src/schema/auth.ts"
+    },
+    "./validation/auth": {
+      "default": "./src/validation/auth.ts"
+    },
     "./*": {
       "default": "./src/*.ts"
     }
@@ -13,12 +19,17 @@
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx src/scripts/seed.ts",
+    "db:seed-stress": "tsx src/scripts/seed-stress.ts",
+    "db:seed-working-hours": "tsx src/scripts/seed-working-hours.ts"
   },
   "dependencies": {
     "@autolab/env": "workspace:*",
+    "better-auth": "catalog:",
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.1",
+    "drizzle-zod": "^0.8.3",
     "pg": "^8.17.1",
     "zod": "catalog:"
   },
@@ -26,6 +37,7 @@
     "@autolab/config": "workspace:*",
     "@types/pg": "^8.16.0",
     "drizzle-kit": "^0.31.8",
+    "tsx": "^4.20.5",
     "typescript": "catalog:"
   }
 }

@@ -1,17 +1,20 @@
 import { cn } from "@autolab/ui/lib/utils";
 import * as React from "react";
 
-function Label({ className, ...props }: React.ComponentProps<"label">) {
-  return (
+const Label = React.forwardRef<HTMLLabelElement, React.ComponentProps<"label">>(
+  ({ className, ...props }, ref) => (
     <label
+      ref={ref}
       data-slot="label"
       className={cn(
-        "flex items-center gap-2 text-xs leading-none select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+        "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
         className,
       )}
       {...props}
     />
-  );
-}
+  ),
+);
+
+Label.displayName = "Label";
 
 export { Label };

@@ -19,7 +19,10 @@
     "db:push": "vp run --filter @autolab/db db:push",
     "db:studio": "vp run --filter @autolab/db db:studio",
     "db:generate": "vp run --filter @autolab/db db:generate",
-    "db:migrate": "vp run --filter @autolab/db db:migrate"
+    "db:migrate": "vp run --filter @autolab/db db:migrate",
+    "db:seed": "vp run --filter @autolab/db db:seed",
+    "db:seed-stress": "vp run --filter @autolab/db db:seed-stress",
+    "db:seed-working-hours": "vp run --filter @autolab/db db:seed-working-hours"
   },
   "dependencies": {
     "@autolab/env": "workspace:*",
