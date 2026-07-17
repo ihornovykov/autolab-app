@@ -1,8 +1,12 @@
+"use client";
+
 import dayjs from "dayjs";
+import { useSyncExternalStore } from "react";
 import { Area, AreaChart, CartesianGrid, Label, Pie, PieChart, XAxis, YAxis } from "recharts";
 
 import { formatPrice } from "@/shared/lib/format";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@autolab/ui/components/card";
+import { AnalyticsChartsSkeleton } from "@/features/dashboard/ui/analytics-charts-skeleton";
 import {
   type ChartConfig,
   ChartContainer,
@@ -32,10 +36,10 @@ const statusLabels: Record<Status, string> = {
 };
 
 const statusColors: Record<Status, string> = {
-  PENDING: "var(--color-status-warning)",
-  IN_PROGRESS: "var(--color-status-info)",
-  COMPLETED: "var(--color-status-success)",
-  CANCELLED: "var(--color-status-danger)",
+  PENDING: "var(--status-warning)",
+  IN_PROGRESS: "var(--status-info)",
+  COMPLETED: "var(--status-success)",
+  CANCELLED: "var(--status-danger)",
 };
 
 const revenueChartConfig = {
@@ -58,7 +62,17 @@ type Props = {
   statusBreakdown: StatusPoint[];
 };
 
+const subscribe = () => () => {};
+
+const useIsClient = () => useSyncExternalStore(subscribe, () => true, () => false);
+
 export const AnalyticsCharts = ({ revenueTimeSeries, statusBreakdown }: Props) => {
+  const isClient = useIsClient();
+
+  if (!isClient) {
+    return <AnalyticsChartsSkeleton />;
+  }
+
   const revenueData = revenueTimeSeries.map((point) => ({
     date: dayjs(point.date).format("D MMM"),
     revenue: Number(point.revenue),

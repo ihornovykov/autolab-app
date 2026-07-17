@@ -46,10 +46,10 @@ export const OnboardingView = () => {
     const splitName = splitFullName(session?.user.name ?? "");
 
     return {
-      firstName: profile?.firstName ?? splitName.firstName,
-      lastName: profile?.lastName ?? splitName.lastName,
-      middleName: profile?.middleName ?? "",
-      phone: profile?.phone ?? "",
+      firstName: profile?.firstName?.trim() || splitName.firstName,
+      lastName: profile?.lastName?.trim() || splitName.lastName,
+      middleName: profile?.middleName?.trim() ?? "",
+      phone: profile?.phone?.trim() ?? "",
     };
   }, [profileQuery.data, session?.user.name]);
 
@@ -79,80 +79,76 @@ export const OnboardingView = () => {
     workingHoursQuery.isLoading
   ) {
     return (
-      <AuthPageShell contentClassName="max-w-2xl" contentAlign="start">
+      <AuthPageShell contentClassName="max-w-2xl" contentAlign="start" fixedHeight>
         <p className="text-center text-sm text-muted-foreground">Завантаження...</p>
       </AuthPageShell>
     );
   }
 
   return (
-    <AuthPageShell contentClassName="max-w-2xl" contentAlign="start">
-      <div className="space-y-8">
-        <div className="space-y-3 text-center">
-          <h1 className="text-2xl font-bold tracking-tight">Налаштування акаунту</h1>
-          <p className="text-balance text-sm text-muted-foreground">
-            Заповніть профіль, налаштуйте графік роботи та створіть організацію
-          </p>
-        </div>
-
-        <OnboardingStepIndicator currentStep={step} />
-
-        {step === "profile" ? (
-          <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm sm:p-8">
-            <OnboardingProfileForm
-              initialValues={profileInitialValues}
-              onCompleted={() => setStep("working-hours")}
-            />
+    <AuthPageShell contentClassName="max-w-2xl mx-auto" contentAlign="start" fixedHeight>
+      <div className="space-y-8 pb-4">
+          <div className="space-y-3 text-center">
+            <h1 className="text-2xl font-bold tracking-tight">Налаштування акаунту</h1>
+            <p className="text-balance text-sm text-muted-foreground">
+              Заповніть профіль, налаштуйте графік роботи та створіть організацію
+            </p>
           </div>
-        ) : null}
 
-        {step === "working-hours" ? (
-          <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm sm:p-8">
-            <div className="mb-6 space-y-1">
-              <h2 className="text-lg font-semibold">Графік роботи</h2>
-              <p className="text-sm text-muted-foreground">
-                Вкажіть години, коли ви доступні для записів. Робота поза цим часом
-                переноситься на наступний робочий день.
-              </p>
-            </div>
-            <OnboardingWorkingHoursForm
-              initialDays={workingHoursQuery.data}
-              onCompleted={() => setStep("organization")}
-            />
-            <div className="mt-6">
-              <Button type="button" variant="outline" onClick={() => setStep("profile")}>
-                Назад
-              </Button>
-            </div>
-          </div>
-        ) : null}
+          <OnboardingStepIndicator currentStep={step} />
 
-        {step === "organization" ? (
-          <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm sm:p-8">
-            <div className="mb-6 space-y-1">
-              <h2 className="text-lg font-semibold">Створіть організацію</h2>
-              <p className="text-sm text-muted-foreground">
-                Додайте СТО або автосервіс, яким ви керуватимете в системі
-              </p>
+          {step === "profile" ? (
+            <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm sm:p-8">
+              <OnboardingProfileForm
+                initialValues={profileInitialValues}
+                onCompleted={() => setStep("working-hours")}
+              />
             </div>
-            <CreateOrganizationForm
-              formId={ORGANIZATION_FORM_ID}
-              onSubmit={(values) => createOrganizationMutation.mutate(values)}
-            />
-            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-              <Button type="button" variant="outline" onClick={() => setStep("working-hours")}>
-                Назад
-              </Button>
-              <Button
-                type="submit"
-                form={ORGANIZATION_FORM_ID}
-                loading={createOrganizationMutation.isPending}
-              >
-                Завершити налаштування
-              </Button>
+          ) : null}
+
+          {step === "working-hours" ? (
+            <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm sm:p-8">
+              <div className="mb-6 space-y-1">
+                <h2 className="text-lg font-semibold">Графік роботи</h2>
+                <p className="text-sm text-muted-foreground">
+                  Вкажіть години, коли ви доступні для записів. Робота поза цим часом
+                  переноситься на наступний робочий день.
+                </p>
+              </div>
+              <OnboardingWorkingHoursForm
+                initialDays={workingHoursQuery.data}
+                onCompleted={() => setStep("organization")}
+                onBack={() => setStep("profile")}
+              />
             </div>
-          </div>
-        ) : null}
+          ) : null}
+
+          {step === "organization" ? (
+            <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm sm:p-8">
+              <div className="mb-6 space-y-1">
+                <h2 className="text-lg font-semibold">Створіть організацію</h2>
+                <p className="text-sm text-muted-foreground">
+                  Додайте СТО або автосервіс, яким ви керуватимете в системі
+                </p>
+              </div>
+              <CreateOrganizationForm
+                formId={ORGANIZATION_FORM_ID}
+                onSubmit={(values) => createOrganizationMutation.mutate(values)}
+              />
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+                <Button type="button" variant="outline" onClick={() => setStep("working-hours")}>
+                  Назад
+                </Button>
+                <Button
+                  type="submit"
+                  form={ORGANIZATION_FORM_ID}
+                  loading={createOrganizationMutation.isPending}
+                >
+                  Завершити налаштування
+                </Button>
+              </div>
+            </div>
+          ) : null}
       </div>
     </AuthPageShell>
   );

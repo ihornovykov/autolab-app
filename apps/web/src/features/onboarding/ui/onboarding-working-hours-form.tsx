@@ -17,9 +17,10 @@ import { Button } from "@autolab/ui/components/button";
 type Props = {
   initialDays?: WorkingHoursDay[];
   onCompleted: () => void;
+  onBack?: () => void;
 };
 
-export const OnboardingWorkingHoursForm = ({ initialDays, onCompleted }: Props) => {
+export const OnboardingWorkingHoursForm = ({ initialDays, onCompleted, onBack }: Props) => {
   const queryClient = useQueryClient();
   const [days, setDays] = useState<WorkingHoursDay[]>(initialDays ?? defaultWorkingHoursDays);
   const [formError, setFormError] = useState<string | null>(null);
@@ -64,15 +65,22 @@ export const OnboardingWorkingHoursForm = ({ initialDays, onCompleted }: Props) 
     <form onSubmit={handleSubmit} className="space-y-6">
       <WorkingHoursEditor days={days} onChange={setDays} formError={hasAttemptedSubmit ? formError ?? undefined : undefined} />
 
-      <Button
-        type="submit"
-        size="lg"
-        className="w-full"
-        loading={updateMutation.isPending}
-        icon={<ArrowRight className="size-4" />}
-      >
-        Продовжити
-      </Button>
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {onBack ? (
+          <Button type="button" variant="outline" onClick={onBack}>
+            Назад
+          </Button>
+        ) : null}
+        <Button
+          type="submit"
+          size="lg"
+          className={onBack ? "sm:min-w-40" : "w-full"}
+          loading={updateMutation.isPending}
+          icon={<ArrowRight className="size-4" />}
+        >
+          Продовжити
+        </Button>
+      </div>
     </form>
   );
 };

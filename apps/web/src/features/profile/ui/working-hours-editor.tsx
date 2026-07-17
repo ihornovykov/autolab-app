@@ -1,5 +1,5 @@
 import { Checkbox } from "@autolab/ui/components/checkbox";
-import { Input } from "@autolab/ui/components/input";
+import { TimePicker } from "@autolab/ui/components/time-picker";
 import { cn } from "@autolab/ui/lib/utils";
 
 import {
@@ -48,20 +48,20 @@ export const WorkingHoursEditor = ({ days, onChange, dayErrors, formError }: Pro
           >
             <p className="self-center text-sm font-medium">{weekdayLabels[day.weekday]}</p>
 
-            <Input
+            <TimePicker
               label="Початок"
-              type="time"
               value={toTimeInputValue(day.openTime)}
               disabled={day.isClosed}
-              onChange={(event) => updateDay(day.weekday, { openTime: event.target.value })}
+              minuteStep={1}
+              onChange={(nextValue) => updateDay(day.weekday, { openTime: nextValue })}
             />
 
-            <Input
+            <TimePicker
               label="Кінець"
-              type="time"
               value={toTimeInputValue(day.closeTime)}
               disabled={day.isClosed}
-              onChange={(event) => updateDay(day.weekday, { closeTime: event.target.value })}
+              minuteStep={1}
+              onChange={(nextValue) => updateDay(day.weekday, { closeTime: nextValue })}
             />
 
             <label className="flex items-center gap-2 self-end pb-2 text-sm">

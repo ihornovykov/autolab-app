@@ -8,7 +8,7 @@ import {
   UsersIcon,
   WalletIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, lazy, Suspense } from "react";
 
 import { toListBookingsDateRange } from "@/features/booking/lib/date-range-filter";
 import {
@@ -17,7 +17,7 @@ import {
   type DashboardDatePreset,
 } from "@/features/dashboard/lib/date-range-presets";
 import { AnalyticsBookingsTable } from "@/features/dashboard/ui/analytics-bookings-table";
-import { AnalyticsCharts } from "@/features/dashboard/ui/analytics-charts";
+import { AnalyticsChartsSkeleton } from "@/features/dashboard/ui/analytics-charts-skeleton";
 import { DashboardDateRange } from "@/features/dashboard/ui/dashboard-date-range";
 import { DashboardStatsSkeleton } from "@/features/dashboard/ui/dashboard-stats-skeleton";
 import { DownloadAnalyticsReportButton } from "@/features/dashboard/ui/download-analytics-report-button";
@@ -31,6 +31,12 @@ import { Heading, PageContainer } from "@/shared/ui/page-container";
 import type { DateRangeFilterValue } from "@autolab/ui/components/date-range-picker";
 
 const DASHBOARD_BOOKINGS_PAGE_SIZE = 10;
+
+const AnalyticsCharts = lazy(() =>
+  import("@/features/dashboard/ui/analytics-charts").then((module) => ({
+    default: module.AnalyticsCharts,
+  })),
+);
 
 export const DashboardView = () => {
   const organizationId = useSelectedOrganizationId();
@@ -164,10 +170,16 @@ export const DashboardView = () => {
             />
           </div>
 
-          <AnalyticsCharts
-            revenueTimeSeries={analytics.revenueTimeSeries}
-            statusBreakdown={analytics.statusBreakdown}
-          />
+          <Suspense
+            fallback={
+              <AnalyticsChartsSkeleton />
+            }
+          >
+            <AnalyticsCharts
+              revenueTimeSeries={analytics.revenueTimeSeries}
+              statusBreakdown={analytics.statusBreakdown}
+            />
+          </Suspense>
 
           <AnalyticsBookingsTable
             bookings={(bookings?.items ?? []).map((booking) => ({
