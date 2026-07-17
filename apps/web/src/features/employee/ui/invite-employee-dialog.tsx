@@ -51,10 +51,10 @@ export const InviteEmployeeDialog = ({ organizationId }: Props) => {
   }, [debouncedQuery]);
 
   const findUserQuery = useQuery({
-    ...orpc.employee.findEmployeeByEmailOrUsername.queryOptions({
-      input: { organizationId, query: debouncedQuery },
+    ...orpc.employee.findEmployeeByEmail.queryOptions({
+      input: { organizationId, email: debouncedQuery },
     }),
-    enabled: debouncedQuery.length > 2,
+    enabled: debouncedQuery.includes("@") && debouncedQuery.length > 5,
   });
 
   const inviteMutation = useMutation(
@@ -86,7 +86,7 @@ export const InviteEmployeeDialog = ({ organizationId }: Props) => {
       open
       onOpenChange={(open) => !open && dialogs.close()}
       title="Додати працівника"
-      description="Знайдіть користувача за email або ім'ям користувача та запросіть до організації."
+      description="Знайдіть користувача за email та запросіть до організації."
       className="max-w-md"
       footer={
         <div className="flex items-center justify-end gap-3">
@@ -111,7 +111,7 @@ export const InviteEmployeeDialog = ({ organizationId }: Props) => {
     >
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="employee-search">Email / ім'я користувача</Label>
+          <Label htmlFor="employee-search">Email</Label>
           <Input
             id="employee-search"
             placeholder="example@gmail.com"
@@ -148,7 +148,7 @@ export const InviteEmployeeDialog = ({ organizationId }: Props) => {
           </div>
         ) : null}
 
-        {foundUser && debouncedQuery.length > 2 ? (
+        {foundUser && debouncedQuery.includes("@") ? (
           <button
             type="button"
             className={cn(
@@ -169,7 +169,7 @@ export const InviteEmployeeDialog = ({ organizationId }: Props) => {
           </button>
         ) : null}
 
-        {!findUserQuery.isFetching && debouncedQuery.length > 2 && !foundUser ? (
+        {!findUserQuery.isFetching && debouncedQuery.includes("@") && !foundUser ? (
           <p className="rounded-md border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
             Користувача не знайдено
           </p>

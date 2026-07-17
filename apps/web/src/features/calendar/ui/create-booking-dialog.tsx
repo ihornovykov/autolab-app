@@ -1,24 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { PlusIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { VehicleBookingForm, VehicleBookingFormSkeleton } from "@/features/booking/ui/vehicle-booking-form";
+import { VehicleSearchSelect } from "@/features/booking/ui/vehicle-search-select";
+import { SERVICES_SELECT_PAGE_SIZE } from "@/features/service/lib/constants";
 import { orpc } from "@/shared/api/orpc";
 import { createSelectListInput } from "@/shared/lib/pagination";
 import { dialogs } from "@/shared/stores/dialogs";
 import { Button } from "@autolab/ui/components/button";
 import { Dialog } from "@autolab/ui/components/sheet";
-import { Label } from "@autolab/ui/components/label";
 import { Skeleton } from "@autolab/ui/components/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@autolab/ui/components/select";
 
 const FORM_ID = "calendar-create-booking-form";
 
@@ -31,16 +25,14 @@ export const CreateBookingDialog = ({ organizationId, initialStartTime }: Props)
   const queryClient = useQueryClient();
   const [vehicleId, setVehicleId] = useState("");
 
-  const vehiclesQuery = useQuery({
-    ...orpc.vehicle.listVehicles.queryOptions({ input: createSelectListInput(organizationId) }),
-  });
-
   const employeesQuery = useQuery({
     ...orpc.employee.listEmployees.queryOptions({ input: createSelectListInput(organizationId) }),
   });
 
   const servicesQuery = useQuery({
-    ...orpc.service.listServices.queryOptions({ input: createSelectListInput(organizationId) }),
+    ...orpc.service.listServices.queryOptions({
+      input: { organizationId, page: 1, pageSize: SERVICES_SELECT_PAGE_SIZE },
+    }),
   });
 
   const createMutation = useMutation(
@@ -56,17 +48,6 @@ export const CreateBookingDialog = ({ organizationId, initialStartTime }: Props)
     }),
   );
 
-  const vehicles = vehiclesQuery.data?.items ?? [];
-
-  const vehicleItems = useMemo(
-    () =>
-      vehicles.map((vehicle) => ({
-        value: vehicle.id,
-        label: [vehicle.make, vehicle.model, vehicle.licensePlate].filter(Boolean).join(" · "),
-      })),
-    [vehicles],
-  );
-
   const employees = (employeesQuery.data?.items ?? [])
     .filter((employee) => employee.isActive)
     .map((employee) => ({
@@ -77,12 +58,13 @@ export const CreateBookingDialog = ({ organizationId, initialStartTime }: Props)
   const services = (servicesQuery.data?.items ?? []).map((service) => ({
     id: service.id,
     title: service.title,
+    description: service.description,
+    category: service.category,
     price: service.price,
     duration: service.duration,
   }));
 
-  const isLoading =
-    vehiclesQuery.isLoading || employeesQuery.isLoading || servicesQuery.isLoading;
+  const isLoading = employeesQuery.isLoading || servicesQuery.isLoading;
 
   const canSubmit =
     !!vehicleId && employees.length > 0 && services.length > 0 && !createMutation.isPending;
@@ -93,7 +75,7 @@ export const CreateBookingDialog = ({ organizationId, initialStartTime }: Props)
       onOpenChange={(open) => !open && dialogs.close()}
       title="Новий запис"
       description="Оберіть автомобіль і створіть запис на обслуговування"
-      className="max-w-lg"
+      className="max-w-xl"
       footer={
         <div className="flex items-center justify-end gap-3">
           <Button
@@ -124,10 +106,6 @@ export const CreateBookingDialog = ({ organizationId, initialStartTime }: Props)
           </div>
           <VehicleBookingFormSkeleton />
         </div>
-      ) : vehicles.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border/60 px-4 py-8 text-center text-sm text-muted-foreground">
-          Додайте автомобіль до організації, щоб створити запис.
-        </p>
       ) : employees.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border/60 px-4 py-8 text-center text-sm text-muted-foreground">
           Додайте активного працівника, щоб створити запис.
@@ -138,25 +116,11 @@ export const CreateBookingDialog = ({ organizationId, initialStartTime }: Props)
         </p>
       ) : (
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="calendar-booking-vehicle">Автомобіль *</Label>
-            <Select
-              value={vehicleId || null}
-              onValueChange={(value) => setVehicleId(value ?? "")}
-              items={vehicleItems}
-            >
-              <SelectTrigger id="calendar-booking-vehicle">
-                <SelectValue placeholder="Оберіть автомобіль" />
-              </SelectTrigger>
-              <SelectContent>
-                {vehicleItems.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <VehicleSearchSelect
+            organizationId={organizationId}
+            value={vehicleId}
+            onValueChange={setVehicleId}
+          />
 
           <VehicleBookingForm
             formId={FORM_ID}
@@ -171,7 +135,7 @@ export const CreateBookingDialog = ({ organizationId, initialStartTime }: Props)
                 organizationId,
                 vehicleId,
                 employeeId: values.employeeId,
-                serviceIds: values.serviceIds,
+                items: values.items,
                 startTime: dayjs(values.startTime).toISOString(),
                 endTime: dayjs(values.endTime).toISOString(),
                 allowsOvertime: values.allowsOvertime,

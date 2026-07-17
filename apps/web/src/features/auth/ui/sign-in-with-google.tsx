@@ -10,7 +10,7 @@ export const SignInWithGoogle = () => (
     onClick={() =>
       authClient.signIn.social({
         provider: "google",
-        callbackURL: "/dashboard",
+        callbackURL: "/onboarding",
       })
     }
   >

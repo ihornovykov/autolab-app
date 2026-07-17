@@ -12,10 +12,7 @@ export const profileOutputSchema = profileSelectSchema.pick({
   firstName: true,
   lastName: true,
   middleName: true,
-  username: true,
   phone: true,
-  birthDate: true,
-  gender: true,
 });
 
 export type ProfileOutput = z.infer<typeof profileOutputSchema>;

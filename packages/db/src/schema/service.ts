@@ -9,6 +9,7 @@ export const services = pgTable(
     organizationId: text("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
+    category: text("category"),
     title: text("title").notNull(),
     description: text("description"),
     price: numeric("price", { precision: 10, scale: 2 }).notNull(),
@@ -19,5 +20,8 @@ export const services = pgTable(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (table) => [index("idx_services_organization_id").on(table.organizationId)],
+  (table) => [
+    index("idx_services_organization_id").on(table.organizationId),
+    index("idx_services_category").on(table.category),
+  ],
 );

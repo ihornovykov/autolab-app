@@ -18,22 +18,12 @@ export const updateProfileInputSchema = z.object({
   firstName: z.string().min(1).optional(),
   lastName: z.string().optional(),
   middleName: z.string().optional(),
-  birthDate: z.string().nullable().optional(),
-  gender: z.enum(["MALE", "FEMALE"]).nullable().optional(),
+  phone: z.string().min(10).optional(),
 });
 
 export const updateProfileOutputSchema = profileOutputSchema;
 export type UpdateProfileInput = z.infer<typeof updateProfileInputSchema>;
 export type UpdateProfileOutput = z.infer<typeof updateProfileOutputSchema>;
-
-export const updateUsernamePhoneInputSchema = z.object({
-  username: z.string().min(3).optional(),
-  phone: z.string().min(10).optional(),
-});
-
-export const updateUsernamePhoneOutputSchema = profileOutputSchema;
-export type UpdateUsernamePhoneInput = z.infer<typeof updateUsernamePhoneInputSchema>;
-export type UpdateUsernamePhoneOutput = z.infer<typeof updateUsernamePhoneOutputSchema>;
 
 export const workingHoursOutputSchema = z.array(profileWorkingHoursSelectSchema);
 export type GetWorkingHoursOutput = z.infer<typeof workingHoursOutputSchema>;
@@ -61,3 +51,11 @@ export const updateWorkingHoursInputSchema = z.object({
 export const updateWorkingHoursOutputSchema = workingHoursOutputSchema;
 export type UpdateWorkingHoursInput = z.infer<typeof updateWorkingHoursInputSchema>;
 export type UpdateWorkingHoursOutput = z.infer<typeof updateWorkingHoursOutputSchema>;
+
+export const onboardingStatusOutputSchema = z.object({
+  needsOnboarding: z.boolean(),
+  isProfileComplete: z.boolean(),
+  hasOrganization: z.boolean(),
+});
+
+export type OnboardingStatusOutput = z.infer<typeof onboardingStatusOutputSchema>;

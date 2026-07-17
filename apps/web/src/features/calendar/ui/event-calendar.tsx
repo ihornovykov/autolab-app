@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import {
   CalendarCheckIcon,
   ChevronDownIcon,
@@ -11,6 +10,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
 import { mapBookingToHistoryItem } from "@/features/calendar/lib/map-booking";
+import { BookingPreviewSheet } from "@/features/booking/ui/booking-preview-sheet";
 import {
   EventGap,
   EventHeight,
@@ -31,6 +31,7 @@ import { MonthView } from "@/features/calendar/ui/month-view";
 import { WeekView } from "@/features/calendar/ui/week-view";
 import { orpc } from "@/shared/api/orpc";
 import { dialogs } from "@/shared/stores/dialogs";
+import { sheets } from "@/shared/stores/sheets";
 import { Button } from "@autolab/ui/components/button";
 import {
   DropdownMenu,
@@ -59,7 +60,6 @@ export const EventCalendar = ({
   className,
 }: Props) => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const view = useCalendarStore((state) => state.view);
   const currentDate = useCalendarStore((state) => state.currentDate);
   const setView = useCalendarStore((state) => state.setView);
@@ -135,16 +135,18 @@ export const EventCalendar = ({
   const handleEventClick = useCallback(
     (eventId: string) => {
       const event = eventsById.get(eventId);
-      const bookingId = event?.bookingId ?? eventId;
-      if (!bookingId) return;
+      const booking = event ? bookingsById.get(event.bookingId) : undefined;
+      if (!booking) return;
 
-      navigate({
-        to: "/dashboard/organization/bookings/$bookingId",
-        params: { bookingId },
-        search: { organizationId },
-      });
+      sheets.open(
+        <BookingPreviewSheet
+          booking={booking}
+          organizationId={organizationId}
+          calendarEvent={event}
+        />,
+      );
     },
-    [eventsById, navigate, organizationId],
+    [bookingsById, eventsById, organizationId],
   );
 
   const handleEventUpdate = useCallback(

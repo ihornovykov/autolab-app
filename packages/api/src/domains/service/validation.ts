@@ -9,14 +9,16 @@ export const organizationIdInputSchema = z.object({
 
 export const listServicesInputSchema = organizationIdInputSchema.extend({
   page: paginationInputSchema.shape.page,
-  pageSize: paginationInputSchema.shape.pageSize,
+  pageSize: z.number().int().min(1).max(500).default(25),
   search: searchInputSchema.shape.search,
+  category: z.string().min(1).optional(),
 });
 
 export const listServicesOutputSchema = createPaginatedOutputSchema(serviceOutputSchema);
 
 export const createServiceInputSchema = z.object({
   organizationId: z.string().min(1),
+  category: z.string().min(1).optional(),
   title: z.string().min(1),
   description: z.string().optional(),
   price: z.string().min(1),

@@ -11,6 +11,7 @@ type Service = {
   id: string;
   title: string;
   description?: string | null;
+  category?: string | null;
   price: string;
   duration: number;
 };
@@ -54,7 +55,7 @@ export const ServiceCard = ({ service, className, onClick }: Props) => (
             variant="secondary"
             className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
           >
-            Послуга
+            {service.category?.trim() || "Інше"}
           </Badge>
           <CardTitle className="mt-2 line-clamp-2 text-base font-bold leading-snug tracking-tight">
             {service.title}

@@ -1,11 +1,20 @@
 import { useForm } from "@tanstack/react-form";
 import z from "zod";
 
+import { SERVICE_CATEGORIES } from "@/features/service/lib/service-categories";
 import { formatFieldErrors } from "@/shared/lib/format-field-errors";
 import { Input } from "@autolab/ui/components/input";
 import { Textarea } from "@autolab/ui/components/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@autolab/ui/components/select";
 
 export type ServiceFormValues = {
+  category?: string;
   title: string;
   description?: string;
   price: string;
@@ -19,6 +28,7 @@ type Props = {
 };
 
 const serviceFormSchema = z.object({
+  category: z.string().trim().min(1, "Категорія обов'язкова"),
   title: z.string().trim().min(1, "Назва обов'язкова"),
   description: z.string(),
   price: z
@@ -26,15 +36,14 @@ const serviceFormSchema = z.object({
     .trim()
     .min(1, "Ціна обов'язкова")
     .refine((value) => !Number.isNaN(Number(value)) && Number(value) > 0, "Некоректна ціна"),
-  duration: z
-    .union([z.string(), z.number()])
-    .refine((value) => {
-      const parsed = Number(value);
-      return value !== "" && !Number.isNaN(parsed) && Number.isInteger(parsed) && parsed > 0;
-    }, "Тривалість має бути більше 0"),
+  duration: z.union([z.string(), z.number()]).refine((value) => {
+    const parsed = Number(value);
+    return value !== "" && !Number.isNaN(parsed) && Number.isInteger(parsed) && parsed > 0;
+  }, "Тривалість має бути більше 0"),
 });
 
 const toSubmitValues = (value: z.infer<typeof serviceFormSchema>): ServiceFormValues => ({
+  category: value.category.trim() || undefined,
   title: value.title.trim(),
   description: value.description.trim() || undefined,
   price: value.price.trim(),
@@ -44,6 +53,7 @@ const toSubmitValues = (value: z.infer<typeof serviceFormSchema>): ServiceFormVa
 export const ServiceForm = ({ formId, initialValues, onSubmit }: Props) => {
   const form = useForm({
     defaultValues: {
+      category: initialValues?.category ?? "",
       title: initialValues?.title ?? "",
       description: initialValues?.description ?? "",
       price: initialValues?.price ?? "",
@@ -67,10 +77,35 @@ export const ServiceForm = ({ formId, initialValues, onSubmit }: Props) => {
       <div className="space-y-4 rounded-xl border border-border/60 p-4">
         <div>
           <p className="text-sm font-medium">Основна інформація</p>
-          <p className="text-xs text-muted-foreground">
-            Назва та опис послуги для прайс-листа
-          </p>
+          <p className="text-xs text-muted-foreground">Назва та опис послуги для прайс-листа</p>
         </div>
+
+        <form.Field name="category">
+          {(field) => (
+            <div className="space-y-1">
+              <label className="text-sm font-medium leading-none">Категорія</label>
+              <Select
+                value={field.state.value || null}
+                onValueChange={(value) => field.handleChange(value ?? "")}
+                items={SERVICE_CATEGORIES.map((category) => ({
+                  value: category,
+                  label: category,
+                }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Оберіть категорію" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SERVICE_CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </form.Field>
 
         <form.Field name="title">
           {(field) => (
@@ -92,6 +127,7 @@ export const ServiceForm = ({ formId, initialValues, onSubmit }: Props) => {
               className="min-h-24 resize-none"
               value={field.state.value}
               onChange={(e) => field.handleChange(e.target.value)}
+              error={formatFieldErrors(field.state.meta.errors)}
             />
           )}
         </form.Field>

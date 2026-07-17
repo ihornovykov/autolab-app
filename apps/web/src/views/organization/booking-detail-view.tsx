@@ -193,15 +193,27 @@ export const BookingDetailView = () => {
           <div className="p-5">
             {booking.services?.length ? (
               <div className="space-y-3">
-                {booking.services.map((service) => (
+                {booking.services.map((service) => {
+                  const quantity = service.quantity ?? 1;
+                  const unitPrice = service.unitPrice ?? service.price;
+                  const lineTotal = Number(unitPrice) * quantity;
+
+                  return (
                   <div
                     key={service.id}
                     className="rounded-lg border border-border/60 px-4 py-3"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
-                      <p className="font-medium">{service.title}</p>
+                      <div className="min-w-0">
+                        <p className="font-medium">{service.title}</p>
+                        {quantity > 1 ? (
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {formatPrice(unitPrice)} × {quantity}
+                          </p>
+                        ) : null}
+                      </div>
                       <p className="shrink-0 text-sm font-semibold tabular-nums">
-                        {formatPrice(service.price)}
+                        {formatPrice(lineTotal)}
                       </p>
                     </div>
                     {service.description ? (
@@ -210,7 +222,8 @@ export const BookingDetailView = () => {
                       </p>
                     ) : null}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">Послуги не вказані</p>

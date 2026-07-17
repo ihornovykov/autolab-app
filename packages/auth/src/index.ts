@@ -28,6 +28,9 @@ export function createAuth() {
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
+      sendResetPassword: async ({ user, url }) => {
+        console.info(`[auth] Password reset for ${user.email}: ${url}`);
+      },
     },
     emailVerification: {
       sendVerificationEmail: async ({ user, url }) => {

@@ -1,10 +1,8 @@
-import L from "leaflet";
+import type * as Leaflet from "leaflet";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@autolab/ui/lib/utils";
-
-import "leaflet/dist/leaflet.css";
 
 type Props = {
   onLocationSelect: (lat: number, lng: number, address: string) => void;
@@ -25,20 +23,24 @@ const mapStyles = {
   },
 };
 
-const customIcon = new L.Icon({
-  iconUrl: "/icons/map-pin.svg",
-  iconSize: [25, 30],
-  iconAnchor: [12, 30],
-  popupAnchor: [1, -34],
-});
+const loadLeaflet = async () => {
+  const [leafletModule] = await Promise.all([
+    import("leaflet"),
+    import("leaflet/dist/leaflet.css"),
+  ]);
+
+  return leafletModule.default;
+};
 
 export const CreateOrganizationMap = ({ onLocationSelect, initialLocation, className }: Props) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
-  const tileLayerRef = useRef<L.TileLayer | null>(null);
+  const mapInstanceRef = useRef<Leaflet.Map | null>(null);
+  const markerRef = useRef<Leaflet.Marker | null>(null);
+  const tileLayerRef = useRef<Leaflet.TileLayer | null>(null);
+  const leafletRef = useRef<typeof Leaflet | null>(null);
   const onLocationSelectRef = useRef(onLocationSelect);
-  const [selectedLocation, setSelectedLocation] = useState<L.LatLng | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<Leaflet.LatLng | null>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
   const { resolvedTheme } = useTheme();
 
   onLocationSelectRef.current = onLocationSelect;
@@ -46,80 +48,112 @@ export const CreateOrganizationMap = ({ onLocationSelect, initialLocation, class
   useEffect(() => {
     if (typeof window === "undefined" || !mapRef.current || mapInstanceRef.current) return;
 
-    const map = L.map(mapRef.current, {
-      center: [50.4501, 30.5234],
-      zoom: 6,
-      zoomControl: false,
-    });
-    mapInstanceRef.current = map;
+    let isCancelled = false;
+    let cleanup: (() => void) | undefined;
 
-    const theme = resolvedTheme === "dark" ? "dark" : "light";
-    const currentStyle = mapStyles[theme];
-    tileLayerRef.current = L.tileLayer(currentStyle.tiles, {
-      attribution: currentStyle.attribution,
-      subdomains: "abcd",
-      className: theme === "dark" ? "dark-map-tiles" : "",
-    }).addTo(map);
+    void loadLeaflet().then((L) => {
+      if (isCancelled || !mapRef.current || mapInstanceRef.current) return;
 
-    L.control.zoom({ position: "topright" }).addTo(map);
+      leafletRef.current = L;
 
-    const handleMapClick = async (e: L.LeafletMouseEvent) => {
-      const currentMap = mapInstanceRef.current;
-      if (!currentMap) return;
-
-      const { lat, lng } = e.latlng;
-      setSelectedLocation(e.latlng);
-
-      if (markerRef.current) {
-        markerRef.current.setLatLng([lat, lng]);
-      } else {
-        markerRef.current = L.marker([lat, lng], { icon: customIcon }).addTo(currentMap);
-      }
-
-      currentMap.setView([lat, lng], currentMap.getZoom(), {
-        animate: true,
-        duration: 0.5,
-        noMoveStart: true,
+      const customIcon = new L.Icon({
+        iconUrl: "/icons/map-pin.svg",
+        iconSize: [25, 30],
+        iconAnchor: [12, 30],
+        popupAnchor: [1, -34],
       });
 
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=uk`,
-        );
-        const data = await response.json();
-        const address = data.display_name || "Адресу не знайдено";
-        onLocationSelectRef.current(lat, lng, address);
-      } catch {
-        onLocationSelectRef.current(lat, lng, "Помилка при отриманні адреси");
-      }
-    };
+      const map = L.map(mapRef.current, {
+        center: [50.4501, 30.5234],
+        zoom: 6,
+        zoomControl: false,
+      });
+      mapInstanceRef.current = map;
 
-    map.on("click", handleMapClick);
+      const theme = resolvedTheme === "dark" ? "dark" : "light";
+      const currentStyle = mapStyles[theme];
+      tileLayerRef.current = L.tileLayer(currentStyle.tiles, {
+        attribution: currentStyle.attribution,
+        subdomains: "abcd",
+        className: theme === "dark" ? "dark-map-tiles" : "",
+      }).addTo(map);
 
-    const style = document.createElement("style");
-    style.textContent = `
-      .dark-map-tiles {
-        filter: brightness(0.8) invert(1) contrast(1.1) hue-rotate(180deg) saturate(0.5);
-      }
-    `;
-    document.head.appendChild(style);
+      L.control.zoom({ position: "topright" }).addTo(map);
+
+      const handleMapClick = async (event: Leaflet.LeafletMouseEvent) => {
+        const currentMap = mapInstanceRef.current;
+        if (!currentMap) return;
+
+        const { lat, lng } = event.latlng;
+        setSelectedLocation(event.latlng);
+
+        if (markerRef.current) {
+          markerRef.current.setLatLng([lat, lng]);
+        } else {
+          markerRef.current = L.marker([lat, lng], { icon: customIcon }).addTo(currentMap);
+        }
+
+        currentMap.setView([lat, lng], currentMap.getZoom(), {
+          animate: true,
+          duration: 0.5,
+          noMoveStart: true,
+        });
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=uk`,
+          );
+          const data = await response.json();
+          const address = data.display_name || "Адресу не знайдено";
+          onLocationSelectRef.current(lat, lng, address);
+        } catch {
+          onLocationSelectRef.current(lat, lng, "Помилка при отриманні адреси");
+        }
+      };
+
+      map.on("click", handleMapClick);
+
+      const style = document.createElement("style");
+      style.textContent = `
+        .dark-map-tiles {
+          filter: brightness(0.8) invert(1) contrast(1.1) hue-rotate(180deg) saturate(0.5);
+        }
+      `;
+      document.head.appendChild(style);
+      setIsMapReady(true);
+
+      cleanup = () => {
+        map.off("click", handleMapClick);
+        map.remove();
+        mapInstanceRef.current = null;
+        tileLayerRef.current = null;
+        markerRef.current = null;
+        leafletRef.current = null;
+        style.remove();
+        setIsMapReady(false);
+      };
+    });
 
     return () => {
-      map.off("click", handleMapClick);
-      map.remove();
-      mapInstanceRef.current = null;
-      tileLayerRef.current = null;
-      markerRef.current = null;
-      style.remove();
+      isCancelled = true;
+      cleanup?.();
     };
   }, []);
 
   useEffect(() => {
-    if (!mapInstanceRef.current || !initialLocation) return;
+    const L = leafletRef.current;
+    if (!L || !mapInstanceRef.current || !initialLocation) return;
 
     const { lat, lng } = initialLocation;
     const latLng = L.latLng(lat, lng);
     setSelectedLocation(latLng);
+
+    const customIcon = new L.Icon({
+      iconUrl: "/icons/map-pin.svg",
+      iconSize: [25, 30],
+      iconAnchor: [12, 30],
+      popupAnchor: [1, -34],
+    });
 
     if (markerRef.current) {
       markerRef.current.setLatLng([lat, lng]);
@@ -128,10 +162,11 @@ export const CreateOrganizationMap = ({ onLocationSelect, initialLocation, class
     }
 
     mapInstanceRef.current.setView([lat, lng], 14, { animate: false });
-  }, [initialLocation]);
+  }, [initialLocation, isMapReady]);
 
   useEffect(() => {
-    if (!mapInstanceRef.current || !tileLayerRef.current) return;
+    const L = leafletRef.current;
+    if (!L || !mapInstanceRef.current || !tileLayerRef.current) return;
 
     const theme = resolvedTheme === "dark" ? "dark" : "light";
     const currentStyle = mapStyles[theme];
@@ -142,7 +177,7 @@ export const CreateOrganizationMap = ({ onLocationSelect, initialLocation, class
       subdomains: "abcd",
       className: theme === "dark" ? "dark-map-tiles" : "",
     }).addTo(mapInstanceRef.current);
-  }, [resolvedTheme]);
+  }, [resolvedTheme, isMapReady]);
 
   useEffect(() => {
     if (mapInstanceRef.current && selectedLocation) {

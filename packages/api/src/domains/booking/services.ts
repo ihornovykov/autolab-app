@@ -10,6 +10,7 @@ import { and, asc, count, desc, eq, gte, inArray, lt, lte, ne, or, sql, sum } fr
 
 import type { AuthenticatedContext } from "../../context";
 import { getWorkingHoursForUserId, getWorkingHoursForUserIds } from "../profile/services";
+import { buildAnalyticsReportFilename, buildBookingReceiptFilename } from "../../lib/pdf-filename";
 import { createId, getOrgContext } from "../../lib/org-scope";
 import {
   buildPaginatedResult,
@@ -33,6 +34,10 @@ import type {
   getBookingReceiptPdfInputSchema,
   listBookingsInputSchema,
   listBookingsOutputSchema,
+  organizationAnalyticsBookingsInputSchema,
+  organizationAnalyticsBookingsOutputSchema,
+  organizationAnalyticsInputSchema,
+  organizationAnalyticsOutputSchema,
   updateBookingInputSchema,
   updateBookingStatusInputSchema,
 } from "./validation";
@@ -40,6 +45,10 @@ import type { listVehicleBookingsInputSchema, listVehicleBookingsOutputSchema } 
 import { getOrganizationById } from "../organization/services";
 import { getVehicleById } from "../vehicle/services";
 import { buildBookingReceiptPdf } from "./lib/receipt-pdf";
+import {
+  collectOrganizationAnalytics,
+} from "./lib/analytics";
+import { buildOrganizationAnalyticsPdf, mapReportBooking } from "./lib/analytics-pdf";
 
 const bookingWith = {
   vehicle: true as const,
@@ -75,12 +84,16 @@ const mapBooking = (
       user?: unknown;
     } | null;
     bookingServices?: Array<{
+      quantity: number;
+      unitPrice: string;
+      duration: number;
       service: {
         id: string;
         title: string;
         description: string | null;
         price: string;
         duration: number;
+        category: string | null;
       };
     }>;
   },
@@ -89,7 +102,11 @@ const mapBooking = (
   },
 ) => ({
   ...row,
-  services: row.bookingServices?.map((bs) => bs.service),
+  services: row.bookingServices?.map((bs) => ({
+    ...bs.service,
+    quantity: bs.quantity,
+    unitPrice: bs.unitPrice,
+  })),
   employee: row.employee
     ? {
         id: row.employee.id,
@@ -101,24 +118,63 @@ const mapBooking = (
   employeeWorkingHours: options?.employeeWorkingHours,
 });
 
-const calculateTotalPrice = async (serviceIds: string[]) => {
+type ResolvedBookingItem = {
+  serviceId: string;
+  quantity: number;
+  unitPrice: string;
+  duration: number;
+};
+
+const resolveBookingItems = async (
+  organizationId: string,
+  items: Array<{ serviceId: string; quantity: number; unitPrice: string }>,
+) => {
+  const uniqueIds = [...new Set(items.map((item) => item.serviceId))];
+
   const selected = await db.query.services.findMany({
-    where: inArray(services.id, serviceIds),
+    where: and(
+      inArray(services.id, uniqueIds),
+      eq(services.organizationId, organizationId),
+    ),
   });
 
-  if (selected.length !== serviceIds.length) {
+  if (selected.length !== uniqueIds.length) {
     throw new ORPCError("BAD_REQUEST", { message: "Invalid service selection" });
   }
 
-  const total = selected.reduce((acc, s) => acc + Number(s.price), 0);
-  const duration = selected.reduce((acc, s) => acc + s.duration, 0);
-  return { total: total.toFixed(2), selected, duration };
+  const serviceMap = new Map(selected.map((service) => [service.id, service]));
+
+  let total = 0;
+  let duration = 0;
+
+  const resolved: ResolvedBookingItem[] = items.map((item) => {
+    const service = serviceMap.get(item.serviceId);
+    if (!service) {
+      throw new ORPCError("BAD_REQUEST", { message: "Invalid service selection" });
+    }
+
+    const unitPrice = Number(item.unitPrice).toFixed(2);
+    total += Number(unitPrice) * item.quantity;
+    duration += service.duration * item.quantity;
+
+    return {
+      serviceId: item.serviceId,
+      quantity: item.quantity,
+      unitPrice,
+      duration: service.duration,
+    };
+  });
+
+  return { total: total.toFixed(2), duration, items: resolved, selected };
 };
+
+const calculateBookingDuration = (items: ResolvedBookingItem[]) =>
+  items.reduce((sum, item) => sum + item.duration * item.quantity, 0);
 
 const resolveEndTimeForBooking = async (
   employeeId: string,
   startTime: Date,
-  serviceIds: string[],
+  items: ResolvedBookingItem[],
 ) => {
   const employee = await db.query.employees.findFirst({
     where: eq(employees.id, employeeId),
@@ -129,7 +185,7 @@ const resolveEndTimeForBooking = async (
     throw new ORPCError("BAD_REQUEST", { message: "Invalid employee" });
   }
 
-  const { duration } = await calculateTotalPrice(serviceIds);
+  const duration = calculateBookingDuration(items);
   const schedule = await getWorkingHoursForUserId(employee.userId);
   return resolveBookingEndTime(startTime, duration, schedule);
 };
@@ -405,7 +461,12 @@ export const generateBookingReceiptPdf = async (
 
   return {
     pdfBase64: pdfBuffer.toString("base64"),
-    filename: `kvytantsiia-${booking.id}.pdf`,
+    filename: buildBookingReceiptFilename({
+      startTime: booking.startTime,
+      licensePlate: vehicle?.licensePlate ?? booking.vehicle?.licensePlate,
+      make: vehicle?.make ?? booking.vehicle?.make,
+      model: vehicle?.model ?? booking.vehicle?.model,
+    }),
     contentType: "application/pdf" as const,
   };
 };
@@ -423,7 +484,10 @@ export const createBooking = async (
   input: z.infer<typeof createBookingInputSchema>,
 ) => {
   const org = await getOrgContext(context, input.organizationId);
-  const { total, selected } = await calculateTotalPrice(input.serviceIds);
+  const { total, items: resolvedItems } = await resolveBookingItems(
+    org.organizationId,
+    input.items,
+  );
   const bookingId = createId();
   const startTime = new Date(input.startTime);
   const endTime = new Date(input.endTime);
@@ -443,7 +507,13 @@ export const createBooking = async (
   });
 
   await db.insert(bookingServices).values(
-    selected.map((s) => ({ bookingId, serviceId: s.id })),
+    resolvedItems.map((item) => ({
+      bookingId,
+      serviceId: item.serviceId,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      duration: item.duration,
+    })),
   );
 
   const full = await getBookingById(context, {
@@ -476,15 +546,27 @@ export const updateBooking = async (
   }
 
   let totalPrice = existing.totalPrice;
-  let serviceIds = existing.bookingServices?.map((bs) => bs.service.id) ?? [];
+  let resolvedItems: ResolvedBookingItem[] =
+    existing.bookingServices?.map((bs) => ({
+      serviceId: bs.service.id,
+      quantity: bs.quantity,
+      unitPrice: bs.unitPrice,
+      duration: bs.duration,
+    })) ?? [];
 
-  if (input.serviceIds) {
-    const { total } = await calculateTotalPrice(input.serviceIds);
-    totalPrice = total;
-    serviceIds = input.serviceIds;
+  if (input.items) {
+    const resolved = await resolveBookingItems(org.organizationId, input.items);
+    totalPrice = resolved.total;
+    resolvedItems = resolved.items;
     await db.delete(bookingServices).where(eq(bookingServices.bookingId, input.bookingId));
     await db.insert(bookingServices).values(
-      input.serviceIds.map((serviceId) => ({ bookingId: input.bookingId, serviceId })),
+      resolvedItems.map((item) => ({
+        bookingId: input.bookingId,
+        serviceId: item.serviceId,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        duration: item.duration,
+      })),
     );
   }
 
@@ -492,8 +574,8 @@ export const updateBooking = async (
   const startTime = input.startTime ? new Date(input.startTime) : existing.startTime;
   const endTime = input.endTime
     ? new Date(input.endTime)
-    : input.startTime || input.serviceIds || input.employeeId
-      ? await resolveEndTimeForBooking(employeeId, startTime, serviceIds)
+    : input.startTime || input.items || input.employeeId
+      ? await resolveEndTimeForBooking(employeeId, startTime, resolvedItems)
       : existing.endTime;
 
   assertEndTimeAfterStart(startTime, endTime);
@@ -607,5 +689,116 @@ export const getDashboardStats = async (
     todayBookings: withHours.map(({ row, employeeWorkingHours }) =>
       mapBooking(row, { employeeWorkingHours }),
     ),
+  };
+};
+
+const mapBookingsWithHours = async (rows: Parameters<typeof mapBooking>[0][]) => {
+  const withHours = await attachWorkingHours(rows);
+  return withHours.map(({ row, employeeWorkingHours }) =>
+    mapBooking(row, { employeeWorkingHours }),
+  );
+};
+
+export const getOrganizationAnalytics = async (
+  context: AuthenticatedContext,
+  input: z.infer<typeof organizationAnalyticsInputSchema>,
+): Promise<z.infer<typeof organizationAnalyticsOutputSchema>> => {
+  const org = await getOrgContext(context, input.organizationId);
+  const from = new Date(input.from);
+  const to = new Date(input.to);
+
+  return collectOrganizationAnalytics({
+    organizationId: org.organizationId,
+    from,
+    to,
+  });
+};
+
+export const listOrganizationAnalyticsBookings = async (
+  context: AuthenticatedContext,
+  input: z.infer<typeof organizationAnalyticsBookingsInputSchema>,
+): Promise<z.infer<typeof organizationAnalyticsBookingsOutputSchema>> => {
+  const org = await getOrgContext(context, input.organizationId);
+  const from = new Date(input.from);
+  const to = new Date(input.to);
+  const page = input.page ?? 1;
+  const pageSize = input.pageSize ?? 10;
+  const whereClause = and(
+    eq(bookings.organizationId, org.organizationId),
+    gte(bookings.startTime, from),
+    lte(bookings.startTime, to),
+  );
+
+  const [totalResult, rows] = await Promise.all([
+    db.select({ count: count() }).from(bookings).where(whereClause),
+    db.query.bookings.findMany({
+      where: whereClause,
+      with: bookingWith,
+      orderBy: (booking, { desc: descOrder }) => [descOrder(booking.startTime)],
+      limit: pageSize,
+      offset: getOffset(page, pageSize),
+    }),
+  ]);
+
+  const items = await mapBookingsWithHours(rows);
+
+  return buildPaginatedResult(items, totalResult[0]?.count ?? 0, page, pageSize);
+};
+
+const reportBookingWith = {
+  vehicle: { with: { client: true as const } },
+  employee: { with: { user: { columns: { name: true } } } },
+  bookingServices: { with: { service: { columns: { title: true } } } },
+};
+
+export const exportOrganizationAnalyticsPdf = async (
+  context: AuthenticatedContext,
+  input: z.infer<typeof organizationAnalyticsInputSchema>,
+) => {
+  const org = await getOrgContext(context, input.organizationId);
+  const from = new Date(input.from);
+  const to = new Date(input.to);
+
+  const [analytics, organization, reportRows] = await Promise.all([
+    getOrganizationAnalytics(context, input),
+    getOrganizationById(context, {
+      organizationId: input.organizationId,
+    }),
+    db.query.bookings.findMany({
+      where: and(
+        eq(bookings.organizationId, org.organizationId),
+        gte(bookings.startTime, from),
+        lte(bookings.startTime, to),
+      ),
+      with: reportBookingWith,
+      orderBy: (booking, { desc: descOrder }) => [descOrder(booking.startTime)],
+    }),
+  ]);
+
+  if (!organization) {
+    throw new ORPCError("NOT_FOUND", { message: "Organization not found" });
+  }
+
+  const pdfBuffer = await buildOrganizationAnalyticsPdf({
+    organization: {
+      name: organization.name,
+      logo: organization.logo,
+      address: organization.address,
+      phone: organization.phone,
+      email: organization.email,
+      website: organization.website,
+    },
+    analytics,
+    reportBookings: reportRows.map(mapReportBooking),
+  });
+
+  return {
+    pdfBase64: pdfBuffer.toString("base64"),
+    filename: buildAnalyticsReportFilename({
+      organizationName: organization.name,
+      from,
+      to,
+    }),
+    contentType: "application/pdf" as const,
   };
 };

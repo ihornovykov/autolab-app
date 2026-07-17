@@ -30,8 +30,14 @@ export const listServices = async (
 
   const conditions = [eq(services.organizationId, input.organizationId)];
 
+  if (input.category) {
+    conditions.push(eq(services.category, input.category));
+  }
+
   if (pattern) {
-    conditions.push(orHomoglyphs(pattern, services.title, services.description)!);
+    conditions.push(
+      orHomoglyphs(pattern, services.title, services.description, services.category)!,
+    );
   }
 
   const whereClause = and(...conditions);
@@ -60,6 +66,7 @@ export const createService = async (
     .values({
       id: createId(),
       organizationId: input.organizationId,
+      category: input.category,
       title: input.title,
       description: input.description,
       price: input.price,

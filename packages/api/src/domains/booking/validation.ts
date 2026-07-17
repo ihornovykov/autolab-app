@@ -12,6 +12,17 @@ export const organizationIdInputSchema = z.object({
   organizationId: z.string().min(1),
 });
 
+export const bookingServiceItemSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string().nullable().optional(),
+  price: z.string(),
+  duration: z.number(),
+  category: z.string().nullable().optional(),
+  quantity: z.number().int().positive(),
+  unitPrice: z.string(),
+});
+
 export const bookingWithRelationsSchema = bookingOutputSchema.extend({
   vehicle: z
     .object({
@@ -31,17 +42,7 @@ export const bookingWithRelationsSchema = bookingOutputSchema.extend({
     })
     .optional(),
   employeeWorkingHours: z.array(workingHoursDayInputSchema).optional(),
-  services: z
-    .array(
-      z.object({
-        id: z.string(),
-        title: z.string(),
-        description: z.string().nullable().optional(),
-        price: z.string(),
-        duration: z.number(),
-      }),
-    )
-    .optional(),
+  services: z.array(bookingServiceItemSchema).optional(),
 });
 
 export const listBookingsInputSchema = z.object({
@@ -74,6 +75,17 @@ export const getBookingReceiptPdfOutputSchema = z.object({
   contentType: z.literal("application/pdf"),
 });
 
+export const bookingServiceItemInputSchema = z.object({
+  serviceId: z.string().min(1),
+  quantity: z.number().int().min(1).max(99),
+  unitPrice: z
+    .string()
+    .min(1)
+    .refine((value) => !Number.isNaN(Number(value)) && Number(value) >= 0, {
+      message: "Invalid unit price",
+    }),
+});
+
 export const createBookingInputSchema = z
   .object({
     organizationId: z.string().min(1),
@@ -83,7 +95,7 @@ export const createBookingInputSchema = z
     endTime: z.string().datetime(),
     allowsOvertime: z.boolean().optional(),
     notes: z.string().optional(),
-    serviceIds: z.array(z.string().min(1)).min(1),
+    items: z.array(bookingServiceItemInputSchema).min(1),
   })
   .refine((input) => new Date(input.endTime) > new Date(input.startTime), {
     message: "End time must be after start time",
@@ -99,7 +111,7 @@ export const updateBookingInputSchema = z
     endTime: z.string().datetime().optional(),
     allowsOvertime: z.boolean().optional(),
     notes: z.string().optional(),
-    serviceIds: z.array(z.string().min(1)).optional(),
+    items: z.array(bookingServiceItemInputSchema).min(1).optional(),
   })
   .refine(
     (input) => {
@@ -133,4 +145,78 @@ export const dashboardStatsOutputSchema = z.object({
   revenueThisWeek: z.string(),
   newClientsThisWeek: z.number(),
   todayBookings: z.array(bookingWithRelationsSchema),
+});
+
+export const organizationAnalyticsInputSchema = z
+  .object({
+    organizationId: z.string().min(1),
+    from: z.string().datetime(),
+    to: z.string().datetime(),
+  })
+  .refine((input) => new Date(input.to) > new Date(input.from), {
+    message: "End date must be after start date",
+    path: ["to"],
+  });
+
+export const organizationAnalyticsBookingsInputSchema = organizationAnalyticsInputSchema.extend({
+  page: paginationInputSchema.shape.page,
+  pageSize: paginationInputSchema.shape.pageSize,
+});
+
+export const organizationAnalyticsBookingsOutputSchema =
+  createPaginatedOutputSchema(bookingWithRelationsSchema);
+
+const analyticsSummarySchema = z.object({
+  totalBookings: z.number(),
+  completedBookings: z.number(),
+  cancelledBookings: z.number(),
+  inProgressBookings: z.number(),
+  pendingBookings: z.number(),
+  totalRevenue: z.string(),
+  averageTicket: z.string(),
+  newClients: z.number(),
+});
+
+const analyticsComparisonSchema = analyticsSummarySchema.extend({
+  totalBookingsDeltaPercent: z.number().nullable(),
+  completedBookingsDeltaPercent: z.number().nullable(),
+  totalRevenueDeltaPercent: z.number().nullable(),
+  averageTicketDeltaPercent: z.number().nullable(),
+  newClientsDeltaPercent: z.number().nullable(),
+});
+
+export const organizationAnalyticsOutputSchema = z.object({
+  from: z.string().datetime(),
+  to: z.string().datetime(),
+  summary: analyticsComparisonSchema,
+  revenueTimeSeries: z.array(
+    z.object({
+      date: z.string(),
+      revenue: z.string(),
+      bookingsCount: z.number(),
+    }),
+  ),
+  statusBreakdown: z.array(
+    z.object({
+      status: z.enum(["PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED"]),
+      count: z.number(),
+      revenue: z.string(),
+    }),
+  ),
+  topServices: z.array(
+    z.object({
+      serviceId: z.string(),
+      title: z.string(),
+      count: z.number(),
+      revenue: z.string(),
+    }),
+  ),
+});
+
+export const exportOrganizationAnalyticsPdfInputSchema = organizationAnalyticsInputSchema;
+
+export const exportOrganizationAnalyticsPdfOutputSchema = z.object({
+  pdfBase64: z.string(),
+  filename: z.string(),
+  contentType: z.literal("application/pdf"),
 });

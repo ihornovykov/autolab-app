@@ -14,7 +14,7 @@ import { getWorkingHoursForUserId } from "../profile/services";
 import type { z } from "zod";
 
 import type {
-  findEmployeeByEmailOrUsernameInputSchema,
+  findEmployeeByEmailInputSchema,
   inviteEmployeeInputSchema,
   listEmployeesInputSchema,
   listEmployeesOutputSchema,
@@ -39,7 +39,7 @@ export const listEmployees = async (
   }
 
   if (pattern) {
-    conditions.push(orHomoglyphs(pattern, users.name, users.email, profiles.username)!);
+    conditions.push(orHomoglyphs(pattern, users.name, users.email)!);
   }
 
   const whereClause = and(...conditions);
@@ -78,7 +78,6 @@ export const listEmployees = async (
         ? {
             firstName: row.profile.firstName,
             lastName: row.profile.lastName,
-            username: row.profile.username,
             phone: row.profile.phone,
           }
         : null,
@@ -148,30 +147,24 @@ export const deleteManyEmployees = async (
   return { success: true as const };
 };
 
-export const findEmployeeByEmailOrUsername = async (
+export const findEmployeeByEmail = async (
   context: AuthenticatedContext,
-  input: z.infer<typeof findEmployeeByEmailOrUsernameInputSchema>,
+  input: z.infer<typeof findEmployeeByEmailInputSchema>,
 ) => {
   await assertOrgManager(context.session.user.id, input.organizationId);
 
-  const profileMatch = await db.query.profiles.findFirst({
-    where: eq(profiles.username, input.query),
-  });
-
-  const user = profileMatch
-    ? await db.query.users.findFirst({ where: eq(users.id, profileMatch.userId) })
-    : await db.query.users.findFirst({ where: eq(users.email, input.query) });
+  const user = await db.query.users.findFirst({ where: eq(users.email, input.email) });
 
   if (!user) return null;
 
-  const profile = profileMatch ?? (await db.query.profiles.findFirst({ where: eq(profiles.userId, user.id) }));
+  const profile = await db.query.profiles.findFirst({ where: eq(profiles.userId, user.id) });
 
   return {
     id: user.id,
     name: user.name,
     email: user.email,
     image: user.image,
-    profile: profile ? { username: profile.username, phone: profile.phone } : null,
+    profile: profile ? { phone: profile.phone } : null,
   };
 };
 

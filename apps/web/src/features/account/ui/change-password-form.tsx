@@ -1,4 +1,5 @@
 import { useForm } from "@tanstack/react-form";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -57,8 +58,11 @@ export const ChangePasswordForm = ({ hasPassword }: Props) => {
       <div className="space-y-2">
         <h3 className="text-sm font-medium">Пароль</h3>
         <p className="text-sm text-muted-foreground">
-          Ви увійшли через Google. Щоб встановити пароль, скористайтеся функцією &quot;Забули
-          пароль?&quot; на сторінці входу.
+          Ви увійшли через Google. Щоб встановити пароль, скористайтеся{" "}
+          <Link to="/auth/forgot-password" className="underline underline-offset-4">
+            сторінкою відновлення пароля
+          </Link>
+          .
         </p>
       </div>
     );

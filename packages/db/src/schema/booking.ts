@@ -1,4 +1,4 @@
-import { boolean, index, numeric, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, index, integer, numeric, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
 
 import { employees } from "./employee";
 import { bookingStatusEnum } from "./enums";
@@ -48,6 +48,9 @@ export const bookingServices = pgTable(
     serviceId: text("service_id")
       .notNull()
       .references(() => services.id, { onDelete: "cascade" }),
+    quantity: integer("quantity").default(1).notNull(),
+    unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
+    duration: integer("duration").notNull(),
   },
   (table) => [primaryKey({ columns: [table.bookingId, table.serviceId] })],
 );

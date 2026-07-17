@@ -4,6 +4,7 @@ import { PlusIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { VehicleBookingForm, VehicleBookingFormSkeleton } from "@/features/booking/ui/vehicle-booking-form";
+import { SERVICES_SELECT_PAGE_SIZE } from "@/features/service/lib/constants";
 import { orpc } from "@/shared/api/orpc";
 import { createSelectListInput } from "@/shared/lib/pagination";
 import { dialogs } from "@/shared/stores/dialogs";
@@ -25,7 +26,9 @@ export const CreateVehicleBookingDialog = ({ organizationId, vehicleId }: Props)
   });
 
   const servicesQuery = useQuery({
-    ...orpc.service.listServices.queryOptions({ input: createSelectListInput(organizationId) }),
+    ...orpc.service.listServices.queryOptions({
+      input: { organizationId, page: 1, pageSize: SERVICES_SELECT_PAGE_SIZE },
+    }),
   });
 
   const createMutation = useMutation(
@@ -51,6 +54,8 @@ export const CreateVehicleBookingDialog = ({ organizationId, vehicleId }: Props)
   const services = (servicesQuery.data?.items ?? []).map((service) => ({
     id: service.id,
     title: service.title,
+    description: service.description,
+    category: service.category,
     price: service.price,
     duration: service.duration,
   }));
@@ -63,7 +68,7 @@ export const CreateVehicleBookingDialog = ({ organizationId, vehicleId }: Props)
       onOpenChange={(open) => !open && dialogs.close()}
       title="Новий запис"
       description="Створіть запис на обслуговування для цього автомобіля"
-      className="max-w-lg"
+      className="max-w-xl"
       footer={
         <div className="flex items-center justify-end gap-3">
           <Button
@@ -107,7 +112,7 @@ export const CreateVehicleBookingDialog = ({ organizationId, vehicleId }: Props)
               organizationId,
               vehicleId,
               employeeId: values.employeeId,
-              serviceIds: values.serviceIds,
+              items: values.items,
               startTime: dayjs(values.startTime).toISOString(),
               endTime: dayjs(values.endTime).toISOString(),
               allowsOvertime: values.allowsOvertime,

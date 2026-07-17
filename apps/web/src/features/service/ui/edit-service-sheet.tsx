@@ -18,6 +18,7 @@ type Service = {
   id: string;
   title: string;
   description?: string | null;
+  category?: string | null;
   price: string;
   duration: number;
 };
@@ -110,6 +111,7 @@ export const EditServiceSheet = ({ service, organizationId }: Props) => {
       <ServiceForm
         formId={FORM_ID}
         initialValues={{
+          category: service.category ?? undefined,
           title: service.title,
           description: service.description ?? undefined,
           price: service.price,

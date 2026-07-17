@@ -149,6 +149,17 @@ const resolveBookingStatus = (startTime: Date, today: Date, index: number): Book
   return index % 23 === 0 ? "CANCELLED" : "PENDING";
 };
 
+const STRESS_CATEGORIES = [
+  "Рульове управління",
+  "Передня підвіска",
+  "Задня підвіска",
+  "Двигун",
+  "Технічне обслуговування",
+  "Трансмісія",
+  "Гальмівна система",
+  "Інше",
+] as const;
+
 const seedStressServices = async (db: Db, count: number) => {
   if (count <= 0) return 0;
 
@@ -157,6 +168,7 @@ const seedStressServices = async (db: Db, count: number) => {
     return {
       id: `${STRESS_PREFIX}-service-${pad(number, 3)}`,
       organizationId: SEED_IDS.organization,
+      category: pick(STRESS_CATEGORIES, index),
       title: `Тестова послуга ${pad(number, 2)}`,
       description: `Автогенерована послуга для навантажувального тесту #${number}`,
       price: (250 + (index % 45) * 75).toFixed(2),
@@ -171,6 +183,7 @@ const seedStressServices = async (db: Db, count: number) => {
       .onConflictDoUpdate({
         target: services.id,
         set: {
+          category: sql`excluded.category`,
           title: sql`excluded.title`,
           description: sql`excluded.description`,
           price: sql`excluded.price`,
@@ -291,7 +304,10 @@ const seedStressBookings = async (
       pick(serviceCatalog, index + serviceIndex * 5),
     );
 
-    const totalDuration = selectedServices.reduce((sum, service) => sum + service.duration, 0);
+    const totalDuration = selectedServices.reduce(
+      (sum, service) => sum + service.duration,
+      0,
+    );
     const totalPrice = selectedServices
       .reduce((sum, service) => sum + Number(service.price), 0)
       .toFixed(2);
@@ -315,6 +331,9 @@ const seedStressBookings = async (
       bookingServiceRows.push({
         bookingId,
         serviceId: service.id,
+        quantity: 1,
+        unitPrice: service.price,
+        duration: service.duration,
       });
     }
   }

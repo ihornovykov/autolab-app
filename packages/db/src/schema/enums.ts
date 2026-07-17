@@ -1,7 +1,5 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 
-export const genderEnum = pgEnum("gender", ["MALE", "FEMALE"]);
-
 export const employeeRoleEnum = pgEnum("employee_role", ["TECHNICIAN", "MANAGER", "OWNER"]);
 
 export const vehicleTypeEnum = pgEnum("vehicle_type", [

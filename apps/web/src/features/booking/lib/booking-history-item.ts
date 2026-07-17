@@ -7,5 +7,12 @@ export type VehicleBookingHistoryItem = {
   allowsOvertime?: boolean;
   notes?: string | null;
   totalPrice: string;
-  services?: Array<{ id: string; title: string; price?: string; duration?: number }>;
+  services?: Array<{
+    id: string;
+    title: string;
+    price?: string;
+    unitPrice?: string;
+    quantity?: number;
+    duration?: number;
+  }>;
 };

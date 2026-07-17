@@ -21,7 +21,14 @@ type BookingWithRelations = {
     id: string;
     make: string;
     model: string;
+    year?: number;
     licensePlate: string | null;
+  };
+  employee?: {
+    id: string;
+    userId: string;
+    role: "TECHNICIAN" | "MANAGER" | "OWNER";
+    name?: string;
   };
   services?: Array<{ id: string; title: string; price?: string; duration?: number }>;
 };

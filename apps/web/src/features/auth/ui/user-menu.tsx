@@ -23,8 +23,8 @@ export const UserMenu = () => {
 
   if (!session) {
     return (
-      <Link to="/login">
-        <Button variant="outline">Sign In</Button>
+      <Link to="/auth/sign-in">
+        <Button variant="outline">Увійти</Button>
       </Link>
     );
   }
@@ -46,7 +46,7 @@ export const UserMenu = () => {
                 fetchOptions: {
                   onSuccess: () => {
                     navigate({
-                      to: "/",
+                      to: "/auth/sign-in",
                     });
                   },
                 },

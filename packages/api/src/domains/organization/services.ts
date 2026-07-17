@@ -1,4 +1,5 @@
 import { db } from "@autolab/db";
+import { createDefaultOrganizationServices } from "@autolab/db/lib/sto-service-catalog";
 import { employees } from "@autolab/db/schema/employee";
 import { organizations } from "@autolab/db/schema/organization";
 import { ORPCError } from "@orpc/server";
@@ -50,32 +51,42 @@ export const createOrganization = async (
 
   const orgId = createId();
 
-  const [organization] = await db
-    .insert(organizations)
-    .values({
-      id: orgId,
-      name: input.name,
-      slug,
-      description: input.description,
-      address: input.address,
-      phone: input.phone,
-      email: input.email,
-      website: input.website,
-      latitude: input.latitude,
-      longitude: input.longitude,
-    })
-    .returning();
+  const [organization] = await db.transaction(async (tx) => {
+    const [created] = await tx
+      .insert(organizations)
+      .values({
+        id: orgId,
+        name: input.name,
+        slug,
+        description: input.description,
+        address: input.address,
+        phone: input.phone,
+        email: input.email,
+        website: input.website,
+        latitude: input.latitude,
+        longitude: input.longitude,
+      })
+      .returning();
+
+    if (!created) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create organization" });
+    }
+
+    await tx.insert(employees).values({
+      id: createId(),
+      userId,
+      organizationId: orgId,
+      role: "OWNER",
+    });
+
+    await createDefaultOrganizationServices(tx, orgId);
+
+    return [created];
+  });
 
   if (!organization) {
     throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create organization" });
   }
-
-  await db.insert(employees).values({
-    id: createId(),
-    userId,
-    organizationId: orgId,
-    role: "OWNER",
-  });
 
   return organization;
 };

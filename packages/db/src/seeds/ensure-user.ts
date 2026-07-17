@@ -15,7 +15,6 @@ export type SeedUserInput = {
   lastName: string;
   middleName?: string;
   phone?: string;
-  username?: string;
 };
 
 export const ensureSeedUser = async (db: Db, user: SeedUserInput, password: string) => {
@@ -57,7 +56,6 @@ export const ensureSeedUser = async (db: Db, user: SeedUserInput, password: stri
       firstName: user.firstName,
       lastName: user.lastName,
       middleName: user.middleName,
-      username: user.username,
       phone: user.phone,
     })
     .onConflictDoUpdate({
@@ -66,7 +64,6 @@ export const ensureSeedUser = async (db: Db, user: SeedUserInput, password: stri
         firstName: user.firstName,
         lastName: user.lastName,
         middleName: user.middleName,
-        username: user.username,
         phone: user.phone,
         updatedAt: new Date(),
       },

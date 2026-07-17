@@ -3,7 +3,6 @@ import { z } from "zod";
 import { employeeOutputSchema } from "@autolab/db/validation/employee";
 import {
   workingHoursDayInputSchema,
-  workingHoursOutputSchema,
 } from "@autolab/db/validation/profile-working-hours";
 import { userPublicSchema } from "@autolab/db/validation/auth";
 import { createPaginatedOutputSchema, paginationInputSchema, searchInputSchema } from "../../lib/pagination";
@@ -25,7 +24,6 @@ export const employeeWithUserSchema = employeeOutputSchema.extend({
       .object({
         firstName: z.string().nullable(),
         lastName: z.string().nullable(),
-        username: z.string().nullable(),
         phone: z.string().nullable(),
       })
       .nullable()
@@ -63,12 +61,12 @@ export const deleteManyEmployeesInputSchema = z.object({
   employeeIds: z.array(z.string().min(1)).min(1),
 });
 
-export const findEmployeeByEmailOrUsernameInputSchema = z.object({
+export const findEmployeeByEmailInputSchema = z.object({
   organizationId: z.string().min(1),
-  query: z.string().min(1),
+  email: z.string().email(),
 });
 
-export const findEmployeeByEmailOrUsernameOutputSchema = z
+export const findEmployeeByEmailOutputSchema = z
   .object({
     id: z.string(),
     name: z.string(),
@@ -76,7 +74,6 @@ export const findEmployeeByEmailOrUsernameOutputSchema = z
     image: z.string().nullable(),
     profile: z
       .object({
-        username: z.string().nullable(),
         phone: z.string().nullable(),
       })
       .nullable(),

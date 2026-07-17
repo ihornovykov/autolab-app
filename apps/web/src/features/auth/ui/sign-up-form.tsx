@@ -10,7 +10,7 @@ import { authClient } from "@/shared/lib/auth-client";
 import { formatFieldErrors } from "@/shared/lib/format-field-errors";
 
 export const SignUpForm = () => {
-  const navigate = useNavigate({ from: "/" });
+  const navigate = useNavigate({ from: "/auth/sign-up" });
 
   const form = useForm({
     defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
@@ -19,7 +19,7 @@ export const SignUpForm = () => {
         { name: value.name, email: value.email, password: value.password },
         {
           onSuccess: () => {
-            navigate({ to: "/dashboard" });
+            navigate({ to: "/onboarding" });
             toast.success("Ви успішно зареєструвались!");
           },
           onError: (error) => {

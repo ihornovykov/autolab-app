@@ -3,60 +3,22 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { range } from "@/shared/lib/arrays";
+import {
+  defaultWorkingHoursDays,
+  mapApiWorkingHoursDays,
+  toWorkingHoursMutationInput,
+  workingHoursDaysSchema,
+  type WorkingHoursDay,
+} from "@/features/profile/lib/working-hours";
+import { WorkingHoursEditor } from "@/features/profile/ui/working-hours-editor";
 import { orpc } from "@/shared/api/orpc";
 import { Button } from "@autolab/ui/components/button";
-import { Checkbox } from "@autolab/ui/components/checkbox";
-import { Input } from "@autolab/ui/components/input";
 import { Skeleton } from "@autolab/ui/components/skeleton";
-import { cn } from "@autolab/ui/lib/utils";
-
-type WorkingHoursDay = {
-  weekday: number;
-  openTime: string | null;
-  closeTime: string | null;
-  isClosed: boolean;
-};
-
-const weekdayLabels: Record<number, string> = {
-  1: "Понеділок",
-  2: "Вівторок",
-  3: "Середа",
-  4: "Четвер",
-  5: "П'ятниця",
-  6: "Субота",
-  7: "Неділя",
-};
-
-const defaultDays: WorkingHoursDay[] = [
-  { weekday: 1, openTime: "09:00", closeTime: "18:00", isClosed: false },
-  { weekday: 2, openTime: "09:00", closeTime: "18:00", isClosed: false },
-  { weekday: 3, openTime: "09:00", closeTime: "18:00", isClosed: false },
-  { weekday: 4, openTime: "09:00", closeTime: "18:00", isClosed: false },
-  { weekday: 5, openTime: "09:00", closeTime: "18:00", isClosed: false },
-  { weekday: 6, openTime: null, closeTime: null, isClosed: true },
-  { weekday: 7, openTime: null, closeTime: null, isClosed: true },
-];
-
-const toTimeInputValue = (value: string | null | undefined) => {
-  if (!value) return "";
-  return value.slice(0, 5);
-};
-
-const mapApiDays = (rows: Array<WorkingHoursDay>) =>
-  defaultDays.map((fallback) => {
-    const row = rows.find((item) => item.weekday === fallback.weekday);
-    if (!row) return fallback;
-    return {
-      weekday: row.weekday,
-      openTime: toTimeInputValue(row.openTime) || fallback.openTime,
-      closeTime: toTimeInputValue(row.closeTime) || fallback.closeTime,
-      isClosed: row.isClosed,
-    };
-  });
 
 export const ProfileWorkingHoursForm = () => {
   const queryClient = useQueryClient();
-  const [days, setDays] = useState<WorkingHoursDay[]>(defaultDays);
+  const [days, setDays] = useState<WorkingHoursDay[]>(defaultWorkingHoursDays);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const workingHoursQuery = useQuery(orpc.profile.getMyWorkingHours.queryOptions());
 
@@ -74,33 +36,22 @@ export const ProfileWorkingHoursForm = () => {
 
   useEffect(() => {
     if (workingHoursQuery.data?.length) {
-      setDays(mapApiDays(workingHoursQuery.data));
+      setDays(mapApiWorkingHoursDays(workingHoursQuery.data));
     }
   }, [workingHoursQuery.data]);
 
-  const updateDay = (weekday: number, patch: Partial<WorkingHoursDay>) => {
-    setDays((current) =>
-      current.map((day) => (day.weekday === weekday ? { ...day, ...patch } : day)),
-    );
-  };
-
-  const handleClosedChange = (weekday: number, isClosed: boolean) => {
-    updateDay(weekday, {
-      isClosed,
-      openTime: isClosed ? null : "09:00",
-      closeTime: isClosed ? null : "18:00",
-    });
-  };
-
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+
+    const result = workingHoursDaysSchema.safeParse(days);
+    if (!result.success) {
+      setFormError(result.error.issues[0]?.message ?? "Перевірте графік роботи");
+      return;
+    }
+
+    setFormError(null);
     updateMutation.mutate({
-      days: days.map((day) => ({
-        weekday: day.weekday,
-        isClosed: day.isClosed,
-        openTime: day.isClosed ? null : day.openTime,
-        closeTime: day.isClosed ? null : day.closeTime,
-      })),
+      days: toWorkingHoursMutationInput(result.data),
     });
   };
 
@@ -118,45 +69,7 @@ export const ProfileWorkingHoursForm = () => {
         </p>
       </div>
 
-      <div className="space-y-2">
-        {days.map((day) => (
-          <div
-            key={day.weekday}
-            className={cn(
-              "grid grid-cols-1 gap-3 rounded-xl border border-border/60 p-3 sm:grid-cols-[9rem_1fr_1fr_auto]",
-              day.isClosed && "bg-muted/20",
-            )}
-          >
-            <p className="self-center text-sm font-medium">{weekdayLabels[day.weekday]}</p>
-
-            <Input
-              label="Початок"
-              type="time"
-              value={toTimeInputValue(day.openTime)}
-              disabled={day.isClosed}
-              onChange={(event) => updateDay(day.weekday, { openTime: event.target.value })}
-            />
-
-            <Input
-              label="Кінець"
-              type="time"
-              value={toTimeInputValue(day.closeTime)}
-              disabled={day.isClosed}
-              onChange={(event) => updateDay(day.weekday, { closeTime: event.target.value })}
-            />
-
-            <label className="flex items-center gap-2 self-end pb-2 text-sm">
-              <Checkbox
-                checked={day.isClosed}
-                onCheckedChange={(checked) =>
-                  handleClosedChange(day.weekday, checked === true)
-                }
-              />
-              Вихідний
-            </label>
-          </div>
-        ))}
-      </div>
+      <WorkingHoursEditor days={days} onChange={setDays} formError={formError ?? undefined} />
 
       <div className="flex justify-end border-t border-border pt-4">
         <Button type="submit" loading={updateMutation.isPending}>

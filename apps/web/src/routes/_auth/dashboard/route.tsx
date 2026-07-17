@@ -38,7 +38,7 @@ const DashboardLayout = () => {
     authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          window.location.href = "/login";
+          window.location.href = "/auth/sign-in";
         },
       },
     });

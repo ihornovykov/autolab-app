@@ -1,9 +1,13 @@
 import { useForm } from "@tanstack/react-form";
 import { Building2, MapPin } from "lucide-react";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import z from "zod";
 
-import { CreateOrganizationMap } from "@/features/organization/ui/create-organization-map";
+const CreateOrganizationMap = lazy(() =>
+  import("@/features/organization/ui/create-organization-map").then((module) => ({
+    default: module.CreateOrganizationMap,
+  })),
+);
 import { LogoUpload } from "@/features/organization/ui/logo-upload";
 import { formatFieldErrors } from "@/shared/lib/format-field-errors";
 import { Input } from "@autolab/ui/components/input";
@@ -119,6 +123,21 @@ export const CreateOrganizationForm = ({ formId, initialOrganization, onSubmit }
         form.handleSubmit();
       }}
     >
+      <form.Subscribe
+        selector={(state) => ({
+          hasAttemptedSubmit: state.submissionAttempts > 0,
+          canSubmit: state.canSubmit,
+        })}
+      >
+        {({ hasAttemptedSubmit, canSubmit }) =>
+          hasAttemptedSubmit && !canSubmit ? (
+            <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+              Заповніть усі обов&apos;язкові поля перед збереженням
+            </p>
+          ) : null
+        }
+      </form.Subscribe>
+
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="space-y-5">
           <SectionHeading
@@ -190,18 +209,24 @@ export const CreateOrganizationForm = ({ formId, initialOrganization, onSubmit }
 
           <div className="space-y-2">
             <Label>Адреса на карті</Label>
-            <CreateOrganizationMap
-              initialLocation={
-                initialOrganization?.latitude != null && initialOrganization?.longitude != null
-                  ? {
-                      lat: initialOrganization.latitude,
-                      lng: initialOrganization.longitude,
-                    }
-                  : undefined
+            <Suspense
+              fallback={
+                <div className="h-[220px] animate-pulse rounded-lg border border-input bg-muted/40" />
               }
-              onLocationSelect={handleLocationSelect}
-              className="h-[220px] overflow-hidden rounded-lg border border-input shadow-sm"
-            />
+            >
+              <CreateOrganizationMap
+                initialLocation={
+                  initialOrganization?.latitude != null && initialOrganization?.longitude != null
+                    ? {
+                        lat: initialOrganization.latitude,
+                        lng: initialOrganization.longitude,
+                      }
+                    : undefined
+                }
+                onLocationSelect={handleLocationSelect}
+                className="h-[220px] overflow-hidden rounded-lg border border-input shadow-sm"
+              />
+            </Suspense>
             <form.Field name="address">
               {(field) => (
                 <p

@@ -4,15 +4,18 @@ import dayjs from "dayjs";
 import { useMemo } from "react";
 import z from "zod";
 
+import {
+  BookingServicePicker,
+  type BookingServiceCatalogItem,
+  type BookingServiceLineItem,
+} from "@/features/booking/ui/booking-service-picker";
 import { BookingOvertimeNotice } from "@/features/booking/ui/booking-overtime-notice";
 import { range } from "@/shared/lib/arrays";
-import { formatPrice } from "@/shared/lib/format";
 import { formatFieldErrors } from "@/shared/lib/format-field-errors";
 import { orpc } from "@/shared/api/orpc";
 import { StatusLight } from "@/shared/ui/status-light";
 import { DateTimePicker } from "@autolab/ui/components/date-time-picker";
 import { Label } from "@autolab/ui/components/label";
-import { MultiSelect } from "@autolab/ui/components/multi-select";
 import {
   Select,
   SelectContent,
@@ -27,7 +30,7 @@ export type BookingStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED
 
 export type VehicleBookingFormValues = {
   employeeId: string;
-  serviceIds: string[];
+  items: BookingServiceLineItem[];
   startTime: string;
   endTime: string;
   allowsOvertime: boolean;
@@ -40,16 +43,9 @@ type EmployeeOption = {
   label: string;
 };
 
-type ServiceOption = {
-  id: string;
-  title: string;
-  price: string;
-  duration: number;
-};
-
 type InitialValues = Partial<VehicleBookingFormValues> & {
   employeeId?: string;
-  serviceIds?: string[];
+  items?: BookingServiceLineItem[];
   startTime?: string;
   endTime?: string;
   allowsOvertime?: boolean;
@@ -61,7 +57,7 @@ type Props = {
   formId: string;
   organizationId: string;
   employees: EmployeeOption[];
-  services: ServiceOption[];
+  services: BookingServiceCatalogItem[];
   onSubmit: (values: VehicleBookingFormValues) => void;
   initialValues?: InitialValues;
   showStatus?: boolean;
@@ -79,7 +75,15 @@ const statusLabels: Record<BookingStatus, string> = {
 const vehicleBookingFormSchema = z
   .object({
     employeeId: z.string().min(1, "Працівник обов'язковий"),
-    serviceIds: z.array(z.string()).min(1, "Оберіть хоча б одну послугу"),
+    items: z
+      .array(
+        z.object({
+          serviceId: z.string().min(1),
+          quantity: z.number().int().min(1).max(99),
+          unitPrice: z.string().min(1),
+        }),
+      )
+      .min(1, "Оберіть хоча б одну послугу"),
     startTime: z.string().min(1, "Дата і час обов'язкові"),
     endTime: z.string().min(1, "Дата і час закінчення обов'язкові"),
     allowsOvertime: z.boolean(),
@@ -91,14 +95,16 @@ const vehicleBookingFormSchema = z
     path: ["endTime"],
   });
 
-const computeEndTimeFromServices = (
+const computeEndTimeFromItems = (
   startTime: string,
-  serviceIds: string[],
-  services: ServiceOption[],
+  items: BookingServiceLineItem[],
+  services: BookingServiceCatalogItem[],
 ) => {
-  const duration = services
-    .filter((service) => serviceIds.includes(service.id))
-    .reduce((sum, service) => sum + service.duration, 0);
+  const serviceMap = new Map(services.map((service) => [service.id, service]));
+  const duration = items.reduce((sum, item) => {
+    const service = serviceMap.get(item.serviceId);
+    return sum + (service?.duration ?? 0) * item.quantity;
+  }, 0);
 
   return dayjs(startTime)
     .add(duration > 0 ? duration : 60, "minute")
@@ -132,16 +138,16 @@ export const VehicleBookingForm = ({
   const defaultStartTime =
     initialValues?.startTime ??
     dayjs().add(1, "hour").minute(0).second(0).format("YYYY-MM-DDTHH:mm");
-  const defaultServiceIds = initialValues?.serviceIds ?? [];
+  const defaultItems = initialValues?.items ?? [];
 
   const form = useForm({
     defaultValues: {
       employeeId: initialValues?.employeeId ?? "",
-      serviceIds: defaultServiceIds,
+      items: defaultItems,
       startTime: defaultStartTime,
       endTime:
         initialValues?.endTime ??
-        computeEndTimeFromServices(defaultStartTime, defaultServiceIds, services),
+        computeEndTimeFromItems(defaultStartTime, defaultItems, services),
       allowsOvertime: initialValues?.allowsOvertime ?? false,
       notes: initialValues?.notes ?? "",
       status: initialValues?.status ?? "PENDING",
@@ -152,7 +158,7 @@ export const VehicleBookingForm = ({
     onSubmit: async ({ value }) =>
       onSubmit({
         employeeId: value.employeeId,
-        serviceIds: value.serviceIds,
+        items: value.items,
         startTime: value.startTime,
         endTime: value.endTime,
         allowsOvertime: value.allowsOvertime,
@@ -161,11 +167,8 @@ export const VehicleBookingForm = ({
       }),
   });
 
-  const syncEndTime = (startTime: string, serviceIds: string[]) => {
-    form.setFieldValue(
-      "endTime",
-      computeEndTimeFromServices(startTime, serviceIds, services),
-    );
+  const syncEndTime = (startTime: string, items: BookingServiceLineItem[]) => {
+    form.setFieldValue("endTime", computeEndTimeFromItems(startTime, items, services));
   };
 
   const employeeId = useStore(form.store, (state) => state.values.employeeId);
@@ -200,16 +203,6 @@ export const VehicleBookingForm = ({
     value: status,
     label: statusLabels[status],
   }));
-
-  const serviceOptions = useMemo(
-    () =>
-      services.map((service) => ({
-        value: service.id,
-        label: service.title,
-        description: `${formatPrice(service.price)} · ${service.duration} хв`,
-      })),
-    [services],
-  );
 
   return (
     <form
@@ -291,7 +284,7 @@ export const VehicleBookingForm = ({
               value={field.state.value}
               onChange={(value) => {
                 field.handleChange(value);
-                syncEndTime(value, form.getFieldValue("serviceIds"));
+                syncEndTime(value, form.getFieldValue("items"));
                 form.validateField("endTime", "change");
               }}
               error={formatFieldErrors(field.state.meta.errors)}
@@ -338,11 +331,10 @@ export const VehicleBookingForm = ({
         </form.Field>
       </div>
 
-      <form.Field name="serviceIds">
+      <form.Field name="items">
         {(field) => (
-          <ServicePicker
+          <BookingServicePicker
             services={services}
-            serviceOptions={serviceOptions}
             value={field.state.value}
             onChange={(value) => {
               field.handleChange(value);
@@ -353,48 +345,6 @@ export const VehicleBookingForm = ({
         )}
       </form.Field>
     </form>
-  );
-};
-
-type ServicePickerProps = {
-  services: ServiceOption[];
-  serviceOptions: Array<{ value: string; label: string; description?: string }>;
-  value: string[];
-  onChange: (value: string[]) => void;
-  error?: string;
-};
-
-const ServicePicker = ({ services, serviceOptions, value, onChange, error }: ServicePickerProps) => {
-  const totals = useMemo(() => {
-    const picked = services.filter((service) => value.includes(service.id));
-    return {
-      price: picked.reduce((sum, service) => sum + Number(service.price), 0),
-      duration: picked.reduce((sum, service) => sum + service.duration, 0),
-    };
-  }, [services, value]);
-
-  return (
-    <div className="space-y-3 rounded-xl border border-border/60 p-4">
-      <MultiSelect
-        label="Послуги *"
-        placeholder="Оберіть послуги"
-        searchPlaceholder="Пошук послуг..."
-        emptyMessage="Немає послуг у прайс-листі"
-        options={serviceOptions}
-        value={value}
-        onChange={onChange}
-        error={error}
-      />
-
-      {value.length > 0 ? (
-        <div className="flex items-center justify-between rounded-lg bg-muted/30 px-3 py-2 text-sm">
-          <span className="text-muted-foreground">Разом</span>
-          <span className="font-semibold tabular-nums">
-            {formatPrice(totals.price)} · {totals.duration} хв
-          </span>
-        </div>
-      ) : null}
-    </div>
   );
 };
 

@@ -104,7 +104,7 @@ const searchEmployees = async (
     .where(
       and(
         eq(employees.organizationId, organizationId),
-        orHomoglyphs(pattern, users.name, users.email, profiles.username)!,
+        orHomoglyphs(pattern, users.name, users.email)!,
       ),
     )
     .limit(MATCH_LIMIT);

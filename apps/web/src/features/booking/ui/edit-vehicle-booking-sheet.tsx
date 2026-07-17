@@ -10,6 +10,7 @@ import {
   VehicleBookingFormSkeleton,
 } from "@/features/booking/ui/vehicle-booking-form";
 import { type VehicleBookingHistoryItem } from "@/features/booking/lib/booking-history-item";
+import { SERVICES_SELECT_PAGE_SIZE } from "@/features/service/lib/constants";
 import { orpc } from "@/shared/api/orpc";
 import { createSelectListInput } from "@/shared/lib/pagination";
 import { formatDate, formatPrice } from "@/shared/lib/format";
@@ -35,7 +36,9 @@ export const EditVehicleBookingSheet = ({ booking, organizationId }: Props) => {
   });
 
   const servicesQuery = useQuery({
-    ...orpc.service.listServices.queryOptions({ input: createSelectListInput(organizationId) }),
+    ...orpc.service.listServices.queryOptions({
+      input: { organizationId, page: 1, pageSize: SERVICES_SELECT_PAGE_SIZE },
+    }),
   });
 
   const updateMutation = useMutation(
@@ -64,6 +67,8 @@ export const EditVehicleBookingSheet = ({ booking, organizationId }: Props) => {
   const services = (servicesQuery.data?.items ?? []).map((service) => ({
     id: service.id,
     title: service.title,
+    description: service.description,
+    category: service.category,
     price: service.price,
     duration: service.duration,
   }));
@@ -80,7 +85,7 @@ export const EditVehicleBookingSheet = ({ booking, organizationId }: Props) => {
 
   const handleSubmit = async (values: {
     employeeId: string;
-    serviceIds: string[];
+    items: Array<{ serviceId: string; quantity: number; unitPrice: string }>;
     startTime: string;
     endTime: string;
     allowsOvertime: boolean;
@@ -91,7 +96,7 @@ export const EditVehicleBookingSheet = ({ booking, organizationId }: Props) => {
       organizationId,
       bookingId: booking.id,
       employeeId: values.employeeId,
-      serviceIds: values.serviceIds,
+      items: values.items,
       startTime: dayjs(values.startTime).toISOString(),
       endTime: dayjs(values.endTime).toISOString(),
       allowsOvertime: values.allowsOvertime,
@@ -172,7 +177,12 @@ export const EditVehicleBookingSheet = ({ booking, organizationId }: Props) => {
           services={services}
           initialValues={{
             employeeId: booking.employeeId,
-            serviceIds: booking.services?.map((service) => service.id) ?? [],
+            items:
+              booking.services?.map((service) => ({
+                serviceId: service.id,
+                quantity: service.quantity ?? 1,
+                unitPrice: service.unitPrice ?? service.price,
+              })) ?? [],
             startTime: dayjs(booking.startTime).format("YYYY-MM-DDTHH:mm"),
             endTime: dayjs(booking.endTime).format("YYYY-MM-DDTHH:mm"),
             allowsOvertime: booking.allowsOvertime ?? false,

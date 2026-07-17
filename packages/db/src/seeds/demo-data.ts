@@ -2,9 +2,13 @@ import { bookingServices, bookings } from "../schema/booking";
 import { clients } from "../schema/client";
 import { employees } from "../schema/employee";
 import { organizations } from "../schema/organization";
-import { services } from "../schema/service";
 import { vehicles } from "../schema/vehicle";
 import type { createDb } from "../index";
+import {
+  createDefaultOrganizationServices,
+  createStableCatalogServiceId,
+  loadStoServiceCatalogRows,
+} from "../lib/sto-service-catalog";
 import { SEED_IDS, SEED_PASSWORD } from "./constants";
 import { ensureSeedUser } from "./ensure-user";
 import { seedOrganizationWorkingHours } from "./working-hours";
@@ -40,7 +44,6 @@ const SEED_USERS = [
     email: "owner@autolab.local",
     firstName: "Олександр",
     lastName: "Коваленко",
-    username: "oleksandr.kovalenko",
     phone: "+380501112233",
   },
   {
@@ -49,7 +52,6 @@ const SEED_USERS = [
     email: "manager@autolab.local",
     firstName: "Яна",
     lastName: "Мельник",
-    username: "yana.melnyk",
     phone: "+380672223344",
   },
   {
@@ -58,7 +60,6 @@ const SEED_USERS = [
     email: "dmytro@autolab.local",
     firstName: "Дмитро",
     lastName: "Шевченко",
-    username: "dmytro.shevchenko",
     phone: "+380933334455",
   },
   {
@@ -67,7 +68,6 @@ const SEED_USERS = [
     email: "andrii@autolab.local",
     firstName: "Андрій",
     lastName: "Бондаренко",
-    username: "andrii.bondarenko",
     phone: "+380664445566",
   },
   {
@@ -77,83 +77,22 @@ const SEED_USERS = [
     firstName: "Марія",
     lastName: "Петренко",
     middleName: "Іванівна",
-    username: "maria.petrenko",
     phone: "+380977778899",
   },
 ] as const;
 
-const SEED_SERVICES = [
-  {
-    id: "seed-service-oil-change",
-    title: "Заміна моторного мастила",
-    description: "Мастило, фільтр та перевірка рівнів технічних рідин",
-    price: "1200.00",
-    duration: 60,
-  },
-  {
-    id: "seed-service-wheel-alignment",
-    title: "Розвал-сходження",
-    description: "Регулювання кутів установки коліс на стенді",
-    price: "950.00",
-    duration: 90,
-  },
-  {
-    id: "seed-service-brake-pads",
-    title: "Заміна гальмівних колодок",
-    description: "Передня або задня вісь, перевірка дисків",
-    price: "1800.00",
-    duration: 120,
-  },
-  {
-    id: "seed-service-suspension-diagnostics",
-    title: "Діагностика ходової частини",
-    description: "Перевірка сайлентблоків, амортизаторів та кульових опор",
-    price: "650.00",
-    duration: 45,
-  },
-  {
-    id: "seed-service-air-filter",
-    title: "Заміна повітряного фільтра",
-    description: "Оригінал або аналог за узгодженням",
-    price: "350.00",
-    duration: 30,
-  },
-  {
-    id: "seed-service-spark-plugs",
-    title: "Заміна свічок запалювання",
-    description: "Комплект свічок та перевірка котушок",
-    price: "800.00",
-    duration: 60,
-  },
-  {
-    id: "seed-service-ac-refill",
-    title: "Заправка кондиціонера",
-    description: "Вакуумування, заправка фреоном, перевірка герметичності",
-    price: "1400.00",
-    duration: 75,
-  },
-  {
-    id: "seed-service-battery",
-    title: "Заміна акумулятора",
-    description: "Підбір АКБ, установка, перевірка генератора",
-    price: "450.00",
-    duration: 40,
-  },
-  {
-    id: "seed-service-tire-change",
-    title: "Шиномонтаж (4 колеса)",
-    description: "Демонтаж, балансування, монтаж",
-    price: "600.00",
-    duration: 50,
-  },
-  {
-    id: "seed-service-engine-diagnostics",
-    title: "Комп'ютерна діагностика двигуна",
-    description: "Сканування помилок, live-data, звіт клієнту",
-    price: "700.00",
-    duration: 60,
-  },
-] as const;
+const CATALOG_SERVICE = {
+  engineDiagnostics: createStableCatalogServiceId(74),
+  oilChange: createStableCatalogServiceId(76),
+  airFilter: createStableCatalogServiceId(77),
+  sparkPlugs: createStableCatalogServiceId(79),
+  battery: createStableCatalogServiceId(97),
+  suspensionDiagnostics: createStableCatalogServiceId(25),
+  acRefill: createStableCatalogServiceId(157),
+  tireChange: createStableCatalogServiceId(165),
+  wheelAlignment: createStableCatalogServiceId(167),
+  brakePads: createStableCatalogServiceId(207),
+} as const;
 
 const SEED_CLIENTS = [
   {
@@ -409,30 +348,10 @@ const seedEmployees = async (db: Db, userIds: SeedUserIds) => {
   }
 };
 
-const seedServices = async (db: Db) => {
-  for (const service of SEED_SERVICES) {
-    await db
-      .insert(services)
-      .values({
-        id: service.id,
-        organizationId: SEED_IDS.organization,
-        title: service.title,
-        description: service.description,
-        price: service.price,
-        duration: service.duration,
-      })
-      .onConflictDoUpdate({
-        target: services.id,
-        set: {
-          title: service.title,
-          description: service.description,
-          price: service.price,
-          duration: service.duration,
-          updatedAt: new Date(),
-        },
-      });
-  }
-};
+const seedServices = async (db: Db) =>
+  createDefaultOrganizationServices(db, SEED_IDS.organization, {
+    createServiceId: createStableCatalogServiceId,
+  });
 
 const seedClients = async (db: Db) => {
   for (const client of SEED_CLIENTS) {
@@ -500,12 +419,18 @@ const seedVehicles = async (db: Db) => {
   }
 };
 
-const sumPrices = (serviceIds: readonly string[]) => {
-  const priceById = new Map<string, number>(
-    SEED_SERVICES.map((service) => [service.id, Number(service.price)]),
-  );
-  return serviceIds.reduce((sum, id) => sum + (priceById.get(id) ?? 0), 0).toFixed(2);
-};
+const catalogRows = loadStoServiceCatalogRows();
+const serviceById = new Map(
+  catalogRows.map((row, index) => [createStableCatalogServiceId(index), row]),
+);
+
+const sumBookingItems = (items: readonly { serviceId: string; quantity: number }[]) =>
+  items
+    .reduce((sum, item) => {
+      const service = serviceById.get(item.serviceId);
+      return sum + Number(service?.price ?? 0) * item.quantity;
+    }, 0)
+    .toFixed(2);
 
 const seedBookings = async (db: Db) => {
   const today = startOfDay(new Date());
@@ -519,7 +444,7 @@ const seedBookings = async (db: Db) => {
       endTime: atLocalTime(today, 10, 0),
       status: "PENDING" as const,
       notes: "Клієнт просить оригінальний фільтр Toyota",
-      serviceIds: ["seed-service-oil-change"],
+      items: [{ serviceId: CATALOG_SERVICE.oilChange, quantity: 1 }],
     },
     {
       id: "seed-booking-today-brakes",
@@ -529,7 +454,7 @@ const seedBookings = async (db: Db) => {
       endTime: atLocalTime(today, 12, 30),
       status: "IN_PROGRESS" as const,
       notes: "Скрип передніх колодок, заміна термінова",
-      serviceIds: ["seed-service-brake-pads"],
+      items: [{ serviceId: CATALOG_SERVICE.brakePads, quantity: 1 }],
       allowsOvertime: true,
     },
     {
@@ -539,7 +464,7 @@ const seedBookings = async (db: Db) => {
       startTime: atLocalTime(addDays(today, 1), 11, 0),
       endTime: atLocalTime(addDays(today, 1), 12, 30),
       status: "PENDING" as const,
-      serviceIds: ["seed-service-wheel-alignment"],
+      items: [{ serviceId: CATALOG_SERVICE.wheelAlignment, quantity: 1 }],
     },
     {
       id: "seed-booking-yesterday-diagnostics",
@@ -548,7 +473,7 @@ const seedBookings = async (db: Db) => {
       startTime: atLocalTime(addDays(today, -1), 14, 0),
       endTime: atLocalTime(addDays(today, -1), 14, 45),
       status: "COMPLETED" as const,
-      serviceIds: ["seed-service-suspension-diagnostics"],
+      items: [{ serviceId: CATALOG_SERVICE.suspensionDiagnostics, quantity: 1 }],
     },
     {
       id: "seed-booking-last-week-ac",
@@ -557,7 +482,7 @@ const seedBookings = async (db: Db) => {
       startTime: atLocalTime(addDays(today, -5), 15, 0),
       endTime: atLocalTime(addDays(today, -5), 16, 15),
       status: "COMPLETED" as const,
-      serviceIds: ["seed-service-ac-refill"],
+      items: [{ serviceId: CATALOG_SERVICE.acRefill, quantity: 1 }],
     },
     {
       id: "seed-booking-next-week-spark-plugs",
@@ -566,7 +491,10 @@ const seedBookings = async (db: Db) => {
       startTime: atLocalTime(addDays(today, 3), 9, 30),
       endTime: atLocalTime(addDays(today, 3), 10, 30),
       status: "PENDING" as const,
-      serviceIds: ["seed-service-spark-plugs", "seed-service-air-filter"],
+      items: [
+        { serviceId: CATALOG_SERVICE.sparkPlugs, quantity: 1 },
+        { serviceId: CATALOG_SERVICE.airFilter, quantity: 1 },
+      ],
     },
     {
       id: "seed-booking-cancelled-battery",
@@ -576,7 +504,7 @@ const seedBookings = async (db: Db) => {
       endTime: atLocalTime(addDays(today, -2), 12, 40),
       status: "CANCELLED" as const,
       notes: "Клієнт переніс запис на наступний тиждень",
-      serviceIds: ["seed-service-battery"],
+      items: [{ serviceId: CATALOG_SERVICE.battery, quantity: 1 }],
     },
     {
       id: "seed-booking-today-tires",
@@ -585,7 +513,7 @@ const seedBookings = async (db: Db) => {
       startTime: atLocalTime(today, 14, 0),
       endTime: atLocalTime(today, 14, 50),
       status: "PENDING" as const,
-      serviceIds: ["seed-service-tire-change"],
+      items: [{ serviceId: CATALOG_SERVICE.tireChange, quantity: 1 }],
     },
     {
       id: "seed-booking-today-engine-scan",
@@ -595,7 +523,7 @@ const seedBookings = async (db: Db) => {
       endTime: atLocalTime(today, 16, 30),
       status: "PENDING" as const,
       notes: "Горить Check Engine, потрібен звіт для страхової",
-      serviceIds: ["seed-service-engine-diagnostics"],
+      items: [{ serviceId: CATALOG_SERVICE.engineDiagnostics, quantity: 1 }],
     },
     {
       id: "seed-booking-multi-day",
@@ -605,7 +533,11 @@ const seedBookings = async (db: Db) => {
       endTime: atLocalTime(addDays(today, 3), 11, 0),
       status: "PENDING" as const,
       notes: "Капітальне ТО з затримкою через очікування запчастин",
-      serviceIds: ["seed-service-oil-change", "seed-service-air-filter", "seed-service-brake-pads"],
+      items: [
+        { serviceId: CATALOG_SERVICE.oilChange, quantity: 1 },
+        { serviceId: CATALOG_SERVICE.airFilter, quantity: 1 },
+        { serviceId: CATALOG_SERVICE.brakePads, quantity: 2 },
+      ],
       allowsOvertime: true,
     },
   ] as const;
@@ -623,7 +555,7 @@ const seedBookings = async (db: Db) => {
         status: booking.status,
         notes: "notes" in booking ? booking.notes : undefined,
         allowsOvertime: "allowsOvertime" in booking ? booking.allowsOvertime : false,
-        totalPrice: sumPrices([...booking.serviceIds]),
+        totalPrice: sumBookingItems(booking.items),
       })
       .onConflictDoUpdate({
         target: bookings.id,
@@ -635,19 +567,32 @@ const seedBookings = async (db: Db) => {
           status: booking.status,
           notes: "notes" in booking ? booking.notes : null,
           allowsOvertime: "allowsOvertime" in booking ? booking.allowsOvertime : false,
-          totalPrice: sumPrices([...booking.serviceIds]),
+          totalPrice: sumBookingItems(booking.items),
           updatedAt: new Date(),
         },
       });
 
-    for (const serviceId of booking.serviceIds) {
+    for (const item of booking.items) {
+      const service = serviceById.get(item.serviceId);
+      if (!service) continue;
+
       await db
         .insert(bookingServices)
         .values({
           bookingId: booking.id,
-          serviceId,
+          serviceId: item.serviceId,
+          quantity: item.quantity,
+          unitPrice: service.price,
+          duration: service.duration,
         })
-        .onConflictDoNothing();
+        .onConflictDoUpdate({
+          target: [bookingServices.bookingId, bookingServices.serviceId],
+          set: {
+            quantity: item.quantity,
+            unitPrice: service.price,
+            duration: service.duration,
+          },
+        });
     }
   }
 

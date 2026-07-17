@@ -5,7 +5,7 @@ import { orgProcedure } from "../..";
 import {
   deleteEmployee,
   deleteManyEmployees,
-  findEmployeeByEmailOrUsername,
+  findEmployeeByEmail,
   getEmployeeWorkingHours,
   inviteEmployee,
   listEmployees,
@@ -14,8 +14,8 @@ import {
 import {
   deleteEmployeeInputSchema,
   deleteManyEmployeesInputSchema,
-  findEmployeeByEmailOrUsernameInputSchema,
-  findEmployeeByEmailOrUsernameOutputSchema,
+  findEmployeeByEmailInputSchema,
+  findEmployeeByEmailOutputSchema,
   getEmployeeWorkingHoursInputSchema,
   getEmployeeWorkingHoursOutputSchema,
   inviteEmployeeInputSchema,
@@ -54,10 +54,10 @@ export const employeeRoutes = {
     .output(successSchema)
     .handler(async ({ context, input }) => deleteManyEmployees(context, input)),
 
-  findEmployeeByEmailOrUsername: orgProcedure
-    .input(findEmployeeByEmailOrUsernameInputSchema)
-    .output(findEmployeeByEmailOrUsernameOutputSchema)
-    .handler(async ({ context, input }) => findEmployeeByEmailOrUsername(context, input)),
+  findEmployeeByEmail: orgProcedure
+    .input(findEmployeeByEmailInputSchema)
+    .output(findEmployeeByEmailOutputSchema)
+    .handler(async ({ context, input }) => findEmployeeByEmail(context, input)),
 
   inviteEmployee: orgProcedure
     .input(inviteEmployeeInputSchema)

@@ -1,1 +1,2 @@
 export const SERVICES_PAGE_SIZE = 9;
+export const SERVICES_SELECT_PAGE_SIZE = 500;

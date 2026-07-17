@@ -21,5 +21,4 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
 });
 
-export const isGoogleAuthEnabled = () =>
-  !!env.GOOGLE_CLIENT_ID && !!env.GOOGLE_CLIENT_SECRET;
+export const isGoogleAuthEnabled = () => !!env.GOOGLE_CLIENT_ID && !!env.GOOGLE_CLIENT_SECRET;

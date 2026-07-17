@@ -68,6 +68,8 @@ type ReceiptService = {
   title: string;
   description?: string | null;
   price: string;
+  unitPrice?: string;
+  quantity?: number;
   duration: number;
 };
 
@@ -310,7 +312,10 @@ const renderPdfToBuffer = (
     );
     y += 38;
     const totalDuration =
-      booking.services?.reduce((sum, service) => sum + service.duration, 0) ?? 0;
+      booking.services?.reduce(
+        (sum, service) => sum + service.duration * (service.quantity ?? 1),
+        0,
+      ) ?? 0;
     drawLabelValue("Статус", statusLabels[booking.status], MARGIN, y, columnWidth);
     drawLabelValue(
       "Загальна тривалість",
@@ -433,11 +438,23 @@ const renderPdfToBuffer = (
           .font("regular")
           .fontSize(10)
           .fillColor("#111111")
-          .text(formatDuration(service.duration), colDuration, y + 8, {
-            width: 70,
-            align: "right",
-          });
-        doc.text(formatPrice(service.price), colPrice, y + 8, { width: 64, align: "right" });
+          .text(
+            formatDuration(service.duration * (service.quantity ?? 1)),
+            colDuration,
+            y + 8,
+            {
+              width: 70,
+              align: "right",
+            },
+          );
+        doc.text(
+          formatPrice(
+            Number(service.unitPrice ?? service.price) * (service.quantity ?? 1),
+          ),
+          colPrice,
+          y + 8,
+          { width: 64, align: "right" },
+        );
         y += rowHeight;
       });
     }

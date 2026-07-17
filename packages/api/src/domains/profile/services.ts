@@ -8,14 +8,16 @@ import { and, eq, inArray } from "drizzle-orm";
 import type { Context } from "../../context";
 import { DEFAULT_WORKING_HOURS, mapDbWorkingHours } from "../../lib/working-hours";
 import { createId } from "../../lib/org-scope";
+import { listMyOrganizations } from "../organization/services";
+
+import { isProfileComplete } from "./lib/is-profile-complete";
 
 import type {
   GetProfileOutput,
   GetWorkingHoursOutput,
+  OnboardingStatusOutput,
   UpdateProfileInput,
   UpdateProfileOutput,
-  UpdateUsernamePhoneInput,
-  UpdateUsernamePhoneOutput,
   UpdateWorkingHoursInput,
   UpdateWorkingHoursOutput,
 } from "./validation";
@@ -104,8 +106,7 @@ export const updateProfile = async (
       firstName: input.firstName ?? existing.firstName,
       lastName: input.lastName ?? existing.lastName,
       middleName: input.middleName ?? existing.middleName,
-      birthDate: input.birthDate === undefined ? existing.birthDate : input.birthDate,
-      gender: input.gender === undefined ? existing.gender : input.gender,
+      phone: input.phone ?? existing.phone,
     })
     .where(eq(profiles.userId, userId))
     .returning();
@@ -117,34 +118,28 @@ export const updateProfile = async (
   return updated;
 };
 
-export const updateUsernamePhone = async (
-  context: Context,
-  input: UpdateUsernamePhoneInput,
-): Promise<UpdateUsernamePhoneOutput> => {
-  const userId = context.session!.user.id;
-
-  const existing = await db.query.profiles.findFirst({
-    where: eq(profiles.userId, userId),
-  });
-
-  if (!existing) {
-    throw new ORPCError("NOT_FOUND", { message: "Profile not found" });
+export const getOnboardingStatus = async (context: Context): Promise<OnboardingStatusOutput> => {
+  if (!context.session?.user.id) {
+    return {
+      needsOnboarding: false,
+      isProfileComplete: false,
+      hasOrganization: false,
+    };
   }
 
-  const [updated] = await db
-    .update(profiles)
-    .set({
-      username: input.username ?? existing.username,
-      phone: input.phone ?? existing.phone,
-    })
-    .where(eq(profiles.userId, userId))
-    .returning();
+  const [profile, organizations] = await Promise.all([
+    getMyProfile(context),
+    listMyOrganizations(context as Context & { session: NonNullable<Context["session"]> }),
+  ]);
 
-  if (!updated) {
-    throw new ORPCError("NOT_FOUND", { message: "Profile not found" });
-  }
+  const profileComplete = isProfileComplete(profile);
+  const hasOrganization = organizations.length > 0;
 
-  return updated;
+  return {
+    needsOnboarding: !profileComplete || !hasOrganization,
+    isProfileComplete: profileComplete,
+    hasOrganization,
+  };
 };
 
 export const getMyWorkingHours = async (context: Context): Promise<GetWorkingHoursOutput> => {

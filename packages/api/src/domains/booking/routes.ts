@@ -5,10 +5,13 @@ import { orgProcedure } from "../..";
 import {
   createBooking,
   deleteBooking,
+  exportOrganizationAnalyticsPdf,
   generateBookingReceiptPdf,
   getBookingById,
   getDashboardStats,
+  getOrganizationAnalytics,
   listBookings,
+  listOrganizationAnalyticsBookings,
   listVehicleBookings,
   updateBooking,
   updateBookingStatus,
@@ -19,12 +22,18 @@ import {
   dashboardStatsInputSchema,
   dashboardStatsOutputSchema,
   deleteBookingInputSchema,
+  exportOrganizationAnalyticsPdfInputSchema,
+  exportOrganizationAnalyticsPdfOutputSchema,
   getBookingInputSchema,
   getBookingOutputSchema,
   getBookingReceiptPdfInputSchema,
   getBookingReceiptPdfOutputSchema,
   listBookingsInputSchema,
   listBookingsOutputSchema,
+  organizationAnalyticsBookingsInputSchema,
+  organizationAnalyticsBookingsOutputSchema,
+  organizationAnalyticsInputSchema,
+  organizationAnalyticsOutputSchema,
   updateBookingInputSchema,
   updateBookingStatusInputSchema,
 } from "./validation";
@@ -80,4 +89,19 @@ export const bookingRoutes = {
     .input(dashboardStatsInputSchema)
     .output(dashboardStatsOutputSchema)
     .handler(async ({ context, input }) => getDashboardStats(context, input)),
+
+  getOrganizationAnalytics: orgProcedure
+    .input(organizationAnalyticsInputSchema)
+    .output(organizationAnalyticsOutputSchema)
+    .handler(async ({ context, input }) => getOrganizationAnalytics(context, input)),
+
+  listOrganizationAnalyticsBookings: orgProcedure
+    .input(organizationAnalyticsBookingsInputSchema)
+    .output(organizationAnalyticsBookingsOutputSchema)
+    .handler(async ({ context, input }) => listOrganizationAnalyticsBookings(context, input)),
+
+  exportOrganizationAnalyticsPdf: orgProcedure
+    .input(exportOrganizationAnalyticsPdfInputSchema)
+    .output(exportOrganizationAnalyticsPdfOutputSchema)
+    .handler(async ({ context, input }) => exportOrganizationAnalyticsPdf(context, input)),
 };

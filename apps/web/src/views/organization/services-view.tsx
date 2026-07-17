@@ -23,6 +23,7 @@ type ServiceRow = {
   id: string;
   title: string;
   description?: string | null;
+  category?: string | null;
   price: string;
   duration: number;
 };
