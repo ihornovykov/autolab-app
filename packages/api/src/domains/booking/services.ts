@@ -44,11 +44,9 @@ import type {
 import type { listVehicleBookingsInputSchema, listVehicleBookingsOutputSchema } from "../vehicle/validation";
 import { getOrganizationById } from "../organization/services";
 import { getVehicleById } from "../vehicle/services";
-import { buildBookingReceiptPdf } from "./lib/receipt-pdf";
 import {
   collectOrganizationAnalytics,
 } from "./lib/analytics";
-import { buildOrganizationAnalyticsPdf, mapReportBooking } from "./lib/analytics-pdf";
 
 const bookingWith = {
   vehicle: true as const,
@@ -101,7 +99,19 @@ const mapBooking = (
     employeeWorkingHours?: typeof DEFAULT_WORKING_HOURS;
   },
 ) => ({
-  ...row,
+  id: row.id,
+  organizationId: row.organizationId,
+  employeeId: row.employeeId,
+  vehicleId: row.vehicleId,
+  startTime: row.startTime,
+  endTime: row.endTime,
+  allowsOvertime: row.allowsOvertime,
+  status: row.status,
+  notes: row.notes,
+  totalPrice: row.totalPrice,
+  createdAt: row.createdAt,
+  updatedAt: row.updatedAt,
+  vehicle: row.vehicle,
   services: row.bookingServices?.map((bs) => ({
     ...bs.service,
     quantity: bs.quantity,
@@ -427,6 +437,7 @@ export const generateBookingReceiptPdf = async (
     vehicleId: booking.vehicleId,
   });
 
+  const { buildBookingReceiptPdf } = await import("./lib/receipt-pdf");
   const pdfBuffer = await buildBookingReceiptPdf({
     booking: {
       id: booking.id,
@@ -779,6 +790,9 @@ export const exportOrganizationAnalyticsPdf = async (
     throw new ORPCError("NOT_FOUND", { message: "Organization not found" });
   }
 
+  const { buildOrganizationAnalyticsPdf, mapReportBooking } = await import(
+    "./lib/analytics-pdf"
+  );
   const pdfBuffer = await buildOrganizationAnalyticsPdf({
     organization: {
       name: organization.name,

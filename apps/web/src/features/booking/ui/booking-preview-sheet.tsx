@@ -27,6 +27,7 @@ type BookingPreview = Parameters<typeof mapBookingToHistoryItem>[0];
 
 type Props = {
   booking: BookingPreview;
+  bookingId: string;
   organizationId: string;
   calendarEvent?: CalendarEvent;
 };
@@ -37,36 +38,39 @@ const SectionLabel = ({ children }: { children: string }) => (
   </p>
 );
 
-export const BookingPreviewSheet = ({ booking, organizationId, calendarEvent }: Props) => {
+export const BookingPreviewSheet = ({
+  booking,
+  bookingId,
+  organizationId,
+  calendarEvent,
+}: Props) => {
   const navigate = useNavigate();
   const vehicle = booking.vehicle;
   const employee = booking.employee;
   const vehicleTitle = vehicle ? `${vehicle.make} ${vehicle.model}` : "Запис";
+  const historyItem = mapBookingToHistoryItem({ ...booking, id: bookingId });
 
   const handleEdit = () => {
     sheets.close();
     sheets.open(
-      <EditVehicleBookingSheet
-        booking={mapBookingToHistoryItem(booking)}
-        organizationId={organizationId}
-      />,
+      <EditVehicleBookingSheet booking={historyItem} organizationId={organizationId} />,
     );
   };
 
   const handleDelete = () => {
     sheets.close();
     dialogs.open(
-      <DeleteVehicleBookingDialog organizationId={organizationId} bookingId={booking.id} />,
+      <DeleteVehicleBookingDialog organizationId={organizationId} bookingId={bookingId} />,
     );
   };
 
   const handleOpenDetails = () => {
-    sheets.close();
     navigate({
       to: "/dashboard/organization/bookings/$bookingId",
-      params: { bookingId: booking.id },
+      params: { bookingId },
       search: { organizationId },
     });
+    sheets.close();
   };
 
   return (

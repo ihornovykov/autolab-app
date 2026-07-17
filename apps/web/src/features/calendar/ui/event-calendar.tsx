@@ -135,12 +135,15 @@ export const EventCalendar = ({
   const handleEventClick = useCallback(
     (eventId: string) => {
       const event = eventsById.get(eventId);
-      const booking = event ? bookingsById.get(event.bookingId) : undefined;
+      if (!event?.bookingId) return;
+
+      const booking = bookingsById.get(event.bookingId);
       if (!booking) return;
 
       sheets.open(
         <BookingPreviewSheet
           booking={booking}
+          bookingId={event.bookingId}
           organizationId={organizationId}
           calendarEvent={event}
         />,
