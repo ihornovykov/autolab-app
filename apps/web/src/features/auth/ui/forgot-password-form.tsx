@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import z from "zod";
 
 import { getPasswordResetRedirectUrl } from "@/features/auth/lib/get-password-reset-redirect-url";
-import { authClient } from "@/shared/lib/auth-client";
-import { formatFieldErrors } from "@/shared/lib/format-field-errors";
+import { authClient } from "@/shared/lib/auth";
+import { formatFieldErrors } from "@/shared/lib/errors";
 import { Button } from "@autolab/ui/components/button";
 import { Input } from "@autolab/ui/components/input";
 

@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import z from "zod";
 
-import { formatFieldErrors } from "@/shared/lib/format-field-errors";
+import { formatFieldErrors } from "@/shared/lib/errors";
 import { Input } from "@autolab/ui/components/input";
 
 export type ClientFormValues = {

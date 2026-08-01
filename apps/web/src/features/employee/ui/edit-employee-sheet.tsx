@@ -8,7 +8,7 @@ import {
   type EmployeeRole,
 } from "@/features/employee/lib/employee-roles";
 import { orpc } from "@/shared/api/orpc";
-import { formatDateISO } from "@/shared/lib/format";
+import { formatDate } from "@/shared/lib/date";
 import { sheets } from "@/shared/stores/sheets";
 import { RoleBadge } from "@/shared/ui/role-badge";
 import { StatusLight } from "@/shared/ui/status-light";
@@ -165,7 +165,7 @@ export const EditEmployeeSheet = ({ employee, organizationId }: Props) => {
 
         <div className="flex items-center gap-2 rounded-xl border border-dashed border-border/60 px-4 py-3 text-sm text-muted-foreground">
           <CalendarIcon className="size-4 shrink-0" />
-          <span>Дата найму: {formatDateISO(employee.startDate)}</span>
+          <span>Дата найму: {formatDate(employee.startDate, "iso")}</span>
         </div>
       </div>
     </Sheet>

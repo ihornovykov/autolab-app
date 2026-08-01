@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { DeleteServiceDialog } from "@/features/service/ui/delete-service-dialog";
 import { ServiceForm } from "@/features/service/ui/service-form";
 import { orpc } from "@/shared/api/orpc";
-import { formatPrice } from "@/shared/lib/format";
+import { formatPrice } from "@/shared/lib/money";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
 import { Badge } from "@autolab/ui/components/badge";

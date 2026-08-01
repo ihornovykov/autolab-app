@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { orpc } from "@/shared/api/orpc";
-import { getClientDisplayName } from "@/shared/lib/format";
+import { getClientDisplayName } from "@/shared/lib/client";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 type Props = {

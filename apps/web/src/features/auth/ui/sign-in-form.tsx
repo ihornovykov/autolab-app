@@ -8,8 +8,8 @@ import { toast } from "sonner";
 import z from "zod";
 
 import { clearAuthContextCache } from "@/features/auth/lib/auth-context-cache";
-import { authClient } from "@/shared/lib/auth-client";
-import { formatFieldErrors } from "@/shared/lib/format-field-errors";
+import { authClient } from "@/shared/lib/auth";
+import { formatFieldErrors } from "@/shared/lib/errors";
 
 export const SignInForm = () => {
   const navigate = useNavigate({ from: "/auth/sign-in" });

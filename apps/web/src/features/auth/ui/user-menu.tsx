@@ -12,7 +12,7 @@ import { Skeleton } from "@autolab/ui/components/skeleton";
 import { Link, useNavigate } from "@tanstack/react-router";
 
 import { clearAuthContextCache } from "@/features/auth/lib/auth-context-cache";
-import { authClient } from "@/shared/lib/auth-client";
+import { authClient } from "@/shared/lib/auth";
 
 export const UserMenu = () => {
   const navigate = useNavigate();

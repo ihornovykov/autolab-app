@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { UserVehicleForm, UserVehicleFormSkeleton } from "@/features/vehicle/ui/user-vehicle-form";
 import { orpc } from "@/shared/api/orpc";
 import { createSelectListInput } from "@/shared/lib/pagination";
-import { getClientName } from "@/shared/lib/format";
+import { getClientName } from "@/shared/lib/client";
 import { dialogs } from "@/shared/stores/dialogs";
 import { Button } from "@autolab/ui/components/button";
 import { Dialog } from "@autolab/ui/components/sheet";

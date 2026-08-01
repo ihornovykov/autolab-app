@@ -2,7 +2,7 @@ import {
   computeBookingDiscountAmount,
   computeBookingSubtotal,
 } from "@/features/booking/lib/compute-booking-total";
-import { formatPrice } from "@/shared/lib/format";
+import { formatPrice } from "@/shared/lib/money";
 import { cn } from "@autolab/ui/lib/utils";
 
 type BookingServiceForDiscount = {

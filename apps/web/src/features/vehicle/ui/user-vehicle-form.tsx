@@ -16,7 +16,7 @@ import {
   resolveOptionLabel,
 } from "@/features/vehicle/lib/utils";
 import { range } from "@/shared/lib/arrays";
-import { formatFieldErrors } from "@/shared/lib/format-field-errors";
+import { formatFieldErrors } from "@/shared/lib/errors";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
 import { Input } from "@autolab/ui/components/input";
 import { Skeleton } from "@autolab/ui/components/skeleton";

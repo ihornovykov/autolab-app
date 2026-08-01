@@ -1,4 +1,4 @@
-import { getClientDisplayName } from "@/shared/lib/format";
+import { getClientDisplayName } from "@/shared/lib/client";
 
 type Client = {
   firstName: string;

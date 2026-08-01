@@ -7,7 +7,7 @@ import { EditClientSheet } from "@/features/client/ui/edit-client-sheet";
 import { VehicleCard, VehicleCardSkeleton } from "@/features/vehicle/ui/vehicle-card";
 import { orpc } from "@/shared/api/orpc";
 import { range } from "@/shared/lib/arrays";
-import { getClientDisplayName } from "@/shared/lib/format";
+import { getClientDisplayName } from "@/shared/lib/client";
 import { sheets } from "@/shared/stores/sheets";
 import { Button } from "@autolab/ui/components/button";
 import { Sheet } from "@autolab/ui/components/sheet";

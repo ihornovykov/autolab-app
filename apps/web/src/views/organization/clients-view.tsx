@@ -8,11 +8,12 @@ import { ClientDetailSheet } from "@/features/client/ui/client-detail-sheet";
 import { DeleteClientDialog } from "@/features/client/ui/delete-client-dialog";
 import { EditClientSheet } from "@/features/client/ui/edit-client-sheet";
 import { orpc } from "@/shared/api/orpc";
-import { formatDateISO, getClientDisplayName } from "@/shared/lib/format";
-import { isQueryContentLoading } from "@/shared/lib/is-query-content-loading";
+import { formatDate } from "@/shared/lib/date";
+import { getClientDisplayName } from "@/shared/lib/client";
+import { isQueryContentLoading } from "@/shared/lib/query";
 import { DEFAULT_PAGE_SIZE } from "@/shared/lib/pagination";
-import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
-import { useSelectedOrganizationId } from "@/shared/lib/use-selected-organization-id";
+import { useDebouncedValue } from "@/shared/hooks/use-debounce";
+import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
 import { DataTable } from "@/shared/ui/data-table";
@@ -94,7 +95,7 @@ export const ClientsView = () => {
       header: "Доданий",
       cell: ({ row }) => (
         <span className="font-mono text-sm text-muted-foreground tabular-nums">
-          {formatDateISO(row.original.createdAt)}
+          {formatDate(row.original.createdAt, "iso")}
         </span>
       ),
     },

@@ -1,6 +1,6 @@
 import { Button } from "@autolab/ui/components/button";
 
-import { authClient } from "@/shared/lib/auth-client";
+import { authClient } from "@/shared/lib/auth";
 
 export const SignInWithGoogle = () => (
   <Button

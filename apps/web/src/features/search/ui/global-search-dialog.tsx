@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { getSearchResultNavigation } from "@/features/search/lib/get-search-result-navigation";
 import { SearchResultItem } from "@/features/search/ui/search-result-item";
 import { orpc } from "@/shared/api/orpc";
-import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
+import { useDebouncedValue } from "@/shared/hooks/use-debounce";
 import { Loader } from "@/shared/ui/loader";
 import { Dialog } from "@autolab/ui/components/sheet";
 import { Input } from "@autolab/ui/components/input";

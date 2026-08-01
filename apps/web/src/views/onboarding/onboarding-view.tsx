@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { clearAuthContextCache } from "@/features/auth/lib/auth-context-cache";
-import { authClient } from "@/shared/lib/auth-client";
+import { authClient } from "@/shared/lib/auth";
 import { splitFullName } from "@/features/onboarding/lib/onboarding-profile-schema";
 import { OnboardingProfileForm } from "@/features/onboarding/ui/onboarding-profile-form";
 import {

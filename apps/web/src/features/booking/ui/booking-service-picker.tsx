@@ -1,7 +1,7 @@
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { formatPrice } from "@/shared/lib/format";
+import { formatPrice } from "@/shared/lib/money";
 import { Badge } from "@autolab/ui/components/badge";
 import { Button } from "@autolab/ui/components/button";
 import { Input } from "@autolab/ui/components/input";

@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { Area, AreaChart, CartesianGrid, Label, Pie, PieChart, XAxis, YAxis } from "recharts";
 
-import { formatPrice } from "@/shared/lib/format";
+import { formatPrice } from "@/shared/lib/money";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@autolab/ui/components/card";
 import {
   type ChartConfig,

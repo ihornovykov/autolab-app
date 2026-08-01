@@ -2,7 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import z from "zod";
 
 import { SERVICE_CATEGORIES } from "@/features/service/lib/service-categories";
-import { formatFieldErrors } from "@/shared/lib/format-field-errors";
+import { formatFieldErrors } from "@/shared/lib/errors";
 import { Input } from "@autolab/ui/components/input";
 import { Textarea } from "@autolab/ui/components/textarea";
 import {

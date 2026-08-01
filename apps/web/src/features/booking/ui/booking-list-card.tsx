@@ -6,7 +6,7 @@ import { formatBookingTimeShort } from "@/features/booking/lib/format-booking-ti
 import { LicencePlate } from "@/features/vehicle/ui/licence-plate";
 import { VehicleMakeIcon } from "@/features/vehicle/ui/vehicle-make-icon";
 import { range } from "@/shared/lib/arrays";
-import { formatPrice } from "@/shared/lib/format";
+import { formatPrice } from "@/shared/lib/money";
 import { StatusLight } from "@/shared/ui/status-light";
 import { Badge } from "@autolab/ui/components/badge";
 import { Skeleton } from "@autolab/ui/components/skeleton";

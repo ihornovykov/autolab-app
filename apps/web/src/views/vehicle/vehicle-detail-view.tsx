@@ -15,10 +15,10 @@ import {
 } from "@/features/vehicle/ui/vehicle-detail-sections";
 import { VehicleMakeIcon } from "@/features/vehicle/ui/vehicle-make-icon";
 import { orpc } from "@/shared/api/orpc";
-import { getClientName } from "@/shared/lib/format";
-import { isQueryContentLoading } from "@/shared/lib/is-query-content-loading";
+import { getClientName } from "@/shared/lib/client";
+import { isQueryContentLoading } from "@/shared/lib/query";
 import { DEFAULT_PAGE_SIZE } from "@/shared/lib/pagination";
-import { useSelectedOrganizationId } from "@/shared/lib/use-selected-organization-id";
+import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
 import { PageContainer } from "@/shared/ui/page-container";

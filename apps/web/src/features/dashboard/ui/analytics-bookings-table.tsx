@@ -1,7 +1,8 @@
 import { useNavigate } from "@tanstack/react-router";
 
 import type { BookingRow } from "@/features/booking/lib/booking-row";
-import { formatDateTime, formatPrice } from "@/shared/lib/format";
+import { formatDate } from "@/shared/lib/date";
+import { formatPrice } from "@/shared/lib/money";
 import { DataTablePagination } from "@/shared/ui/data-table-pagination";
 import { StatusLight } from "@/shared/ui/status-light";
 import { Card, CardContent, CardHeader, CardTitle } from "@autolab/ui/components/card";
@@ -43,7 +44,7 @@ const AnalyticsBookingMobileCard = ({
       <StatusLight status={booking.status} className="text-sm font-medium" />
       <p className="shrink-0 text-sm font-semibold tabular-nums">{formatPrice(booking.totalPrice)}</p>
     </div>
-    <p className="text-sm text-muted-foreground">{formatDateTime(booking.startTime)}</p>
+    <p className="text-sm text-muted-foreground">{formatDate(booking.startTime, "datetime")}</p>
     <p className="text-sm font-medium">
       {booking.vehicle ? `${booking.vehicle.make} ${booking.vehicle.model}` : "—"}
     </p>
@@ -139,7 +140,7 @@ export const AnalyticsBookingsTable = ({
                             onClick={() => handleRowClick(booking.id)}
                           >
                             <TableCell className="whitespace-nowrap">
-                              {formatDateTime(booking.startTime)}
+                              {formatDate(booking.startTime, "datetime")}
                             </TableCell>
                             <TableCell>
                               <StatusLight status={booking.status} />

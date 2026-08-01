@@ -4,7 +4,7 @@ import { orpc } from "@/shared/api/orpc";
 import {
   prefetchOrganizationQuery,
   resolveLoaderSearch,
-} from "@/shared/lib/route-prefetch";
+} from "@/shared/lib/prefetch";
 import { BookingDetailView } from "@/views/organization/booking-detail-view";
 
 export const Route = createFileRoute("/_auth/dashboard/organization/bookings/$bookingId")({

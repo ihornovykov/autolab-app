@@ -23,9 +23,9 @@ import { DashboardStatsSkeleton } from "@/features/dashboard/ui/dashboard-stats-
 import { DownloadAnalyticsReportButton } from "@/features/dashboard/ui/download-analytics-report-button";
 import { StatCard } from "@/features/dashboard/ui/stat-card";
 import { orpc } from "@/shared/api/orpc";
-import { isQueryContentLoading } from "@/shared/lib/is-query-content-loading";
-import { formatPrice } from "@/shared/lib/format";
-import { useSelectedOrganizationId } from "@/shared/lib/use-selected-organization-id";
+import { isQueryContentLoading } from "@/shared/lib/query";
+import { formatPrice } from "@/shared/lib/money";
+import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { Heading, PageContainer } from "@/shared/ui/page-container";
 import type { DateRangeFilterValue } from "@autolab/ui/components/date-range-picker";

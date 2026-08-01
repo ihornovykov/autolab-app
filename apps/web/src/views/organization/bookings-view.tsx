@@ -12,9 +12,9 @@ import {
   toListBookingsDateRange,
 } from "@/features/booking/lib/date-range-filter";
 import { orpc } from "@/shared/api/orpc";
-import { isQueryContentLoading } from "@/shared/lib/is-query-content-loading";
-import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
-import { useSelectedOrganizationId } from "@/shared/lib/use-selected-organization-id";
+import { isQueryContentLoading } from "@/shared/lib/query";
+import { useDebouncedValue } from "@/shared/hooks/use-debounce";
+import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { DataTableLayout } from "@/shared/ui/data-table-layout";
 import { DataTablePagination } from "@/shared/ui/data-table-pagination";
 import { DataTableSearch } from "@/shared/ui/data-table-search";

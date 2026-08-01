@@ -7,11 +7,11 @@ import { employeeRoleOptions, type EmployeeRole } from "@/features/employee/lib/
 import { InviteEmployeeDialog } from "@/features/employee/ui/invite-employee-dialog";
 import { EditEmployeeSheet } from "@/features/employee/ui/edit-employee-sheet";
 import { orpc } from "@/shared/api/orpc";
-import { formatDateISO } from "@/shared/lib/format";
-import { isQueryContentLoading } from "@/shared/lib/is-query-content-loading";
+import { formatDate } from "@/shared/lib/date";
+import { isQueryContentLoading } from "@/shared/lib/query";
 import { DEFAULT_PAGE_SIZE } from "@/shared/lib/pagination";
-import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
-import { useSelectedOrganizationId } from "@/shared/lib/use-selected-organization-id";
+import { useDebouncedValue } from "@/shared/hooks/use-debounce";
+import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
 import { DataTable } from "@/shared/ui/data-table";
@@ -98,7 +98,7 @@ export const EmployeesView = () => {
       header: "Дата найму",
       cell: ({ row }) => (
         <span className="text-sm text-muted-foreground">
-          {formatDateISO(row.original.startDate)}
+          {formatDate(row.original.startDate, "iso")}
         </span>
       ),
     },

@@ -7,8 +7,8 @@ import {
   buildDashboardBreadcrumbs,
   formatBookingBreadcrumbLabel,
   formatVehicleBreadcrumbLabel,
-} from "@/shared/lib/dashboard-breadcrumbs";
-import { useSelectedOrganizationId } from "@/shared/lib/use-selected-organization-id";
+} from "@/shared/lib/breadcrumbs";
+import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { cn } from "@autolab/ui/lib/utils";
 
 const getOrganizationSearch = (organizationId: string | null, requiresOrganizationSearch?: boolean) =>

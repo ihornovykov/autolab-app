@@ -1,7 +1,7 @@
 import { ClockIcon, WrenchIcon } from "lucide-react";
 
 import { range } from "@/shared/lib/arrays";
-import { formatPrice } from "@/shared/lib/format";
+import { formatPrice } from "@/shared/lib/money";
 import { Badge } from "@autolab/ui/components/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@autolab/ui/components/card";
 import { Skeleton } from "@autolab/ui/components/skeleton";

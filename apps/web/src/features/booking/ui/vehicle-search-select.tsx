@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Loader2 } from "lucide-react";
 
 import { orpc } from "@/shared/api/orpc";
-import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
+import { useDebouncedValue } from "@/shared/hooks/use-debounce";
 import { Label } from "@autolab/ui/components/label";
 import { cn } from "@autolab/ui/lib/utils";
 

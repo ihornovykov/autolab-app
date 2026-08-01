@@ -8,7 +8,7 @@ import {
   type DashboardDatePreset,
   getPresetDateRange,
 } from "@/features/dashboard/lib/date-range-presets";
-import { useIsMobile } from "@/shared/lib/use-is-mobile";
+import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { Calendar } from "@autolab/ui/components/calendar";
 import type { DateRangeFilterValue } from "@autolab/ui/components/date-range-picker";
 import { Button } from "@autolab/ui/components/button";

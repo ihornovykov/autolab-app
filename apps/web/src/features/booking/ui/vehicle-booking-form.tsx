@@ -17,7 +17,7 @@ import {
 } from "@/features/booking/ui/booking-service-picker";
 import { BookingOvertimeNotice } from "@/features/booking/ui/booking-overtime-notice";
 import { range } from "@/shared/lib/arrays";
-import { formatFieldErrors } from "@/shared/lib/format-field-errors";
+import { formatFieldErrors } from "@/shared/lib/errors";
 import { orpc } from "@/shared/api/orpc";
 import { StatusLight } from "@/shared/ui/status-light";
 import { DateTimePicker } from "@autolab/ui/components/date-time-picker";
@@ -32,7 +32,7 @@ import {
 import { Textarea } from "@autolab/ui/components/textarea";
 import { Skeleton } from "@autolab/ui/components/skeleton";
 import { Input } from "@autolab/ui/components/input";
-import { formatPrice } from "@/shared/lib/format";
+import { formatPrice } from "@/shared/lib/money";
 
 export type BookingStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 

@@ -6,7 +6,7 @@ import { UserVehicleForm, UserVehicleFormSkeleton } from "@/features/vehicle/ui/
 import { VehicleMakeIcon } from "@/features/vehicle/ui/vehicle-make-icon";
 import { orpc } from "@/shared/api/orpc";
 import { createSelectListInput } from "@/shared/lib/pagination";
-import { getClientName } from "@/shared/lib/format";
+import { getClientName } from "@/shared/lib/client";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
 import { Button } from "@autolab/ui/components/button";

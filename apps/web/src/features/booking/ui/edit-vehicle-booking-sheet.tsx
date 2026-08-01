@@ -13,7 +13,8 @@ import { type VehicleBookingHistoryItem } from "@/features/booking/lib/booking-h
 import { SERVICES_SELECT_PAGE_SIZE } from "@/features/service/lib/constants";
 import { orpc } from "@/shared/api/orpc";
 import { createSelectListInput } from "@/shared/lib/pagination";
-import { formatDate, formatPrice } from "@/shared/lib/format";
+import { formatDate } from "@/shared/lib/date";
+import { formatPrice } from "@/shared/lib/money";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
 import { StatusLight } from "@/shared/ui/status-light";

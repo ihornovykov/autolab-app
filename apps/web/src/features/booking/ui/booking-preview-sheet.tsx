@@ -15,7 +15,7 @@ import { EditVehicleBookingSheet } from "@/features/booking/ui/edit-vehicle-book
 import { BookingTimeDisplay } from "@/features/booking/ui/booking-time-display";
 import { LicencePlate } from "@/features/vehicle/ui/licence-plate";
 import { VehicleMakeIcon } from "@/features/vehicle/ui/vehicle-make-icon";
-import { formatPrice } from "@/shared/lib/format";
+import { formatPrice } from "@/shared/lib/money";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
 import { RoleBadge } from "@/shared/ui/role-badge";

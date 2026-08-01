@@ -9,7 +9,7 @@ const CreateOrganizationMap = lazy(() =>
   })),
 );
 import { LogoUpload } from "@/features/organization/ui/logo-upload";
-import { formatFieldErrors } from "@/shared/lib/format-field-errors";
+import { formatFieldErrors } from "@/shared/lib/errors";
 import { Input } from "@autolab/ui/components/input";
 import { Label } from "@autolab/ui/components/label";
 import { Separator } from "@autolab/ui/components/separator";

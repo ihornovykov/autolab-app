@@ -15,7 +15,7 @@ import { cn } from "@autolab/ui/lib/utils";
 import { PanelLeft } from "lucide-react";
 import * as React from "react";
 
-import { useIsMobile } from "@/shared/lib/use-is-mobile";
+import { useIsMobile } from "@/shared/hooks/use-mobile";
 
 const SIDEBAR_STORAGE_KEY = "autolab-sidebar";
 const SIDEBAR_WIDTH = "16rem";

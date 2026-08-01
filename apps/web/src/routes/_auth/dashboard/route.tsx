@@ -2,18 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
-import { authClient } from "@/shared/lib/auth-client";
-import { useSyncOrganizationSelection } from "@/shared/lib/use-sync-organization-selection";
+import { authClient } from "@/shared/lib/auth";
+import { useSyncOrganizationSelection } from "@/shared/hooks/use-organization";
 import { orpc } from "@/shared/api/orpc";
 import { clearAuthContextCache } from "@/features/auth/lib/auth-context-cache";
-import { prefetchOrganizations } from "@/shared/lib/route-prefetch";
+import { prefetchOrganizations } from "@/shared/lib/prefetch";
 import { AppSidebar } from "@/shared/ui/app-sidebar";
 import { DashboardTopbar } from "@/shared/ui/dashboard-topbar";
 import { SidebarInset, SidebarProvider } from "@/shared/ui/sidebar";
 import { GlobalSearchDialog } from "@/features/search/ui/global-search-dialog";
 import { useGlobalSearchShortcut } from "@/features/search/lib/use-global-search-shortcut";
 import { useGlobalSearchStore } from "@/features/search/model/global-search-store";
-import { useSelectedOrganizationId } from "@/shared/lib/use-selected-organization-id";
+import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 
 const searchSchema = z.object({
   organizationId: z.string().optional(),

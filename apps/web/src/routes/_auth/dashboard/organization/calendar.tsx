@@ -5,7 +5,7 @@ import {
   defaultCalendarBookingsInput,
   prefetchOrganizationQuery,
   resolveLoaderSearch,
-} from "@/shared/lib/route-prefetch";
+} from "@/shared/lib/prefetch";
 import { CalendarView } from "@/views/organization/calendar-view";
 
 export const Route = createFileRoute("/_auth/dashboard/organization/calendar")({

@@ -9,7 +9,7 @@ import {
   type OnboardingProfileValues,
 } from "@/features/onboarding/lib/onboarding-profile-schema";
 import { orpc } from "@/shared/api/orpc";
-import { formatFieldErrors } from "@/shared/lib/format-field-errors";
+import { formatFieldErrors } from "@/shared/lib/errors";
 import { Button } from "@autolab/ui/components/button";
 import { Input } from "@autolab/ui/components/input";
 

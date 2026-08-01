@@ -5,7 +5,7 @@ import {
   defaultListInput,
   prefetchOrganizationQuery,
   resolveLoaderSearch,
-} from "@/shared/lib/route-prefetch";
+} from "@/shared/lib/prefetch";
 import { ClientsView } from "@/views/organization/clients-view";
 
 export const Route = createFileRoute("/_auth/dashboard/organization/clients")({

@@ -12,11 +12,11 @@ import {
   VehicleTableLicensePlate,
 } from "@/features/vehicle/ui/vehicle-table-cells";
 import { orpc } from "@/shared/api/orpc";
-import { getClientName } from "@/shared/lib/format";
-import { isQueryContentLoading } from "@/shared/lib/is-query-content-loading";
+import { getClientName } from "@/shared/lib/client";
+import { isQueryContentLoading } from "@/shared/lib/query";
 import { DEFAULT_PAGE_SIZE } from "@/shared/lib/pagination";
-import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
-import { useSelectedOrganizationId } from "@/shared/lib/use-selected-organization-id";
+import { useDebouncedValue } from "@/shared/hooks/use-debounce";
+import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
 import { DataTable } from "@/shared/ui/data-table";

@@ -11,7 +11,7 @@ import {
   VehicleBookingFormSkeleton,
 } from "@/features/booking/ui/vehicle-booking-form";
 import { VehicleSearchSelect } from "@/features/booking/ui/vehicle-search-select";
-import { useSelectedOrganizationId } from "@/shared/lib/use-selected-organization-id";
+import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { PageContainer } from "@/shared/ui/page-container";
 import { Button } from "@autolab/ui/components/button";
 import { Skeleton } from "@autolab/ui/components/skeleton";

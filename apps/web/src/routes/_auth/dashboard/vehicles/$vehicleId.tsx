@@ -5,7 +5,7 @@ import {
   defaultListInput,
   prefetchOrganizationQuery,
   resolveLoaderSearch,
-} from "@/shared/lib/route-prefetch";
+} from "@/shared/lib/prefetch";
 import { VehicleDetailView } from "@/views/vehicle/vehicle-detail-view";
 
 export const Route = createFileRoute("/_auth/dashboard/vehicles/$vehicleId")({

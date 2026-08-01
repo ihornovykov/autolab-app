@@ -4,8 +4,8 @@ import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import z from "zod";
 
-import { authClient } from "@/shared/lib/auth-client";
-import { formatFieldErrors } from "@/shared/lib/format-field-errors";
+import { authClient } from "@/shared/lib/auth";
+import { formatFieldErrors } from "@/shared/lib/errors";
 import { Button } from "@autolab/ui/components/button";
 import { Input } from "@autolab/ui/components/input";
 

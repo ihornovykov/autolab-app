@@ -2,11 +2,11 @@ import { uk } from "date-fns/locale";
 import { useMemo } from "react";
 
 import { mapBookingsToCalendarEvents } from "@/features/calendar/lib/map-booking";
-import { isQueryContentLoading } from "@/shared/lib/is-query-content-loading";
+import { isQueryContentLoading } from "@/shared/lib/query";
 import { useCalendarBookings } from "@/features/calendar/lib/use-calendar-bookings";
 import { useCalendarStore } from "@/features/calendar/model/calendar-store";
 import { EventCalendar } from "@/features/calendar/ui/event-calendar";
-import { useSelectedOrganizationId } from "@/shared/lib/use-selected-organization-id";
+import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { Heading, PageContainer } from "@/shared/ui/page-container";
 import { Calendar } from "@autolab/ui/components/calendar";
 

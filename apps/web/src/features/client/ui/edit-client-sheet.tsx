@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { ClientForm } from "@/features/client/ui/client-form";
 import { DeleteClientDialog } from "@/features/client/ui/delete-client-dialog";
 import { orpc } from "@/shared/api/orpc";
-import { getClientDisplayName, getClientName } from "@/shared/lib/format";
+import { getClientDisplayName, getClientName } from "@/shared/lib/client";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
 import { Badge } from "@autolab/ui/components/badge";
