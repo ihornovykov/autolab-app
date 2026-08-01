@@ -1,9 +1,6 @@
-import { createRequire } from "node:module";
-
 import dayjs from "dayjs";
 import "dayjs/locale/uk.js";
 import PDFDocument from "pdfkit";
-import sharp from "sharp";
 
 import {
   formatBookingTimeRange,
@@ -16,12 +13,14 @@ import {
   resolveBrandFontData,
   type PdfBrandFontOptions,
 } from "../../../lib/brand-font";
-import { toBinaryAssetBuffer } from "../../../lib/pdf-assets";
-import autolabLogoSvg from "../../../assets/autolab.svg" with { type: "bytes" };
+import { bufferFromBase64 } from "../../../lib/pdf-assets";
+import { autolabLogoBase64 } from "../../../assets/generated/autolab-logo";
+import { dejaVuSansBoldBase64 } from "../../../assets/generated/dejavu-sans-bold";
+import { dejaVuSansBase64 } from "../../../assets/generated/dejavu-sans";
 
-const require = createRequire(import.meta.url);
-const fontRegularPath = require.resolve("dejavu-fonts-ttf/ttf/DejaVuSans.ttf");
-const fontBoldPath = require.resolve("dejavu-fonts-ttf/ttf/DejaVuSans-Bold.ttf");
+const fontRegularData = bufferFromBase64(dejaVuSansBase64);
+const fontBoldData = bufferFromBase64(dejaVuSansBoldBase64);
+const autolabLogoBuffer = bufferFromBase64(autolabLogoBase64);
 
 const AUTOLAB_BRAND = {
   fontFamily: "geist",
@@ -138,12 +137,6 @@ const resolveImageBuffer = async (source?: string | null) => {
   return null;
 };
 
-const loadAutolabLogoBuffer = () =>
-  sharp(toBinaryAssetBuffer(autolabLogoSvg, "../../../assets/autolab.svg"))
-    .resize(128, 128, { fit: "contain" })
-    .png()
-    .toBuffer();
-
 const renderPdfToBuffer = (
   input: BookingReceiptPdfInput,
   assets: { orgLogoBuffer: Buffer | null; autolabLogoBuffer: Buffer },
@@ -156,6 +149,7 @@ const renderPdfToBuffer = (
       margin: MARGIN,
       autoFirstPage: true,
       bufferPages: true,
+      font: false as unknown as string,
     });
     const chunks: Buffer[] = [];
 
@@ -163,9 +157,10 @@ const renderPdfToBuffer = (
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
-    doc.registerFont("regular", fontRegularPath);
-    doc.registerFont("bold", fontBoldPath);
+    doc.registerFont("regular", fontRegularData);
+    doc.registerFont("bold", fontBoldData);
     doc.registerFont(brandFontKey, resolveBrandFontData(AUTOLAB_BRAND));
+    doc.font("regular");
 
     const { booking, organization, vehicle, employee } = input;
     const { orgLogoBuffer, autolabLogoBuffer } = assets;
@@ -543,10 +538,9 @@ const renderPdfToBuffer = (
   });
 
 export const buildBookingReceiptPdf = async (input: BookingReceiptPdfInput) => {
-  const [orgLogoBuffer, autolabLogoBuffer] = await Promise.all([
-    input.organization.logo ? resolveImageBuffer(input.organization.logo) : Promise.resolve(null),
-    loadAutolabLogoBuffer(),
-  ]);
+  const orgLogoBuffer = input.organization.logo
+    ? await resolveImageBuffer(input.organization.logo)
+    : null;
 
   return renderPdfToBuffer(input, { orgLogoBuffer, autolabLogoBuffer });
 };

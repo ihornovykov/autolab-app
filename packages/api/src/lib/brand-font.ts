@@ -1,6 +1,5 @@
-import geistBoldItalic from "../assets/fonts/Geist-BoldItalic.ttf" with { type: "bytes" };
-
-import { toBinaryAssetBuffer } from "./pdf-assets";
+import { geistBoldItalicBase64 } from "../assets/generated/geist-bold-italic";
+import { bufferFromBase64 } from "./pdf-assets";
 
 export type PdfBrandFontFamily = "geist";
 export type PdfBrandFontWeight = 400 | 500 | 600 | 700;
@@ -12,15 +11,13 @@ export type PdfBrandFontOptions = {
   fontStyle: PdfBrandFontStyle;
 };
 
-export const resolveBrandFontData = (options: PdfBrandFontOptions): Uint8Array => {
+export const resolveBrandFontData = (options: PdfBrandFontOptions): Buffer => {
   if (options.fontFamily !== "geist") {
     throw new Error(`Unsupported brand font family: ${options.fontFamily}`);
   }
 
   if (options.fontWeight === 700 && options.fontStyle === "italic") {
-    return new Uint8Array(
-      toBinaryAssetBuffer(geistBoldItalic, "../assets/fonts/Geist-BoldItalic.ttf"),
-    );
+    return bufferFromBase64(geistBoldItalicBase64);
   }
 
   throw new Error(

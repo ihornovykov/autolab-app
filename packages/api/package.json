@@ -19,12 +19,9 @@
     "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
     "dayjs": "^1.11.21",
-    "dejavu-fonts-ttf": "^2.37.3",
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.1",
-    "geist": "^1.7.0",
     "pdfkit": "^0.19.1",
-    "sharp": "^0.35.3",
     "zod": "catalog:"
   },
   "devDependencies": {
