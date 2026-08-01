@@ -1,10 +1,10 @@
 import { uk } from "date-fns/locale";
 import { useMemo } from "react";
 
-import { mapBookingsToCalendarEvents } from "@/features/calendar/lib/map-booking";
+import { mapBookingsToCalendarEvents } from "@/features/calendar/lib/utils";
 import { isQueryContentLoading } from "@/shared/lib/query";
-import { useCalendarBookings } from "@/features/calendar/lib/use-calendar-bookings";
-import { useCalendarStore } from "@/features/calendar/model/calendar-store";
+import { useCalendarBookings } from "@/features/calendar/hooks/use-calendar-bookings";
+import { useCalendarStore } from "@/features/calendar/lib/stores";
 import { EventCalendar } from "@/features/calendar/ui/event-calendar";
 import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { Heading, PageContainer } from "@/shared/ui/page-container";

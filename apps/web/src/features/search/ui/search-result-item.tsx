@@ -6,8 +6,8 @@ import { LicencePlate } from "@/features/vehicle/ui/licence-plate";
 import {
   SEARCH_RESULT_TYPE_ICONS,
   SEARCH_RESULT_TYPE_LABELS,
-  type SearchResultType,
-} from "@/features/search/lib/search-result-meta";
+} from "@/features/search/lib/constants";
+import type { SearchResultType } from "@/features/search/lib/types";
 import { Badge } from "@autolab/ui/components/badge";
 
 export type SearchResultItemData = {

@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import z from "zod";
 
-import { SERVICE_CATEGORIES } from "@/features/service/lib/service-categories";
+import { SERVICE_CATEGORIES } from "@/features/service/lib/constants";
 import { formatFieldErrors } from "@/shared/lib/errors";
 import { Input } from "@autolab/ui/components/input";
 import { Textarea } from "@autolab/ui/components/textarea";

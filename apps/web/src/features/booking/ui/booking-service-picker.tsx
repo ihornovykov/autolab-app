@@ -1,26 +1,17 @@
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import type {
+  BookingServiceCatalogItem,
+  BookingServiceLineItem,
+} from "@/features/booking/lib/types";
 import { formatPrice } from "@/shared/lib/money";
 import { Badge } from "@autolab/ui/components/badge";
 import { Button } from "@autolab/ui/components/button";
 import { Input } from "@autolab/ui/components/input";
 import { cn } from "@autolab/ui/lib/utils";
 
-export type BookingServiceCatalogItem = {
-  id: string;
-  title: string;
-  description?: string | null;
-  category?: string | null;
-  price: string;
-  duration: number;
-};
-
-export type BookingServiceLineItem = {
-  serviceId: string;
-  quantity: number;
-  unitPrice: string;
-};
+export type { BookingServiceCatalogItem, BookingServiceLineItem };
 
 type Props = {
   services: BookingServiceCatalogItem[];

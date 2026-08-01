@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import z from "zod";
 
-import { getPasswordResetRedirectUrl } from "@/features/auth/lib/get-password-reset-redirect-url";
+import { getPasswordResetRedirectUrl } from "@/features/auth/lib/utils";
 import { authClient } from "@/shared/lib/auth";
 import { formatFieldErrors } from "@/shared/lib/errors";
 import { Button } from "@autolab/ui/components/button";

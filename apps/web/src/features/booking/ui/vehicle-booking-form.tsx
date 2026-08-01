@@ -8,7 +8,7 @@ import {
   computeBookingDiscountAmount,
   computeBookingItemsTotal,
   formatBookingTotalPrice,
-} from "@/features/booking/lib/compute-booking-total";
+} from "@/features/booking/lib/utils";
 
 import {
   BookingServicePicker,

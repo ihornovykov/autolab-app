@@ -2,11 +2,11 @@ import { useMutation } from "@tanstack/react-query";
 import { DownloadIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { toListBookingsDateRange } from "@/features/booking/lib/date-range-filter";
+import { toListBookingsDateRange } from "@/features/booking/lib/utils";
 import {
   createPdfBlobFromBase64,
   downloadPdfBlob,
-} from "@/features/booking/lib/print-booking-receipt";
+} from "@/features/booking/lib/utils";
 import { client } from "@/shared/api/orpc";
 import { Button } from "@autolab/ui/components/button";
 import { cn } from "@autolab/ui/lib/utils";

@@ -12,8 +12,8 @@ import {
 import { useEffect, useMemo, useRef } from "react";
 
 import { EndHour, StartHour } from "@/features/calendar/lib/constants";
-import { formatDayDate, getTime } from "@/features/calendar/lib/date-format";
-import { positionTimedEvents } from "@/features/calendar/lib/position-timed-events";
+import { formatDayDate, getTime } from "@/features/calendar/lib/utils";
+import { positionTimedEvents } from "@/features/calendar/lib/utils";
 import { type CalendarEvent } from "@/features/calendar/lib/types";
 import { useCurrentTimeIndicator } from "@/features/calendar/hooks/use-current-time-indicator";
 import { DraggableEvent } from "@/features/calendar/ui/draggable-event";

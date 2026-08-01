@@ -1,7 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 
 import { orpc } from "@/shared/api/orpc";
-import { createCalendarBookingsInput, getCalendarFetchRange } from "@/features/calendar/lib/calendar-range";
+import { createCalendarBookingsInput, getCalendarFetchRange } from "@/features/calendar/lib/utils";
 import { DEFAULT_PAGE_SIZE } from "@/shared/lib/pagination";
 
 type DashboardSearch = {

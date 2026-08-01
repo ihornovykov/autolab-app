@@ -3,9 +3,9 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { clearAuthContextCache } from "@/features/auth/lib/auth-context-cache";
+import { clearAuthContextCache } from "@/features/auth/lib/utils";
 import { authClient } from "@/shared/lib/auth";
-import { splitFullName } from "@/features/onboarding/lib/onboarding-profile-schema";
+import { splitFullName } from "@/features/onboarding/lib/utils";
 import { OnboardingProfileForm } from "@/features/onboarding/ui/onboarding-profile-form";
 import {
   OnboardingStepIndicator,

@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { getSearchResultNavigation } from "@/features/search/lib/get-search-result-navigation";
+import { getSearchResultNavigation } from "@/features/search/lib/utils";
 import { SearchResultItem } from "@/features/search/ui/search-result-item";
 import { orpc } from "@/shared/api/orpc";
 import { useDebouncedValue } from "@/shared/hooks/use-debounce";

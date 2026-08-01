@@ -1,8 +1,8 @@
 import { CornerDownRight } from "lucide-react";
 import { useMemo } from "react";
 
-import { getBookingDisplaySegments } from "@/features/booking/lib/get-booking-display-segments";
-import { formatBookingTimeRange } from "@/features/booking/lib/format-booking-time";
+import { getBookingDisplaySegments } from "@/features/booking/lib/utils";
+import { formatBookingTimeRange } from "@/features/booking/lib/utils";
 import { type WorkingHoursEntry } from "@autolab/api/lib/working-hours";
 import { cn } from "@autolab/ui/lib/utils";
 

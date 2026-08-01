@@ -3,11 +3,11 @@ import { useForm } from "@tanstack/react-form";
 import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
-import { clearAuthContextCache } from "@/features/auth/lib/auth-context-cache";
+import { clearAuthContextCache } from "@/features/auth/lib/utils";
 import {
   onboardingProfileSchema,
   type OnboardingProfileValues,
-} from "@/features/onboarding/lib/onboarding-profile-schema";
+} from "@/features/onboarding/lib/validation";
 import { orpc } from "@/shared/api/orpc";
 import { formatFieldErrors } from "@/shared/lib/errors";
 import { Button } from "@autolab/ui/components/button";

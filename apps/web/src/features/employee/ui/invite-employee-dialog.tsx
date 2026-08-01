@@ -3,10 +3,8 @@ import { Loader2, PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import {
-  employeeRoleOptions,
-  type EmployeeRole,
-} from "@/features/employee/lib/employee-roles";
+import { employeeRoleOptions } from "@/features/employee/lib/constants";
+import type { EmployeeRole } from "@/features/employee/lib/types";
 import { orpc } from "@/shared/api/orpc";
 import { dialogs } from "@/shared/stores/dialogs";
 import { Avatar } from "@autolab/ui/components/avatar";

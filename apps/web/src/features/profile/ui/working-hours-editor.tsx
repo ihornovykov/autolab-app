@@ -2,11 +2,9 @@ import { Checkbox } from "@autolab/ui/components/checkbox";
 import { TimePicker } from "@autolab/ui/components/time-picker";
 import { cn } from "@autolab/ui/lib/utils";
 
-import {
-  toTimeInputValue,
-  weekdayLabels,
-  type WorkingHoursDay,
-} from "@/features/profile/lib/working-hours";
+import { weekdayLabels } from "@/features/profile/lib/constants";
+import type { WorkingHoursDay } from "@/features/profile/lib/types";
+import { toTimeInputValue } from "@/features/profile/lib/utils";
 
 type Props = {
   days: WorkingHoursDay[];

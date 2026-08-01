@@ -3,7 +3,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { employeeRoleOptions, type EmployeeRole } from "@/features/employee/lib/employee-roles";
+import { employeeRoleOptions } from "@/features/employee/lib/constants";
+import type { EmployeeRole } from "@/features/employee/lib/types";
 import { InviteEmployeeDialog } from "@/features/employee/ui/invite-employee-dialog";
 import { EditEmployeeSheet } from "@/features/employee/ui/edit-employee-sheet";
 import { orpc } from "@/shared/api/orpc";

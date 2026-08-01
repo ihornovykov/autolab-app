@@ -51,9 +51,16 @@ Move reusable, cross-domain code here:
 
 Each domain gets its own folder with **segments** (no barrel exports):
 
-- `ui/` — presentational / interactive components (`sign-in-form.tsx`, `user-menu.tsx`).
-- `lib/` — constants, validation, hooks, server functions for that domain.
-- `model/` — optional local types/state when not shared.
+- `ui/` — React components only (`.tsx`). No hooks, utils, or constants in this folder.
+- `lib/` — non-React code only, using these filenames when needed:
+  - `utils.ts` — pure helpers, mappers, filters, server functions
+  - `constants.ts` — constants, enums, static config
+  - `validation.ts` — Zod schemas and inferred form types
+  - `types.ts` — shared TypeScript types for the feature
+  - `stores.ts` — Zustand (or other) client state
+- `hooks/` — feature hooks only; files must be named `use-*.ts`.
+
+Move helpers or constants out of `ui/` components when they are not tightly coupled to that component.
 
 Examples: `features/auth/`, `features/home/`, `features/dashboard/`.
 

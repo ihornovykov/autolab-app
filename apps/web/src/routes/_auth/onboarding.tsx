@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { resolveAuthContext } from "@/features/auth/lib/auth-context-cache";
+import { resolveAuthContext } from "@/features/auth/lib/utils";
 import { orpc } from "@/shared/api/orpc";
 import { OnboardingView } from "@/views/onboarding/onboarding-view";
 

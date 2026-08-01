@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 
-import type { BookingRow } from "@/features/booking/lib/booking-row";
+import type { BookingRow } from "@/features/booking/lib/types";
 import { formatDate } from "@/shared/lib/date";
 import { formatPrice } from "@/shared/lib/money";
 import { DataTablePagination } from "@/shared/ui/data-table-pagination";

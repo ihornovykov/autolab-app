@@ -1,8 +1,8 @@
 import { ChevronRightIcon, ClockIcon } from "lucide-react";
 
-import { type BookingRow } from "@/features/booking/lib/booking-row";
+import { type BookingRow } from "@/features/booking/lib/types";
 import { BookingDiscountDisplay } from "@/features/booking/ui/booking-discount-display";
-import { formatBookingTimeShort } from "@/features/booking/lib/format-booking-time";
+import { formatBookingTimeShort } from "@/features/booking/lib/utils";
 import { LicencePlate } from "@/features/vehicle/ui/licence-plate";
 import { VehicleMakeIcon } from "@/features/vehicle/ui/vehicle-make-icon";
 import { range } from "@/shared/lib/arrays";

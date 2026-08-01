@@ -3,7 +3,7 @@ import { PlusIcon } from "lucide-react";
 import {
   CREATE_BOOKING_FORM_ID,
   useCreateBooking,
-} from "@/features/booking/lib/use-create-booking";
+} from "@/features/booking/hooks/use-create-booking";
 import { VehicleBookingForm, VehicleBookingFormSkeleton } from "@/features/booking/ui/vehicle-booking-form";
 import { dialogs } from "@/shared/stores/dialogs";
 import { Button } from "@autolab/ui/components/button";

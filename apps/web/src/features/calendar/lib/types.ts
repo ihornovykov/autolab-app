@@ -18,3 +18,17 @@ export type CalendarEvent = {
     licensePlate: string | null;
   };
 };
+
+export type CalendarRange = {
+  from: string;
+  to: string;
+};
+
+export type PositionedCalendarEvent = {
+  event: CalendarEvent;
+  top: number;
+  height: number;
+  left: number;
+  width: number;
+  zIndex: number;
+};

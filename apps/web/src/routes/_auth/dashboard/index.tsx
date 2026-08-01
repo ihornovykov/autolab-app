@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { getDefaultDashboardDateRange } from "@/features/dashboard/lib/date-range-presets";
-import { toListBookingsDateRange } from "@/features/booking/lib/date-range-filter";
+import { getDefaultDashboardDateRange } from "@/features/dashboard/lib/utils";
+import { toListBookingsDateRange } from "@/features/booking/lib/utils";
 import { orpc } from "@/shared/api/orpc";
 import {
   prefetchOrganizationQuery,

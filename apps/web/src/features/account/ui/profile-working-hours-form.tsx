@@ -3,13 +3,13 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { range } from "@/shared/lib/arrays";
+import { defaultWorkingHoursDays } from "@/features/profile/lib/constants";
+import type { WorkingHoursDay } from "@/features/profile/lib/types";
 import {
-  defaultWorkingHoursDays,
   mapApiWorkingHoursDays,
   toWorkingHoursMutationInput,
-  workingHoursDaysSchema,
-  type WorkingHoursDay,
-} from "@/features/profile/lib/working-hours";
+} from "@/features/profile/lib/utils";
+import { workingHoursDaysSchema } from "@/features/profile/lib/validation";
 import { WorkingHoursEditor } from "@/features/profile/ui/working-hours-editor";
 import { orpc } from "@/shared/api/orpc";
 import { Button } from "@autolab/ui/components/button";

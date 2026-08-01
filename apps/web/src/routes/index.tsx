@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { resolveAuthContext } from "@/features/auth/lib/auth-context-cache";
+import { resolveAuthContext } from "@/features/auth/lib/utils";
 
 export const Route = createFileRoute("/")({
   beforeLoad: async () => {

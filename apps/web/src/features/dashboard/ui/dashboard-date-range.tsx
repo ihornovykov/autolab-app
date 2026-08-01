@@ -3,11 +3,9 @@ import { uk } from "date-fns/locale";
 import { CalendarIcon, XIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import {
-  DASHBOARD_DATE_PRESETS,
-  type DashboardDatePreset,
-  getPresetDateRange,
-} from "@/features/dashboard/lib/date-range-presets";
+import { DASHBOARD_DATE_PRESETS } from "@/features/dashboard/lib/constants";
+import type { DashboardDatePreset } from "@/features/dashboard/lib/types";
+import { getPresetDateRange } from "@/features/dashboard/lib/utils";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { Calendar } from "@autolab/ui/components/calendar";
 import type { DateRangeFilterValue } from "@autolab/ui/components/date-range-picker";

@@ -7,7 +7,7 @@ import {
   fuelOptions,
   useVehicleMakes,
   useVehicleModels,
-} from "@/features/vehicle/lib/use-vehicle-catalog";
+} from "@/features/vehicle/hooks/use-vehicle-catalog";
 import {
   findOptionLabel,
   findOptionValueByLabel,

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams, useRouter } from "@tanstack/react-router";
 import { ArrowLeftIcon, CalendarIcon, PencilIcon, Trash2Icon, UserIcon } from "lucide-react";
 
-import { mapBookingToHistoryItem } from "@/features/calendar/lib/map-booking";
+import { mapBookingToHistoryItem } from "@/features/calendar/lib/utils";
 import { BookingDiscountDisplay } from "@/features/booking/ui/booking-discount-display";
 import { DeleteVehicleBookingDialog } from "@/features/booking/ui/delete-vehicle-booking-dialog";
 import { EditVehicleBookingSheet } from "@/features/booking/ui/edit-vehicle-booking-sheet";

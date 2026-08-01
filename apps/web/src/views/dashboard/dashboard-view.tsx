@@ -10,12 +10,10 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { toListBookingsDateRange } from "@/features/booking/lib/date-range-filter";
-import {
-  DEFAULT_DASHBOARD_PRESET,
-  getDefaultDashboardDateRange,
-  type DashboardDatePreset,
-} from "@/features/dashboard/lib/date-range-presets";
+import { toListBookingsDateRange } from "@/features/booking/lib/utils";
+import { DEFAULT_DASHBOARD_PRESET } from "@/features/dashboard/lib/constants";
+import type { DashboardDatePreset } from "@/features/dashboard/lib/types";
+import { getDefaultDashboardDateRange } from "@/features/dashboard/lib/utils";
 import { AnalyticsBookingsTable } from "@/features/dashboard/ui/analytics-bookings-table";
 import { AnalyticsChartsSection } from "@/features/dashboard/ui/analytics-charts-section";
 import { DashboardDateRange } from "@/features/dashboard/ui/dashboard-date-range";

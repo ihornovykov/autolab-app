@@ -3,7 +3,7 @@ import { Separator } from "@autolab/ui/components/separator";
 import { SearchIcon } from "lucide-react";
 
 import { SearchInput } from "@/shared/ui/search-input";
-import { useGlobalSearchStore } from "@/features/search/model/global-search-store";
+import { useGlobalSearchStore } from "@/features/search/lib/stores";
 import { DashboardBreadcrumbs } from "@/shared/ui/dashboard-breadcrumbs";
 import { SidebarTrigger } from "@/shared/ui/sidebar";
 import { ThemeSwitcher } from "@/shared/ui/theme-switcher";

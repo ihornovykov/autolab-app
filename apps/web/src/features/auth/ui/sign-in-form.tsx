@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import z from "zod";
 
-import { clearAuthContextCache } from "@/features/auth/lib/auth-context-cache";
+import { clearAuthContextCache } from "@/features/auth/lib/utils";
 import { authClient } from "@/shared/lib/auth";
 import { formatFieldErrors } from "@/shared/lib/errors";
 

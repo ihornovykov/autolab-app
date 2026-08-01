@@ -1,6 +1,6 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
-import { resolveAuthContext } from "@/features/auth/lib/auth-context-cache";
+import { resolveAuthContext } from "@/features/auth/lib/utils";
 
 const GuestAuthLayout = () => <Outlet />;
 

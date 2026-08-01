@@ -9,7 +9,7 @@ import {
 import { useCallback, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
-import { mapBookingToHistoryItem } from "@/features/calendar/lib/map-booking";
+import { mapBookingToHistoryItem } from "@/features/calendar/lib/utils";
 import { BookingPreviewSheet } from "@/features/booking/ui/booking-preview-sheet";
 import {
   EventGap,
@@ -18,10 +18,10 @@ import {
   VIEW_TYPE,
   WeekCellsHeight,
 } from "@/features/calendar/lib/constants";
-import { buildSlotStartTime } from "@/features/calendar/lib/build-slot-start-time";
+import { buildSlotStartTime } from "@/features/calendar/lib/utils";
 import { type CalendarEvent, type CalendarView } from "@/features/calendar/lib/types";
 import { getViewTitle, viewHandlers } from "@/features/calendar/lib/utils";
-import { useCalendarStore } from "@/features/calendar/model/calendar-store";
+import { useCalendarStore } from "@/features/calendar/lib/stores";
 import { CalendarActionsProvider } from "@/features/calendar/ui/calendar-actions-context";
 import { CalendarDndProvider } from "@/features/calendar/ui/calendar-dnd-context";
 import { CreateBookingDialog } from "@/features/calendar/ui/create-booking-dialog";

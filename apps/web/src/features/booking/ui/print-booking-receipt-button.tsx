@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import {
   createPdfBlobFromBase64,
   printPdfBlob,
-} from "@/features/booking/lib/print-booking-receipt";
+} from "@/features/booking/lib/utils";
 import { client } from "@/shared/api/orpc";
 import { Button } from "@autolab/ui/components/button";
 

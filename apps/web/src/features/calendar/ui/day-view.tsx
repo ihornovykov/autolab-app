@@ -2,8 +2,8 @@ import { addHours, eachHourOfInterval, getHours, isSameDay, startOfDay } from "d
 import { useEffect, useMemo, useRef } from "react";
 
 import { EndHour, StartHour, WeekCellsHeight } from "@/features/calendar/lib/constants";
-import { getTime } from "@/features/calendar/lib/date-format";
-import { positionTimedEvents } from "@/features/calendar/lib/position-timed-events";
+import { getTime } from "@/features/calendar/lib/utils";
+import { positionTimedEvents } from "@/features/calendar/lib/utils";
 import { type CalendarEvent } from "@/features/calendar/lib/types";
 import { useCurrentTimeIndicator } from "@/features/calendar/hooks/use-current-time-indicator";
 import { DraggableEvent } from "@/features/calendar/ui/draggable-event";

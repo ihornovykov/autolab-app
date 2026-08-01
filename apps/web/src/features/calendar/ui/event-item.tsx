@@ -4,7 +4,7 @@ import { differenceInMinutes, isPast } from "date-fns";
 import { CornerDownRight } from "lucide-react";
 import { useMemo } from "react";
 
-import { getTime } from "@/features/calendar/lib/date-format";
+import { getTime } from "@/features/calendar/lib/utils";
 import { type CalendarEvent } from "@/features/calendar/lib/types";
 import {
   getBorderRadiusClasses,

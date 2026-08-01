@@ -9,7 +9,7 @@ import {
   VehicleBookingForm,
   VehicleBookingFormSkeleton,
 } from "@/features/booking/ui/vehicle-booking-form";
-import { type VehicleBookingHistoryItem } from "@/features/booking/lib/booking-history-item";
+import { type VehicleBookingHistoryItem } from "@/features/booking/lib/types";
 import { SERVICES_SELECT_PAGE_SIZE } from "@/features/service/lib/constants";
 import { orpc } from "@/shared/api/orpc";
 import { createSelectListInput } from "@/shared/lib/pagination";

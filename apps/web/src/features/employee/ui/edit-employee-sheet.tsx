@@ -3,10 +3,8 @@ import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import {
-  employeeRoleOptions,
-  type EmployeeRole,
-} from "@/features/employee/lib/employee-roles";
+import { employeeRoleOptions } from "@/features/employee/lib/constants";
+import type { EmployeeRole } from "@/features/employee/lib/types";
 import { orpc } from "@/shared/api/orpc";
 import { formatDate } from "@/shared/lib/date";
 import { sheets } from "@/shared/stores/sheets";

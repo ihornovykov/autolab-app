@@ -1,7 +1,7 @@
 import { CalendarIcon, ClockIcon, FuelIcon, UserIcon } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 
-import { type VehicleBookingHistoryItem } from "@/features/booking/lib/booking-history-item";
+import { type VehicleBookingHistoryItem } from "@/features/booking/lib/types";
 import { LicencePlate } from "@/features/vehicle/ui/licence-plate";
 import { range } from "@/shared/lib/arrays";
 import { formatDate } from "@/shared/lib/date";
