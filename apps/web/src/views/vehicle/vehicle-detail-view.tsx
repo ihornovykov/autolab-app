@@ -3,9 +3,7 @@ import { useNavigate, useParams, useRouter } from "@tanstack/react-router";
 import { ArrowLeftIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 
-import { type VehicleBookingHistoryItem } from "@/features/booking/lib/booking-history-item";
 import { CreateVehicleBookingDialog } from "@/features/booking/ui/create-vehicle-booking-dialog";
-import { EditVehicleBookingSheet } from "@/features/booking/ui/edit-vehicle-booking-sheet";
 import { DeleteOrganizationVehicleDialog } from "@/features/vehicle/ui/delete-organization-vehicle-dialog";
 import { EditOrganizationVehicleSheet } from "@/features/vehicle/ui/edit-organization-vehicle-sheet";
 import {
@@ -108,8 +106,12 @@ export const VehicleDetailView = () => {
     );
   };
 
-  const handleEditBooking = (booking: VehicleBookingHistoryItem) => {
-    sheets.open(<EditVehicleBookingSheet booking={booking} organizationId={organizationId} />);
+  const handleBookingClick = (bookingId: string) => {
+    navigate({
+      to: "/dashboard/organization/bookings/$bookingId",
+      params: { bookingId },
+      search: { organizationId },
+    });
   };
 
   const specs = [
@@ -205,7 +207,7 @@ export const VehicleDetailView = () => {
             <VehicleServiceHistory
               bookings={bookingsQuery.data?.items ?? []}
               isLoading={isQueryContentLoading(bookingsQuery)}
-              onBookingClick={handleEditBooking}
+              onBookingClick={(booking) => handleBookingClick(booking.id)}
             />
             <DataTablePagination
               page={bookingsPage}

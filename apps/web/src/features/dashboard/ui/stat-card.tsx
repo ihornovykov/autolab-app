@@ -58,7 +58,7 @@ export const StatCard = ({
       </div>
 
       <div className="flex items-end justify-between gap-2">
-        <p className="text-3xl font-semibold tracking-tight tabular-nums">{value}</p>
+        <p className="text-2xl font-semibold tracking-tight tabular-nums sm:text-3xl">{value}</p>
         {hasDelta ? (
           <span
             className={cn(

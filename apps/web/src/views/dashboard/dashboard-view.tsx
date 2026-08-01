@@ -103,14 +103,19 @@ export const DashboardView = () => {
     <PageContainer>
       <Heading title="Огляд" />
 
-      <div className="mb-4 mt-3 flex items-center justify-between gap-4">
+      <div className="mb-4 mt-3 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
         <DashboardDateRange
           preset={preset}
           value={dateRange}
           onPresetChange={setPreset}
           onValueChange={setDateRange}
+          className="w-full min-w-0 lg:flex-1"
         />
-        <DownloadAnalyticsReportButton organizationId={organizationId} dateRange={dateRange} />
+        <DownloadAnalyticsReportButton
+          organizationId={organizationId}
+          dateRange={dateRange}
+          className="w-full max-w-full shrink-0 lg:w-auto"
+        />
       </div>
 
       {isLoading ? (

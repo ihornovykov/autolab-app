@@ -96,6 +96,12 @@ export const createBookingInputSchema = z
     allowsOvertime: z.boolean().optional(),
     notes: z.string().optional(),
     items: z.array(bookingServiceItemInputSchema).min(1),
+    totalPrice: z
+      .string()
+      .optional()
+      .refine((value) => value === undefined || (!Number.isNaN(Number(value)) && Number(value) >= 0), {
+        message: "Invalid total price",
+      }),
   })
   .refine((input) => new Date(input.endTime) > new Date(input.startTime), {
     message: "End time must be after start time",
@@ -112,6 +118,12 @@ export const updateBookingInputSchema = z
     allowsOvertime: z.boolean().optional(),
     notes: z.string().optional(),
     items: z.array(bookingServiceItemInputSchema).min(1).optional(),
+    totalPrice: z
+      .string()
+      .optional()
+      .refine((value) => value === undefined || (!Number.isNaN(Number(value)) && Number(value) >= 0), {
+        message: "Invalid total price",
+      }),
   })
   .refine(
     (input) => {

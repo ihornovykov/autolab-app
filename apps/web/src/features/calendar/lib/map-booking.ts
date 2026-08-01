@@ -30,7 +30,14 @@ type BookingWithRelations = {
     role: "TECHNICIAN" | "MANAGER" | "OWNER";
     name?: string;
   };
-  services?: Array<{ id: string; title: string; price?: string; duration?: number }>;
+  services?: Array<{
+    id: string;
+    title: string;
+    price?: string;
+    unitPrice?: string;
+    quantity?: number;
+    duration?: number;
+  }>;
 };
 
 const toCalendarEvent = (

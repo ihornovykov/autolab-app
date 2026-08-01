@@ -9,14 +9,20 @@ import {
 } from "@/features/booking/lib/print-booking-receipt";
 import { client } from "@/shared/api/orpc";
 import { Button } from "@autolab/ui/components/button";
+import { cn } from "@autolab/ui/lib/utils";
 import type { DateRangeFilterValue } from "@autolab/ui/components/date-range-picker";
 
 type Props = {
   organizationId: string;
   dateRange: DateRangeFilterValue | null;
+  className?: string;
 };
 
-export const DownloadAnalyticsReportButton = ({ organizationId, dateRange }: Props) => {
+export const DownloadAnalyticsReportButton = ({
+  organizationId,
+  dateRange,
+  className,
+}: Props) => {
   const range = toListBookingsDateRange(dateRange);
 
   const downloadMutation = useMutation({
@@ -44,11 +50,12 @@ export const DownloadAnalyticsReportButton = ({ organizationId, dateRange }: Pro
     <Button
       type="button"
       variant="outline"
+      className={cn("max-w-full", className)}
       icon={downloadMutation.isPending ? <Loader2 className="animate-spin" /> : <DownloadIcon />}
       disabled={!range.from || !range.to || downloadMutation.isPending}
       onClick={() => downloadMutation.mutate()}
     >
-      Завантажити звіт
+      <span className="truncate">Завантажити звіт</span>
     </Button>
   );
 };

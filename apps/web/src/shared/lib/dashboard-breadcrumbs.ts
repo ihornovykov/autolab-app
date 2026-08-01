@@ -75,6 +75,14 @@ export const buildDashboardBreadcrumbs = (
     return [overviewCrumb, organizationPage];
   }
 
+  if (path === "/dashboard/organization/bookings/new") {
+    return [
+      overviewCrumb,
+      organizationPages["/dashboard/organization/bookings"],
+      { label: "Створити запис" },
+    ];
+  }
+
   if (/^\/dashboard\/organization\/bookings\/[^/]+$/.test(path)) {
     return [
       overviewCrumb,

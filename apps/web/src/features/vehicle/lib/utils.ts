@@ -29,6 +29,27 @@ const MAKE_SLUG_OVERRIDES: Record<string, string> = {
 export const findOptionLabel = (value: string, options: SearchableSelectOption[]) =>
   options.find((option) => option.value === value)?.label;
 
+const CUSTOM_VALUE_PREFIX = "custom:";
+
+export const isCustomOptionValue = (value: string) => value.startsWith(CUSTOM_VALUE_PREFIX);
+
+export const toCustomOptionValue = (label: string) => `${CUSTOM_VALUE_PREFIX}${label}`;
+
+export const fromCustomOptionValue = (value: string) => value.slice(CUSTOM_VALUE_PREFIX.length);
+
+export const resolveOptionLabel = (value: string, options: SearchableSelectOption[]) => {
+  if (isCustomOptionValue(value)) return fromCustomOptionValue(value);
+  return findOptionLabel(value, options);
+};
+
+export const resolveInitialOptionValue = (
+  label: string | null | undefined,
+  options: SearchableSelectOption[],
+) => {
+  if (!label) return "";
+  return findOptionValueByLabel(label, options) || toCustomOptionValue(label);
+};
+
 export const findOptionValueByLabel = (label: string | null | undefined, options: SearchableSelectOption[]) => {
   if (!label) return "";
   return options.find((option) => option.label === label)?.value ?? "";

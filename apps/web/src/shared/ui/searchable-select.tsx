@@ -16,6 +16,8 @@ type SearchableSelectProps = {
   disabled?: boolean;
   isLoading?: boolean;
   emptyText?: string;
+  allowCustom?: boolean;
+  customOptionLabel?: (query: string) => string;
   error?: string;
   className?: string;
 };
@@ -30,6 +32,8 @@ export const SearchableSelect = ({
   disabled,
   isLoading,
   emptyText = "Нічого не знайдено",
+  allowCustom = false,
+  customOptionLabel = (query) => `Використати «${query}»`,
   error,
   className,
 }: SearchableSelectProps) => {
@@ -37,7 +41,9 @@ export const SearchableSelect = ({
   const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const selectedLabel = options.find((option) => option.value === value)?.label;
+  const selectedLabel = value.startsWith("custom:")
+    ? value.slice("custom:".length)
+    : options.find((option) => option.value === value)?.label;
 
   const filteredOptions = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -46,6 +52,12 @@ export const SearchableSelect = ({
 
     return options.filter((option) => option.label.toLowerCase().includes(normalizedQuery));
   }, [options, query]);
+
+  const trimmedQuery = query.trim();
+  const showCustomOption =
+    allowCustom &&
+    trimmedQuery.length > 0 &&
+    !filteredOptions.some((option) => option.label.toLowerCase() === trimmedQuery.toLowerCase());
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -101,6 +113,17 @@ export const SearchableSelect = ({
             />
           </div>
           <ul className="max-h-60 overflow-auto p-1">
+            {showCustomOption ? (
+              <li>
+                <button
+                  type="button"
+                  className="flex w-full cursor-pointer rounded-sm px-2 py-1.5 text-left text-sm font-medium text-primary transition-colors hover:bg-accent hover:text-accent-foreground"
+                  onClick={() => handleSelect(`custom:${trimmedQuery}`)}
+                >
+                  {customOptionLabel(trimmedQuery)}
+                </button>
+              </li>
+            ) : null}
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option) => (
                 <li key={option.value}>
@@ -116,7 +139,7 @@ export const SearchableSelect = ({
                   </button>
                 </li>
               ))
-            ) : (
+            ) : showCustomOption ? null : (
               <li className="px-2 py-6 text-center text-sm text-muted-foreground">{emptyText}</li>
             )}
           </ul>

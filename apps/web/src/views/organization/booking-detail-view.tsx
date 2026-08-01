@@ -3,6 +3,7 @@ import { useNavigate, useParams, useRouter } from "@tanstack/react-router";
 import { ArrowLeftIcon, CalendarIcon, PencilIcon, Trash2Icon, UserIcon } from "lucide-react";
 
 import { mapBookingToHistoryItem } from "@/features/calendar/lib/map-booking";
+import { BookingDiscountDisplay } from "@/features/booking/ui/booking-discount-display";
 import { DeleteVehicleBookingDialog } from "@/features/booking/ui/delete-vehicle-booking-dialog";
 import { EditVehicleBookingSheet } from "@/features/booking/ui/edit-vehicle-booking-sheet";
 import { BookingTimeDisplay } from "@/features/booking/ui/booking-time-display";
@@ -138,7 +139,15 @@ export const BookingDetailView = () => {
               ) : null}
             </div>
           </div>
-          <p className="text-2xl font-bold tabular-nums">{formatPrice(booking.totalPrice)}</p>
+          <div className="text-right">
+            <BookingDiscountDisplay
+              services={booking.services ?? []}
+              totalPrice={booking.totalPrice}
+              showSubtotal
+              className="mb-1"
+            />
+            <p className="text-2xl font-bold tabular-nums">{formatPrice(booking.totalPrice)}</p>
+          </div>
         </div>
       </div>
 

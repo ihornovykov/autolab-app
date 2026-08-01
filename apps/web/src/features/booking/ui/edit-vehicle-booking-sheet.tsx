@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { DeleteVehicleBookingDialog } from "@/features/booking/ui/delete-vehicle-booking-dialog";
 import {
-  type BookingStatus,
+  type VehicleBookingFormValues,
   VehicleBookingForm,
   VehicleBookingFormSkeleton,
 } from "@/features/booking/ui/vehicle-booking-form";
@@ -83,15 +83,7 @@ export const EditVehicleBookingSheet = ({ booking, organizationId }: Props) => {
     );
   };
 
-  const handleSubmit = async (values: {
-    employeeId: string;
-    items: Array<{ serviceId: string; quantity: number; unitPrice: string }>;
-    startTime: string;
-    endTime: string;
-    allowsOvertime: boolean;
-    notes?: string;
-    status: BookingStatus;
-  }) => {
+  const handleSubmit = async (values: VehicleBookingFormValues) => {
     await updateMutation.mutateAsync({
       organizationId,
       bookingId: booking.id,
@@ -101,6 +93,7 @@ export const EditVehicleBookingSheet = ({ booking, organizationId }: Props) => {
       endTime: dayjs(values.endTime).toISOString(),
       allowsOvertime: values.allowsOvertime,
       notes: values.notes,
+      totalPrice: values.totalPrice,
     });
 
     if (values.status !== booking.status) {
@@ -173,6 +166,7 @@ export const EditVehicleBookingSheet = ({ booking, organizationId }: Props) => {
           formId={FORM_ID}
           organizationId={organizationId}
           showStatus
+          allowTotalPriceOverride
           employees={employees}
           services={services}
           initialValues={{
@@ -181,13 +175,14 @@ export const EditVehicleBookingSheet = ({ booking, organizationId }: Props) => {
               booking.services?.map((service) => ({
                 serviceId: service.id,
                 quantity: service.quantity ?? 1,
-                unitPrice: service.unitPrice ?? service.price,
+                unitPrice: service.unitPrice ?? service.price ?? "0",
               })) ?? [],
             startTime: dayjs(booking.startTime).format("YYYY-MM-DDTHH:mm"),
             endTime: dayjs(booking.endTime).format("YYYY-MM-DDTHH:mm"),
             allowsOvertime: booking.allowsOvertime ?? false,
             notes: booking.notes ?? "",
             status: booking.status,
+            totalPrice: booking.totalPrice,
           }}
           onSubmit={handleSubmit}
         />

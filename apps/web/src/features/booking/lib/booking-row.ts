@@ -20,5 +20,12 @@ export type BookingRow = {
     role: "TECHNICIAN" | "MANAGER" | "OWNER";
     name?: string;
   };
-  services?: Array<{ id: string; title: string; price?: string; duration?: number }>;
+  services?: Array<{
+    id: string;
+    title: string;
+    price?: string;
+    duration?: number;
+    quantity?: number;
+    unitPrice?: string;
+  }>;
 };

@@ -118,7 +118,7 @@ export const Dialog = ({
       />
       <div
         className={cn(
-          "relative z-10 flex max-h-[90vh] w-full max-w-lg translate-y-0 flex-col overflow-hidden border bg-background shadow-lg duration-200 animate-in fade-in-0 zoom-in-95 sm:rounded-xl",
+          "relative z-10 flex max-h-[90vh] w-full max-w-lg translate-y-0 flex-col overflow-hidden rounded-xl border bg-background shadow-lg duration-200 animate-in fade-in-0 zoom-in-95",
           className,
         )}
       >

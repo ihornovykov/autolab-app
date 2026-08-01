@@ -63,6 +63,17 @@ const roleLabels = {
   TECHNICIAN: "Працівник",
 } as const;
 
+const computeReceiptSubtotal = (services: ReceiptService[]) =>
+  services.reduce(
+    (sum, service) => sum + Number(service.unitPrice ?? service.price) * (service.quantity ?? 1),
+    0,
+  );
+
+const computeReceiptDiscount = (subtotal: number, totalPrice: string) => {
+  const discount = subtotal - Number(totalPrice);
+  return discount >= 0.005 ? discount : 0;
+};
+
 type ReceiptService = {
   id: string;
   title: string;
@@ -438,19 +449,12 @@ const renderPdfToBuffer = (
           .font("regular")
           .fontSize(10)
           .fillColor("#111111")
-          .text(
-            formatDuration(service.duration * (service.quantity ?? 1)),
-            colDuration,
-            y + 8,
-            {
-              width: 70,
-              align: "right",
-            },
-          );
+          .text(formatDuration(service.duration * (service.quantity ?? 1)), colDuration, y + 8, {
+            width: 70,
+            align: "right",
+          });
         doc.text(
-          formatPrice(
-            Number(service.unitPrice ?? service.price) * (service.quantity ?? 1),
-          ),
+          formatPrice(Number(service.unitPrice ?? service.price) * (service.quantity ?? 1)),
           colPrice,
           y + 8,
           { width: 64, align: "right" },
@@ -461,6 +465,32 @@ const renderPdfToBuffer = (
 
     ensureSpace(34);
     y += 8;
+
+    const subtotal = computeReceiptSubtotal(services);
+    const discount = computeReceiptDiscount(subtotal, booking.totalPrice);
+
+    if (discount > 0) {
+      ensureSpace(28);
+      doc.rect(MARGIN, y, tableWidth, 24).stroke("#cccccc");
+      doc
+        .font("regular")
+        .fontSize(10)
+        .fillColor("#666666")
+        .text("Підсумок", MARGIN + 10, y + 7);
+      doc.text(formatPrice(subtotal), colPrice, y + 7, { width: 64, align: "right" });
+      y += 24;
+
+      ensureSpace(28);
+      doc.rect(MARGIN, y, tableWidth, 24).stroke("#cccccc");
+      doc
+        .font("regular")
+        .fontSize(10)
+        .fillColor("#059669")
+        .text("Знижка", MARGIN + 10, y + 7);
+      doc.text(`−${formatPrice(discount)}`, colPrice, y + 7, { width: 64, align: "right" });
+      y += 24;
+    }
+
     doc.rect(MARGIN, y, tableWidth, 28).lineWidth(1.5).stroke("#111111");
     doc
       .font("bold")

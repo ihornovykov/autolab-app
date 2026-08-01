@@ -78,13 +78,13 @@ export const AnalyticsCharts = ({ revenueTimeSeries, statusBreakdown }: Props) =
   return (
     <div className="grid gap-4 xl:grid-cols-2">
       <Card className="border-border/60 shadow-sm">
-        <CardHeader>
+        <CardHeader className="px-4 sm:px-6">
           <CardTitle className="text-base">Дохід по днях</CardTitle>
           <CardDescription>Динаміка доходу за обраний період</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 sm:px-6">
           {revenueData.length ? (
-            <ChartContainer config={revenueChartConfig} className="aspect-auto h-72 min-h-72 w-full">
+            <ChartContainer config={revenueChartConfig} className="aspect-auto h-60 min-h-60 w-full sm:h-72 sm:min-h-72">
               <AreaChart data={revenueData} margin={{ left: 4, right: 4 }}>
                 <defs>
                   <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -144,7 +144,7 @@ export const AnalyticsCharts = ({ revenueTimeSeries, statusBreakdown }: Props) =
               </AreaChart>
             </ChartContainer>
           ) : (
-            <p className="flex h-72 items-center justify-center text-sm text-muted-foreground">
+            <p className="flex h-60 items-center justify-center text-sm text-muted-foreground sm:h-72">
               Немає даних за обраний період
             </p>
           )}
@@ -152,11 +152,11 @@ export const AnalyticsCharts = ({ revenueTimeSeries, statusBreakdown }: Props) =
       </Card>
 
       <Card className="border-border/60 shadow-sm">
-        <CardHeader>
+        <CardHeader className="px-4 sm:px-6">
           <CardTitle className="text-base">Записи за статусом</CardTitle>
           <CardDescription>Розподіл записів за обраний період</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 sm:px-6">
           {statusData.length ? (
             <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
               <ChartContainer
@@ -243,7 +243,7 @@ export const AnalyticsCharts = ({ revenueTimeSeries, statusBreakdown }: Props) =
               </div>
             </div>
           ) : (
-            <p className="flex h-72 items-center justify-center text-sm text-muted-foreground">
+            <p className="flex h-60 items-center justify-center text-sm text-muted-foreground sm:h-72">
               Немає даних за обраний період
             </p>
           )}

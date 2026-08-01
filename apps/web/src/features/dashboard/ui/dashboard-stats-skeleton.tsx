@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader } from "@autolab/ui/components/card";
 
 export const DashboardStatsSkeleton = () => (
   <div className="flex flex-1 flex-col gap-4 pt-0">
-    <div className="flex flex-wrap items-center gap-3">
-      <Skeleton className="h-10 w-80" />
-      <Skeleton className="h-10 w-56" />
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full lg:w-40" />
     </div>
 
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

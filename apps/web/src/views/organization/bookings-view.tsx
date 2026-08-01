@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import { type BookingStatusFilter } from "@/features/booking/lib/filter-bookings";
 import { groupBookingsByDate } from "@/features/booking/lib/group-bookings-by-date";
 import { BookingListCard, BookingListSkeleton } from "@/features/booking/ui/booking-list-card";
-import { CreateBookingDialog } from "@/features/calendar/ui/create-booking-dialog";
 import { BOOKINGS_PAGE_SIZE } from "@/features/booking/lib/constants";
 import {
   hasDateRangeFilter,
@@ -16,7 +15,6 @@ import { orpc } from "@/shared/api/orpc";
 import { isQueryContentLoading } from "@/shared/lib/is-query-content-loading";
 import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
 import { useSelectedOrganizationId } from "@/shared/lib/use-selected-organization-id";
-import { dialogs } from "@/shared/stores/dialogs";
 import { DataTableLayout } from "@/shared/ui/data-table-layout";
 import { DataTablePagination } from "@/shared/ui/data-table-pagination";
 import { DataTableSearch } from "@/shared/ui/data-table-search";
@@ -80,6 +78,13 @@ export const BookingsView = () => {
     });
   };
 
+  const handleCreateBooking = () => {
+    navigate({
+      to: "/dashboard/organization/bookings/new",
+      search: { organizationId: organizationId! },
+    });
+  };
+
   if (!organizationId) return null;
 
   const total = bookingsQuery.data?.total ?? 0;
@@ -135,10 +140,7 @@ export const BookingsView = () => {
           </div>
         }
         toolbarRight={
-          <Button
-            icon={<PlusIcon />}
-            onClick={() => dialogs.open(<CreateBookingDialog organizationId={organizationId} />)}
-          >
+          <Button icon={<PlusIcon />} onClick={handleCreateBooking}>
             Додати
           </Button>
         }
@@ -173,11 +175,7 @@ export const BookingsView = () => {
                         : "Створіть перший запис для вашої організації"
                     }
                     actionLabel={hasActiveFilters ? undefined : "Додати запис"}
-                    onAction={
-                      hasActiveFilters
-                        ? undefined
-                        : () => dialogs.open(<CreateBookingDialog organizationId={organizationId} />)
-                    }
+                    onAction={hasActiveFilters ? undefined : handleCreateBooking}
                   />
                 </div>
               ) : (

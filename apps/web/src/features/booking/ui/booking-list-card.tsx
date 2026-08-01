@@ -1,6 +1,7 @@
 import { ChevronRightIcon, ClockIcon } from "lucide-react";
 
 import { type BookingRow } from "@/features/booking/lib/booking-row";
+import { BookingDiscountDisplay } from "@/features/booking/ui/booking-discount-display";
 import { formatBookingTimeShort } from "@/features/booking/lib/format-booking-time";
 import { LicencePlate } from "@/features/vehicle/ui/licence-plate";
 import { VehicleMakeIcon } from "@/features/vehicle/ui/vehicle-make-icon";
@@ -41,7 +42,14 @@ export const BookingListCard = ({ booking, employeeName, onClick, className }: P
               <p className="text-sm text-muted-foreground">{vehicle.year} рік</p>
             ) : null}
           </div>
-          <p className="shrink-0 text-base font-semibold tabular-nums">{formatPrice(booking.totalPrice)}</p>
+          <div className="shrink-0 text-right">
+            <BookingDiscountDisplay
+              services={booking.services ?? []}
+              totalPrice={booking.totalPrice}
+              className="mb-0.5"
+            />
+            <p className="text-base font-semibold tabular-nums">{formatPrice(booking.totalPrice)}</p>
+          </div>
         </div>
 
         <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5">

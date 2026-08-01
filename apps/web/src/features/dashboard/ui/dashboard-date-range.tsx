@@ -8,6 +8,7 @@ import {
   type DashboardDatePreset,
   getPresetDateRange,
 } from "@/features/dashboard/lib/date-range-presets";
+import { useIsMobile } from "@/shared/lib/use-is-mobile";
 import { Calendar } from "@autolab/ui/components/calendar";
 import type { DateRangeFilterValue } from "@autolab/ui/components/date-range-picker";
 import { Button } from "@autolab/ui/components/button";
@@ -20,6 +21,7 @@ type Props = {
   value: DateRangeFilterValue | null;
   onPresetChange: (preset: DashboardDatePreset) => void;
   onValueChange: (value: DateRangeFilterValue | null) => void;
+  className?: string;
 };
 
 const parseDay = (value?: string) => {
@@ -55,8 +57,15 @@ const formatDisplayValue = (value: DateRangeFilterValue) => {
   return `${format(fromDate, "d MMM yyyy", { locale: uk })} – ${format(toDate, "d MMM yyyy", { locale: uk })}`;
 };
 
-export const DashboardDateRange = ({ preset, value, onPresetChange, onValueChange }: Props) => {
+export const DashboardDateRange = ({
+  preset,
+  value,
+  onPresetChange,
+  onValueChange,
+  className,
+}: Props) => {
   const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const selected = useMemo(() => {
     if (!value?.from) return undefined;
@@ -100,15 +109,18 @@ export const DashboardDateRange = ({ preset, value, onPresetChange, onValueChang
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Card className="flex flex-wrap gap-1 p-1 rounded-lg">
+    <div className={cn("flex min-w-0 flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center", className)}>
+      <Card className="flex w-full flex-wrap gap-1 rounded-lg p-1 lg:w-auto">
         {DASHBOARD_DATE_PRESETS.map((item) => (
           <Button
             key={item.id}
             type="button"
             size="sm"
             variant={preset === item.id ? "default" : "ghost"}
-            className={cn("h-7 font-medium", preset === item.id && "shadow-sm font-semibold")}
+            className={cn(
+              "h-7 flex-1 px-2 font-medium lg:flex-none lg:px-3",
+              preset === item.id && "shadow-sm font-semibold",
+            )}
             onClick={() => {
               if (item.id === "custom") return;
               onPresetChange(item.id);
@@ -123,7 +135,7 @@ export const DashboardDateRange = ({ preset, value, onPresetChange, onValueChang
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger
           className={cn(
-            "inline-flex h-9 min-w-56 cursor-pointer items-center gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm font-normal shadow-sm transition-colors",
+            "inline-flex h-9 w-full cursor-pointer items-center gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm font-normal shadow-sm transition-colors lg:min-w-56 lg:w-auto",
             "ring-offset-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
             !value?.from && "text-muted-foreground",
           )}
@@ -150,11 +162,16 @@ export const DashboardDateRange = ({ preset, value, onPresetChange, onValueChang
             </span>
           ) : null}
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4}>
+        <PopoverContent
+          className="w-auto max-w-[calc(100vw-2rem)] p-0"
+          align="start"
+          side="bottom"
+          sideOffset={4}
+        >
           <Calendar
             mode="range"
             locale={uk}
-            numberOfMonths={2}
+            numberOfMonths={isMobile ? 1 : 2}
             month={month}
             onMonthChange={setMonth}
             selected={selected}

@@ -498,7 +498,7 @@ export const createBooking = async (
     endTime,
     allowsOvertime: input.allowsOvertime ?? false,
     notes: input.notes,
-    totalPrice: total,
+    totalPrice: input.totalPrice ? Number(input.totalPrice).toFixed(2) : total,
   });
 
   await db.insert(bookingServices).values(
@@ -548,8 +548,10 @@ export const updateBooking = async (
 
   if (input.items) {
     const resolved = await resolveBookingItems(org.organizationId, input.items);
-    totalPrice = resolved.total;
     resolvedItems = resolved.items;
+    if (input.totalPrice === undefined) {
+      totalPrice = resolved.total;
+    }
     await db.delete(bookingServices).where(eq(bookingServices.bookingId, input.bookingId));
     await db.insert(bookingServices).values(
       resolvedItems.map((item) => ({
@@ -560,6 +562,10 @@ export const updateBooking = async (
         duration: item.duration,
       })),
     );
+  }
+
+  if (input.totalPrice !== undefined) {
+    totalPrice = Number(input.totalPrice).toFixed(2);
   }
 
   const employeeId = input.employeeId ?? existing.employeeId;

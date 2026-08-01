@@ -8,7 +8,13 @@ import {
   useVehicleMakes,
   useVehicleModels,
 } from "@/features/vehicle/lib/use-vehicle-catalog";
-import { findOptionLabel, findOptionValueByLabel } from "@/features/vehicle/lib/utils";
+import {
+  findOptionLabel,
+  findOptionValueByLabel,
+  isCustomOptionValue,
+  resolveInitialOptionValue,
+  resolveOptionLabel,
+} from "@/features/vehicle/lib/utils";
 import { range } from "@/shared/lib/arrays";
 import { formatFieldErrors } from "@/shared/lib/format-field-errors";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
@@ -111,8 +117,8 @@ export const UserVehicleForm = ({
       onSubmit: buildVehicleFormSchema(requireClient),
     },
     onSubmit: async ({ value }) => {
-      const make = findOptionLabel(value.makeId, makeOptions);
-      const model = findOptionLabel(value.modelId, modelOptions);
+      const make = resolveOptionLabel(value.makeId, makeOptions);
+      const model = resolveOptionLabel(value.modelId, modelOptions);
 
       if (!make || !model) return;
 
@@ -131,25 +137,37 @@ export const UserVehicleForm = ({
   });
 
   useEffect(() => {
-    if (!initialVehicle || isMakesLoading || makeOptions.length === 0) return;
+    if (!initialVehicle || isMakesLoading) return;
 
-    const nextMakeId = findOptionValueByLabel(initialVehicle.make, makeOptions);
-    if (nextMakeId) {
-      setMakeId(nextMakeId);
-      form.setFieldValue("makeId", nextMakeId);
-    }
+    const nextMakeValue = resolveInitialOptionValue(initialVehicle.make, makeOptions);
+    if (!nextMakeValue) return;
+
+    setMakeId(isCustomOptionValue(nextMakeValue) ? "" : nextMakeValue);
+    form.setFieldValue("makeId", nextMakeValue);
   }, [form, initialVehicle, isMakesLoading, makeOptions]);
 
   useEffect(() => {
-    if (!initialVehicle || !makeId || isModelsLoading || modelOptions.length === 0) return;
+    if (!initialVehicle) return;
 
-    const nextModelId = findOptionValueByLabel(initialVehicle.model, modelOptions);
-    if (nextModelId) form.setFieldValue("modelId", nextModelId);
+    const currentMakeValue = form.getFieldValue("makeId");
+    if (!currentMakeValue) return;
+
+    if (isCustomOptionValue(currentMakeValue)) {
+      form.setFieldValue("modelId", resolveInitialOptionValue(initialVehicle.model, []));
+      return;
+    }
+
+    if (!makeId || isModelsLoading) return;
+
+    form.setFieldValue(
+      "modelId",
+      resolveInitialOptionValue(initialVehicle.model, modelOptions),
+    );
   }, [form, initialVehicle, makeId, isModelsLoading, modelOptions]);
 
-  const handleMakeChange = (nextMakeId: string) => {
-    setMakeId(nextMakeId);
-    form.setFieldValue("makeId", nextMakeId);
+  const handleMakeChange = (nextMakeValue: string) => {
+    setMakeId(isCustomOptionValue(nextMakeValue) ? "" : nextMakeValue);
+    form.setFieldValue("makeId", nextMakeValue);
     form.setFieldValue("modelId", "");
   };
 
@@ -205,31 +223,39 @@ export const UserVehicleForm = ({
           {(field) => (
             <SearchableSelect
               label="Марка *"
-              placeholder="Оберіть марку"
+              placeholder="Оберіть або введіть марку"
               searchPlaceholder="Пошук марки..."
               options={makeOptions}
-              value={makeId}
+              value={field.state.value}
               onValueChange={(value) => handleMakeChange(value)}
+              allowCustom
               isLoading={isMakesLoading}
               error={formatFieldErrors(field.state.meta.errors)}
             />
           )}
         </form.Field>
-        <form.Field name="modelId">
-          {(field) => (
-            <SearchableSelect
-              label="Модель *"
-              placeholder={makeId ? "Оберіть модель" : "Спочатку оберіть марку"}
-              searchPlaceholder="Пошук моделі..."
-              options={modelOptions}
-              value={field.state.value}
-              onValueChange={(value) => field.handleChange(value)}
-              disabled={!makeId}
-              isLoading={isModelsLoading}
-              error={formatFieldErrors(field.state.meta.errors)}
-            />
+        <form.Subscribe selector={(state) => state.values.makeId}>
+          {(selectedMakeId) => (
+            <form.Field name="modelId">
+              {(field) => (
+                <SearchableSelect
+                  label="Модель *"
+                  placeholder={
+                    selectedMakeId ? "Оберіть або введіть модель" : "Спочатку оберіть марку"
+                  }
+                  searchPlaceholder="Пошук моделі..."
+                  options={modelOptions}
+                  value={field.state.value}
+                  onValueChange={(value) => field.handleChange(value)}
+                  allowCustom
+                  disabled={!selectedMakeId}
+                  isLoading={Boolean(makeId) && isModelsLoading}
+                  error={formatFieldErrors(field.state.meta.errors)}
+                />
+              )}
+            </form.Field>
           )}
-        </form.Field>
+        </form.Subscribe>
         <form.Field name="bodyStyleId">
           {(field) => (
             <SearchableSelect

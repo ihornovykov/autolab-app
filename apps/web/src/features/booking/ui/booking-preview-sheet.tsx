@@ -9,6 +9,7 @@ import {
 
 import { mapBookingToHistoryItem } from "@/features/calendar/lib/map-booking";
 import { type CalendarEvent } from "@/features/calendar/lib/types";
+import { BookingDiscountDisplay } from "@/features/booking/ui/booking-discount-display";
 import { DeleteVehicleBookingDialog } from "@/features/booking/ui/delete-vehicle-booking-dialog";
 import { EditVehicleBookingSheet } from "@/features/booking/ui/edit-vehicle-booking-sheet";
 import { BookingTimeDisplay } from "@/features/booking/ui/booking-time-display";
@@ -123,7 +124,15 @@ export const BookingPreviewSheet = ({
               </div>
             ) : null}
           </div>
-          <p className="shrink-0 text-lg font-bold tabular-nums">{formatPrice(booking.totalPrice)}</p>
+          <div className="shrink-0 text-right">
+            <BookingDiscountDisplay
+              services={booking.services ?? []}
+              totalPrice={booking.totalPrice}
+              showSubtotal
+              className="mb-0.5"
+            />
+            <p className="text-lg font-bold tabular-nums">{formatPrice(booking.totalPrice)}</p>
+          </div>
         </div>
       </div>
 
