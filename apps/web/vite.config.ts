@@ -10,7 +10,6 @@ const pdfExternals = [
   "sharp",
   "tslib",
   "dejavu-fonts-ttf",
-  "geist",
 ];
 
 export default defineConfig({

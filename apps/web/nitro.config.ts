@@ -8,7 +8,6 @@ export default defineConfig({
     "sharp",
     "tslib",
     "dejavu-fonts-ttf",
-    "geist",
   ],
   experimental: {
     asyncContext: true,

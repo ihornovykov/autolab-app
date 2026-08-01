@@ -1,6 +1,4 @@
 import { createRequire } from "node:module";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import dayjs from "dayjs";
 import "dayjs/locale/uk.js";
@@ -9,9 +7,10 @@ import sharp from "sharp";
 
 import {
   getBrandFontRegistrationKey,
-  resolveBrandFontPath,
+  resolveBrandFontData,
   type PdfBrandFontOptions,
 } from "../../../lib/brand-font";
+import autolabLogoSvg from "../../../assets/autolab.svg" with { type: "bytes" };
 import {
   formatBookingTimeRange,
   formatPrice,
@@ -21,9 +20,6 @@ import type { organizationAnalyticsOutputSchema } from "../validation";
 import type { z } from "zod";
 
 const require = createRequire(import.meta.url);
-const currentDir = dirname(fileURLToPath(import.meta.url));
-const assetsDir = join(currentDir, "../../../assets");
-const autolabLogoPath = join(assetsDir, "autolab.svg");
 const fontRegularPath = require.resolve("dejavu-fonts-ttf/ttf/DejaVuSans.ttf");
 const fontBoldPath = require.resolve("dejavu-fonts-ttf/ttf/DejaVuSans-Bold.ttf");
 
@@ -97,7 +93,7 @@ const resolveImageBuffer = async (source?: string | null) => {
 };
 
 const loadAutolabLogoBuffer = () =>
-  sharp(autolabLogoPath).resize(128, 128, { fit: "contain" }).png().toBuffer();
+  sharp(autolabLogoSvg).resize(128, 128, { fit: "contain" }).png().toBuffer();
 
 const formatDateRange = (from: string, to: string) => {
   dayjs.locale("uk");
@@ -143,7 +139,7 @@ const renderPdfToBuffer = (
 
     doc.registerFont("regular", fontRegularPath);
     doc.registerFont("bold", fontBoldPath);
-    doc.registerFont(brandFontKey, resolveBrandFontPath(AUTOLAB_BRAND));
+    doc.registerFont(brandFontKey, resolveBrandFontData(AUTOLAB_BRAND));
 
     const { organization, analytics, reportBookings } = input;
     const { orgLogoBuffer, autolabLogoBuffer } = assets;
