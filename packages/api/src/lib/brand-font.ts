@@ -1,5 +1,7 @@
 import geistBoldItalic from "../assets/fonts/Geist-BoldItalic.ttf" with { type: "bytes" };
 
+import { toBinaryAssetBuffer } from "./pdf-assets";
+
 export type PdfBrandFontFamily = "geist";
 export type PdfBrandFontWeight = 400 | 500 | 600 | 700;
 export type PdfBrandFontStyle = "normal" | "italic";
@@ -16,7 +18,9 @@ export const resolveBrandFontData = (options: PdfBrandFontOptions): Uint8Array =
   }
 
   if (options.fontWeight === 700 && options.fontStyle === "italic") {
-    return geistBoldItalic as unknown as Uint8Array;
+    return new Uint8Array(
+      toBinaryAssetBuffer(geistBoldItalic, "../assets/fonts/Geist-BoldItalic.ttf"),
+    );
   }
 
   throw new Error(

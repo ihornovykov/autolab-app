@@ -10,6 +10,7 @@ import {
   resolveBrandFontData,
   type PdfBrandFontOptions,
 } from "../../../lib/brand-font";
+import { toBinaryAssetBuffer } from "../../../lib/pdf-assets";
 import autolabLogoSvg from "../../../assets/autolab.svg" with { type: "bytes" };
 import {
   formatBookingTimeRange,
@@ -93,7 +94,10 @@ const resolveImageBuffer = async (source?: string | null) => {
 };
 
 const loadAutolabLogoBuffer = () =>
-  sharp(autolabLogoSvg).resize(128, 128, { fit: "contain" }).png().toBuffer();
+  sharp(toBinaryAssetBuffer(autolabLogoSvg, "../../../assets/autolab.svg"))
+    .resize(128, 128, { fit: "contain" })
+    .png()
+    .toBuffer();
 
 const formatDateRange = (from: string, to: string) => {
   dayjs.locale("uk");
