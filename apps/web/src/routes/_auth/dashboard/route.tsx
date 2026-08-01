@@ -5,7 +5,8 @@ import { z } from "zod";
 import { authClient } from "@/shared/lib/auth-client";
 import { useSyncOrganizationSelection } from "@/shared/lib/use-sync-organization-selection";
 import { orpc } from "@/shared/api/orpc";
-import { ensureOrganizations } from "@/shared/lib/route-prefetch";
+import { clearAuthContextCache } from "@/features/auth/lib/auth-context-cache";
+import { prefetchOrganizations } from "@/shared/lib/route-prefetch";
 import { AppSidebar } from "@/shared/ui/app-sidebar";
 import { DashboardTopbar } from "@/shared/ui/dashboard-topbar";
 import { SidebarInset, SidebarProvider } from "@/shared/ui/sidebar";
@@ -35,6 +36,7 @@ const DashboardLayout = () => {
   useSyncOrganizationSelection(organizations, search.organizationId);
 
   const onSignOut = () => {
+    clearAuthContextCache();
     authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
@@ -72,6 +74,6 @@ const DashboardLayout = () => {
 
 export const Route = createFileRoute("/_auth/dashboard")({
   validateSearch: searchSchema,
-  loader: ({ context }) => ensureOrganizations(context.queryClient),
+  loader: ({ context }) => prefetchOrganizations(context.queryClient),
   component: DashboardLayout,
 });

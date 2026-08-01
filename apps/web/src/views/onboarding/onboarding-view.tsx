@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { clearAuthContextCache } from "@/features/auth/lib/auth-context-cache";
 import { authClient } from "@/shared/lib/auth-client";
 import { splitFullName } from "@/features/onboarding/lib/onboarding-profile-schema";
 import { OnboardingProfileForm } from "@/features/onboarding/ui/onboarding-profile-form";
@@ -56,6 +57,7 @@ export const OnboardingView = () => {
   const createOrganizationMutation = useMutation(
     orpc.organization.createOrganization.mutationOptions({
       onSuccess: async (organization) => {
+        clearAuthContextCache();
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: orpc.organization.key() }),
           queryClient.invalidateQueries({ queryKey: orpc.profile.getOnboardingStatus.key() }),

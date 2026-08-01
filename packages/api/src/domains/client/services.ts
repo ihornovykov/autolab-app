@@ -7,6 +7,7 @@ import { ORPCError } from "@orpc/server";
 import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 
 import type { AuthenticatedContext } from "../../context";
+import { mapBooking } from "../booking/services";
 import { createId, getOrgContext } from "../../lib/org-scope";
 import { buildPaginatedResult, getOffset, searchPattern } from "../../lib/pagination";
 import { orHomoglyphs } from "../../lib/search-normalize";
@@ -23,34 +24,8 @@ import type {
 
 const clientBookingWith = {
   vehicle: true as const,
-  employee: true as const,
+  employee: { with: { user: { columns: { name: true } } } },
   bookingServices: { with: { service: true as const } },
-};
-
-const mapClientBooking = (row: {
-  bookingServices?: Array<{
-    service: { id: string; title: string; price: string; duration: number };
-  }>;
-}) => {
-  const { bookingServices: bookingServiceRows, ...booking } = row as typeof row & {
-    id: string;
-    organizationId: string;
-    employeeId: string;
-    vehicleId: string;
-    startTime: Date;
-    endTime: Date;
-    allowsOvertime: boolean;
-    status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
-    notes: string | null;
-    totalPrice: string;
-    createdAt: Date;
-    updatedAt: Date;
-  };
-
-  return {
-    ...booking,
-    services: bookingServiceRows?.map((item) => item.service),
-  };
 };
 
 export const listClients = async (
@@ -192,10 +167,7 @@ export const getClientDetails = async (
   await getOrgContext(context, input.organizationId);
 
   const clientRow = await db.query.clients.findFirst({
-    where: and(
-      eq(clients.id, input.clientId),
-      eq(clients.organizationId, input.organizationId),
-    ),
+    where: and(eq(clients.id, input.clientId), eq(clients.organizationId, input.organizationId)),
     with: {
       user: {
         columns: {
@@ -244,6 +216,6 @@ export const getClientDetails = async (
   return {
     client,
     vehicles: clientVehicles,
-    bookings: bookingRows.map(mapClientBooking),
+    bookings: bookingRows.map((row) => mapBooking(row)),
   };
 };

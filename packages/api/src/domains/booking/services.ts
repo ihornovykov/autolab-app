@@ -12,17 +12,10 @@ import type { AuthenticatedContext } from "../../context";
 import { getWorkingHoursForUserId, getWorkingHoursForUserIds } from "../profile/services";
 import { buildAnalyticsReportFilename, buildBookingReceiptFilename } from "../../lib/pdf-filename";
 import { createId, getOrgContext } from "../../lib/org-scope";
-import {
-  buildPaginatedResult,
-  getOffset,
-  searchPattern,
-} from "../../lib/pagination";
+import { buildPaginatedResult, getOffset, searchPattern } from "../../lib/pagination";
 import { ilikeHomoglyph } from "../../lib/search-normalize";
 import { buildVehicleSearchCondition } from "../../lib/vehicle-search";
-import {
-  DEFAULT_WORKING_HOURS,
-  resolveBookingEndTime,
-} from "../../lib/working-hours";
+import { DEFAULT_WORKING_HOURS, resolveBookingEndTime } from "../../lib/working-hours";
 
 import type { z } from "zod";
 
@@ -41,12 +34,13 @@ import type {
   updateBookingInputSchema,
   updateBookingStatusInputSchema,
 } from "./validation";
-import type { listVehicleBookingsInputSchema, listVehicleBookingsOutputSchema } from "../vehicle/validation";
+import type {
+  listVehicleBookingsInputSchema,
+  listVehicleBookingsOutputSchema,
+} from "../vehicle/validation";
 import { getOrganizationById } from "../organization/services";
 import { getVehicleById } from "../vehicle/services";
-import {
-  collectOrganizationAnalytics,
-} from "./lib/analytics";
+import { collectOrganizationAnalytics } from "./lib/analytics";
 
 const bookingWith = {
   vehicle: true as const,
@@ -54,7 +48,7 @@ const bookingWith = {
   bookingServices: { with: { service: true as const } },
 };
 
-const mapBooking = (
+export const mapBooking = (
   row: {
     id: string;
     organizationId: string;
@@ -142,10 +136,7 @@ const resolveBookingItems = async (
   const uniqueIds = [...new Set(items.map((item) => item.serviceId))];
 
   const selected = await db.query.services.findMany({
-    where: and(
-      inArray(services.id, uniqueIds),
-      eq(services.organizationId, organizationId),
-    ),
+    where: and(inArray(services.id, uniqueIds), eq(services.organizationId, organizationId)),
   });
 
   if (selected.length !== uniqueIds.length) {
@@ -200,9 +191,7 @@ const resolveEndTimeForBooking = async (
   return resolveBookingEndTime(startTime, duration, schedule);
 };
 
-const attachWorkingHours = async <
-  T extends { employee?: { userId: string } | null },
->(
+const attachWorkingHours = async <T extends { employee?: { userId: string } | null }>(
   rows: T[],
 ) => {
   const userIds = rows
@@ -214,7 +203,7 @@ const attachWorkingHours = async <
   return rows.map((row) => ({
     row,
     employeeWorkingHours: row.employee?.userId
-      ? hoursMap.get(row.employee.userId) ?? DEFAULT_WORKING_HOURS
+      ? (hoursMap.get(row.employee.userId) ?? DEFAULT_WORKING_HOURS)
       : DEFAULT_WORKING_HOURS,
   }));
 };
@@ -321,9 +310,7 @@ export const listBookings = async (
     with: bookingWith,
   });
 
-  const orderedRows = [...rows].sort(
-    (a, b) => (idOrder.get(a.id) ?? 0) - (idOrder.get(b.id) ?? 0),
-  );
+  const orderedRows = [...rows].sort((a, b) => (idOrder.get(a.id) ?? 0) - (idOrder.get(b.id) ?? 0));
 
   const withHours = await attachWorkingHours(orderedRows);
   const items = withHours.map(({ row, employeeWorkingHours }) =>
@@ -400,10 +387,7 @@ export const getBookingById = async (
 ) => {
   const org = await getOrgContext(context, input.organizationId);
   const row = await db.query.bookings.findFirst({
-    where: and(
-      eq(bookings.id, input.bookingId),
-      eq(bookings.organizationId, org.organizationId),
-    ),
+    where: and(eq(bookings.id, input.bookingId), eq(bookings.organizationId, org.organizationId)),
     with: bookingWith,
   });
 
@@ -545,10 +529,7 @@ export const updateBooking = async (
 ) => {
   const org = await getOrgContext(context, input.organizationId);
   const existing = await db.query.bookings.findFirst({
-    where: and(
-      eq(bookings.id, input.bookingId),
-      eq(bookings.organizationId, org.organizationId),
-    ),
+    where: and(eq(bookings.id, input.bookingId), eq(bookings.organizationId, org.organizationId)),
     with: bookingWith,
   });
 
@@ -617,9 +598,7 @@ export const updateBookingStatus = async (
   const [updated] = await db
     .update(bookings)
     .set({ status: input.status })
-    .where(
-      and(eq(bookings.id, input.bookingId), eq(bookings.organizationId, org.organizationId)),
-    )
+    .where(and(eq(bookings.id, input.bookingId), eq(bookings.organizationId, org.organizationId)))
     .returning();
 
   if (!updated) {
@@ -790,9 +769,7 @@ export const exportOrganizationAnalyticsPdf = async (
     throw new ORPCError("NOT_FOUND", { message: "Organization not found" });
   }
 
-  const { buildOrganizationAnalyticsPdf, mapReportBooking } = await import(
-    "./lib/analytics-pdf"
-  );
+  const { buildOrganizationAnalyticsPdf, mapReportBooking } = await import("./lib/analytics-pdf");
   const pdfBuffer = await buildOrganizationAnalyticsPdf({
     organization: {
       name: organization.name,

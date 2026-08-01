@@ -4,11 +4,10 @@ import { orpc } from "@/shared/api/orpc";
 import { AccountSettingsView } from "@/views/account/account-settings-view";
 
 export const Route = createFileRoute("/_auth/dashboard/account/settings")({
-  loader: ({ context }) =>
-    Promise.all([
-      context.queryClient.ensureQueryData(orpc.profile.getMyProfile.queryOptions()),
-      context.queryClient.ensureQueryData(orpc.organization.listMyOrganizations.queryOptions()),
-      context.queryClient.ensureQueryData(orpc.vehicle.listUserVehicles.queryOptions()),
-    ]),
+  loader: ({ context }) => {
+    void context.queryClient.prefetchQuery(orpc.profile.getMyProfile.queryOptions());
+    void context.queryClient.prefetchQuery(orpc.organization.listMyOrganizations.queryOptions());
+    void context.queryClient.prefetchQuery(orpc.vehicle.listUserVehicles.queryOptions());
+  },
   component: AccountSettingsView,
 });

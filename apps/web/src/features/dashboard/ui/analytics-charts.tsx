@@ -1,12 +1,8 @@
-"use client";
-
 import dayjs from "dayjs";
-import { useSyncExternalStore } from "react";
 import { Area, AreaChart, CartesianGrid, Label, Pie, PieChart, XAxis, YAxis } from "recharts";
 
 import { formatPrice } from "@/shared/lib/format";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@autolab/ui/components/card";
-import { AnalyticsChartsSkeleton } from "@/features/dashboard/ui/analytics-charts-skeleton";
 import {
   type ChartConfig,
   ChartContainer,
@@ -62,17 +58,7 @@ type Props = {
   statusBreakdown: StatusPoint[];
 };
 
-const subscribe = () => () => {};
-
-const useIsClient = () => useSyncExternalStore(subscribe, () => true, () => false);
-
 export const AnalyticsCharts = ({ revenueTimeSeries, statusBreakdown }: Props) => {
-  const isClient = useIsClient();
-
-  if (!isClient) {
-    return <AnalyticsChartsSkeleton />;
-  }
-
   const revenueData = revenueTimeSeries.map((point) => ({
     date: dayjs(point.date).format("D MMM"),
     revenue: Number(point.revenue),
@@ -98,7 +84,7 @@ export const AnalyticsCharts = ({ revenueTimeSeries, statusBreakdown }: Props) =
         </CardHeader>
         <CardContent>
           {revenueData.length ? (
-            <ChartContainer config={revenueChartConfig} className="aspect-auto h-72 w-full">
+            <ChartContainer config={revenueChartConfig} className="aspect-auto h-72 min-h-72 w-full">
               <AreaChart data={revenueData} margin={{ left: 4, right: 4 }}>
                 <defs>
                   <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -175,7 +161,7 @@ export const AnalyticsCharts = ({ revenueTimeSeries, statusBreakdown }: Props) =
             <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
               <ChartContainer
                 config={statusChartConfig}
-                className="mx-auto aspect-square h-56 w-full max-w-56 shrink-0"
+                className="mx-auto aspect-square h-56 min-h-56 w-full max-w-56 shrink-0"
               >
                 <PieChart>
                   <ChartTooltip

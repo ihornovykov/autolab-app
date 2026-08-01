@@ -1,7 +1,6 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
-import { getOnboardingStatus } from "@/features/auth/lib/get-onboarding-status";
-import { getUser } from "@/features/auth/lib/get-user";
+import { resolveAuthContext } from "@/features/auth/lib/auth-context-cache";
 
 const AuthLayout = () => {
   return <Outlet />;
@@ -10,27 +9,17 @@ const AuthLayout = () => {
 export const Route = createFileRoute("/_auth")({
   component: AuthLayout,
   beforeLoad: async ({ location }) => {
-    const session = await getUser();
+    const { session, onboardingStatus } = await resolveAuthContext();
     if (!session) {
       throw redirect({
         to: "/auth/sign-in",
       });
     }
 
-    if (location.pathname !== "/onboarding") {
-      const status = await getOnboardingStatus();
-      if (status.needsOnboarding) {
-        throw redirect({ to: "/onboarding" });
-      }
+    if (location.pathname !== "/onboarding" && onboardingStatus.needsOnboarding) {
+      throw redirect({ to: "/onboarding" });
     }
 
     return { session };
-  },
-  loader: async ({ context }) => {
-    if (!context.session) {
-      throw redirect({
-        to: "/auth/sign-in",
-      });
-    }
   },
 });

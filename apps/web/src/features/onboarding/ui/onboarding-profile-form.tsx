@@ -3,6 +3,7 @@ import { useForm } from "@tanstack/react-form";
 import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
+import { clearAuthContextCache } from "@/features/auth/lib/auth-context-cache";
 import {
   onboardingProfileSchema,
   type OnboardingProfileValues,
@@ -42,6 +43,8 @@ export const OnboardingProfileForm = ({ initialValues, onCompleted }: Props) => 
         queryClient.invalidateQueries({ queryKey: orpc.profile.key() }),
         queryClient.invalidateQueries({ queryKey: orpc.profile.getOnboardingStatus.key() }),
       ]);
+
+      clearAuthContextCache();
 
       toast.success("Профіль збережено");
       onCompleted();

@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BOOKINGS_PAGE_SIZE } from "@/features/booking/lib/constants";
 import { orpc } from "@/shared/api/orpc";
 import {
-  ensureOrganizationQuery,
+  prefetchOrganizationQuery,
   resolveLoaderSearch,
 } from "@/shared/lib/route-prefetch";
 import { BookingsView } from "@/views/organization/bookings-view";
@@ -11,8 +11,8 @@ import { BookingsView } from "@/views/organization/bookings-view";
 export const Route = createFileRoute("/_auth/dashboard/organization/bookings/")({
   loader: async ({ context, parentMatchPromise }) => {
     const search = await resolveLoaderSearch({ parentMatchPromise });
-    return ensureOrganizationQuery(context.queryClient, search, (organizationId) =>
-      context.queryClient.ensureQueryData(
+    prefetchOrganizationQuery(context.queryClient, search, (organizationId) => {
+      void context.queryClient.prefetchQuery(
         orpc.booking.listBookings.queryOptions({
           input: {
             organizationId,
@@ -23,8 +23,8 @@ export const Route = createFileRoute("/_auth/dashboard/organization/bookings/")(
             sort: "upcoming",
           },
         }),
-      ),
-    );
+      );
+    });
   },
   component: BookingsView,
 });

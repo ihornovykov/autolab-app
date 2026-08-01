@@ -4,7 +4,7 @@ import { getDefaultDashboardDateRange } from "@/features/dashboard/lib/date-rang
 import { toListBookingsDateRange } from "@/features/booking/lib/date-range-filter";
 import { orpc } from "@/shared/api/orpc";
 import {
-  ensureOrganizationQuery,
+  prefetchOrganizationQuery,
   resolveLoaderSearch,
 } from "@/shared/lib/route-prefetch";
 import { DashboardView } from "@/views/dashboard/dashboard-view";
@@ -14,8 +14,8 @@ export const Route = createFileRoute("/_auth/dashboard/")({
     const search = await resolveLoaderSearch({ parentMatchPromise });
     const range = toListBookingsDateRange(getDefaultDashboardDateRange());
 
-    return ensureOrganizationQuery(context.queryClient, search, (organizationId) =>
-      context.queryClient.ensureQueryData(
+    prefetchOrganizationQuery(context.queryClient, search, (organizationId) => {
+      void context.queryClient.prefetchQuery(
         orpc.booking.getOrganizationAnalytics.queryOptions({
           input: {
             organizationId,
@@ -23,8 +23,8 @@ export const Route = createFileRoute("/_auth/dashboard/")({
             to: range.to!,
           },
         }),
-      ),
-    );
+      );
+    });
   },
   component: DashboardView,
 });

@@ -1,13 +1,13 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
-import { getUser } from "@/features/auth/lib/get-user";
+import { resolveAuthContext } from "@/features/auth/lib/auth-context-cache";
 
 const GuestAuthLayout = () => <Outlet />;
 
 export const Route = createFileRoute("/_guest")({
   component: GuestAuthLayout,
   beforeLoad: async () => {
-    const session = await getUser();
+    const { session } = await resolveAuthContext();
     if (session) {
       throw redirect({ to: "/dashboard" });
     }

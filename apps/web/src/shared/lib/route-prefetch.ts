@@ -13,6 +13,15 @@ type LoaderSearchContext = {
   parentMatchPromise?: Promise<{ search: unknown } | undefined>;
 };
 
+type OrganizationSummary = { id: string };
+
+const organizationListQueryOptions = () => orpc.organization.listMyOrganizations.queryOptions();
+
+const getCachedOrganizations = (queryClient: QueryClient): OrganizationSummary[] | undefined =>
+  queryClient.getQueryData(organizationListQueryOptions().queryKey) as
+    | OrganizationSummary[]
+    | undefined;
+
 export const defaultListInput = (organizationId: string) => ({
   organizationId,
   page: 1,
@@ -22,15 +31,16 @@ export const defaultListInput = (organizationId: string) => ({
 export const defaultCalendarBookingsInput = (organizationId: string) =>
   createCalendarBookingsInput(organizationId, getCalendarFetchRange("week", new Date()));
 
-export const ensureOrganizations = (queryClient: QueryClient) =>
-  queryClient.ensureQueryData(orpc.organization.listMyOrganizations.queryOptions());
+export const prefetchOrganizations = (queryClient: QueryClient) => {
+  void queryClient.prefetchQuery(organizationListQueryOptions());
+};
 
-export const resolveOrganizationId = async (
+export const resolveOrganizationId = (
   queryClient: QueryClient,
   search: DashboardSearch,
-) => {
-  const organizations = await ensureOrganizations(queryClient);
-  return search.organizationId ?? organizations[0]?.id;
+): string | undefined => {
+  const organizations = getCachedOrganizations(queryClient);
+  return search.organizationId ?? organizations?.[0]?.id;
 };
 
 export const resolveLoaderSearch = async ({
@@ -45,13 +55,19 @@ export const resolveLoaderSearch = async ({
   return (parent?.search ?? {}) as DashboardSearch;
 };
 
-export const ensureOrganizationQuery = async (
+export const prefetchOrganizationQuery = (
   queryClient: QueryClient,
   search: DashboardSearch,
-  prefetch: (organizationId: string) => Promise<unknown>,
+  prefetch: (organizationId: string) => void,
 ) => {
-  const organizationId = await resolveOrganizationId(queryClient, search);
-  if (!organizationId) return null;
-  await prefetch(organizationId);
-  return organizationId;
+  const organizationId = resolveOrganizationId(queryClient, search);
+  if (organizationId) {
+    prefetch(organizationId);
+    return;
+  }
+
+  void queryClient.prefetchQuery(organizationListQueryOptions()).then(() => {
+    const resolvedOrganizationId = resolveOrganizationId(queryClient, search);
+    if (resolvedOrganizationId) prefetch(resolvedOrganizationId);
+  });
 };

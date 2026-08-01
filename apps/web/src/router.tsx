@@ -11,7 +11,8 @@ export const getRouter = () => {
   const router = createTanStackRouter({
     routeTree,
     scrollRestoration: true,
-    defaultPreloadStaleTime: 0,
+    defaultPreload: "intent",
+    defaultPreloadStaleTime: 30_000,
     context: { orpc, queryClient },
     defaultNotFoundComponent: () => <div>Not Found</div>,
   });

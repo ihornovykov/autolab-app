@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import z from "zod";
 
+import { clearAuthContextCache } from "@/features/auth/lib/auth-context-cache";
 import { authClient } from "@/shared/lib/auth-client";
 import { formatFieldErrors } from "@/shared/lib/format-field-errors";
 
@@ -20,6 +21,7 @@ export const SignInForm = () => {
         { email: value.email, password: value.password },
         {
           onSuccess: () => {
+            clearAuthContextCache();
             navigate({ to: "/dashboard" });
             toast.success("Ви успішно увійшли");
           },

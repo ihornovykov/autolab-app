@@ -11,6 +11,7 @@ import {
 import { Skeleton } from "@autolab/ui/components/skeleton";
 import { Link, useNavigate } from "@tanstack/react-router";
 
+import { clearAuthContextCache } from "@/features/auth/lib/auth-context-cache";
 import { authClient } from "@/shared/lib/auth-client";
 
 export const UserMenu = () => {
@@ -42,6 +43,7 @@ export const UserMenu = () => {
           <DropdownMenuItem
             variant="destructive"
             onClick={() => {
+              clearAuthContextCache();
               authClient.signOut({
                 fetchOptions: {
                   onSuccess: () => {
