@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Loader2 } from "lucide-react";
 
 import { Label } from "@autolab/ui/components/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@autolab/ui/components/popover";
 import { cn } from "@autolab/ui/lib/utils";
 
 export type SearchableSelectOption = { value: string; label: string };
@@ -39,7 +40,7 @@ export const SearchableSelect = ({
 }: SearchableSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const containerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const selectedLabel = value.startsWith("custom:")
     ? value.slice("custom:".length)
@@ -60,17 +61,20 @@ export const SearchableSelect = ({
     !filteredOptions.some((option) => option.label.toLowerCase() === trimmedQuery.toLowerCase());
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        setIsOpen(false);
-        setQuery("");
-      }
-    };
+    if (!isOpen) return;
 
-    document.addEventListener("mousedown", handleClickOutside);
+    const frame = requestAnimationFrame(() => {
+      searchInputRef.current?.focus();
+    });
 
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    return () => cancelAnimationFrame(frame);
+  }, [isOpen]);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setIsOpen(nextOpen);
+
+    if (!nextOpen) setQuery("");
+  };
 
   const handleSelect = (nextValue: string) => {
     onValueChange(nextValue);
@@ -79,33 +83,32 @@ export const SearchableSelect = ({
   };
 
   return (
-    <div ref={containerRef} className={cn("relative space-y-1", className)}>
+    <div className={cn("space-y-1", className)}>
       {label ? <Label>{label}</Label> : null}
-      <button
-        type="button"
-        disabled={disabled || isLoading}
-        className={cn(
-          "flex h-9 w-full cursor-pointer items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors",
-          "ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring",
-          "disabled:cursor-not-allowed disabled:opacity-50",
-          error && "border-destructive focus:ring-destructive",
-        )}
-        onClick={() => setIsOpen((prev) => !prev)}
-      >
-        <span className={cn("truncate", !selectedLabel && "text-muted-foreground")}>
-          {isLoading ? "Завантаження..." : (selectedLabel ?? placeholder)}
-        </span>
-        {isLoading ? (
-          <Loader2 className="size-4 shrink-0 animate-spin opacity-50" />
-        ) : (
-          <ChevronDown className="size-4 shrink-0 opacity-50" />
-        )}
-      </button>
-      {isOpen ? (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-input bg-popover text-popover-foreground shadow-md">
+      <Popover open={isOpen} onOpenChange={handleOpenChange}>
+        <PopoverTrigger
+          type="button"
+          disabled={disabled || isLoading}
+          className={cn(
+            "flex h-9 w-full cursor-pointer items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors",
+            "ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            error && "border-destructive focus:ring-destructive",
+          )}
+        >
+          <span className={cn("truncate", !selectedLabel && "text-muted-foreground")}>
+            {isLoading ? "Завантаження..." : (selectedLabel ?? placeholder)}
+          </span>
+          {isLoading ? (
+            <Loader2 className="size-4 shrink-0 animate-spin opacity-50" />
+          ) : (
+            <ChevronDown className="size-4 shrink-0 opacity-50" />
+          )}
+        </PopoverTrigger>
+        <PopoverContent className="w-[var(--anchor-width)] min-w-64 p-0" align="start" sideOffset={4}>
           <div className="border-b border-input p-2">
             <input
-              autoFocus
+              ref={searchInputRef}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder={searchPlaceholder}
@@ -143,8 +146,8 @@ export const SearchableSelect = ({
               <li className="px-2 py-6 text-center text-sm text-muted-foreground">{emptyText}</li>
             )}
           </ul>
-        </div>
-      ) : null}
+        </PopoverContent>
+      </Popover>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
     </div>
   );

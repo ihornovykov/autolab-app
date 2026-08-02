@@ -17,6 +17,7 @@ import {
 } from "@/features/vehicle/lib/utils";
 import { range } from "@/shared/lib/arrays";
 import { formatFieldErrors } from "@/shared/lib/errors";
+import { YearInput } from "@/features/vehicle/ui/year-input";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
 import { Input } from "@autolab/ui/components/input";
 import { Skeleton } from "@autolab/ui/components/skeleton";
@@ -271,13 +272,10 @@ export const UserVehicleForm = ({
         </form.Field>
         <form.Field name="year">
           {(field) => (
-            <Input
+            <YearInput
               label="Рік випуску *"
-              placeholder="2020"
-              type="number"
-              inputMode="numeric"
               value={field.state.value}
-              onChange={(e) => field.handleChange(Number(e.target.value))}
+              onChange={(value) => field.handleChange(value)}
               error={formatFieldErrors(field.state.meta.errors)}
             />
           )}
