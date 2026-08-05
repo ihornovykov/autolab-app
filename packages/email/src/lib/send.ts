@@ -3,8 +3,7 @@ import type { ReactElement } from "react";
 
 import { env, isSmtpEnabled } from "@autolab/env/server";
 
-import { EMAIL_LOGO_CID } from "./logo";
-import { emailLogoPath } from "./logo-attachment";
+import { EMAIL_LOGO_CID, emailLogoBuffer } from "./logo";
 import { renderEmail } from "./render";
 
 type SendEmailInput = {
@@ -56,7 +55,8 @@ export const sendEmail = async ({ to, subject, html, text }: SendEmailInput) => 
       attachments: [
         {
           filename: "autolab-icon.png",
-          path: emailLogoPath,
+          content: emailLogoBuffer,
+          contentType: "image/png",
           cid: EMAIL_LOGO_CID,
         },
       ],
