@@ -1,11 +1,11 @@
-import { Button } from "@autolab/ui/components/button";
-
 import { authClient } from "@/shared/lib/auth";
 
+import { GoogleAuthButton } from "@/features/auth/ui/google-auth-button";
+
 export const SignInWithGoogle = () => (
-  <Button
+  <GoogleAuthButton
+    label="Увійти через Google"
     size="lg"
-    variant="outline"
     className="w-full"
     onClick={() =>
       authClient.signIn.social({
@@ -13,8 +13,5 @@ export const SignInWithGoogle = () => (
         callbackURL: "/onboarding",
       })
     }
-  >
-    <img src="/icons/google.svg" alt="Google" className="size-4" width={16} height={16} />
-    Увійти через Google
-  </Button>
+  />
 );

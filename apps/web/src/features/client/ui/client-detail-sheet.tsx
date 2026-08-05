@@ -55,7 +55,6 @@ export const ClientDetailSheet = ({ client, organizationId }: Props) => {
     navigate({
       to: "/dashboard/vehicles/$vehicleId",
       params: { vehicleId },
-      search: { organizationId },
     });
   };
 
@@ -64,7 +63,6 @@ export const ClientDetailSheet = ({ client, organizationId }: Props) => {
     navigate({
       to: "/dashboard/organization/bookings/$bookingId",
       params: { bookingId },
-      search: { organizationId },
     });
   };
 

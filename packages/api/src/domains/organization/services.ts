@@ -6,7 +6,7 @@ import { ORPCError } from "@orpc/server";
 import { eq } from "drizzle-orm";
 
 import type { AuthenticatedContext } from "../../context";
-import { assertOrgManager, assertOrgOwner, createId, getOrgContext, slugify } from "../../lib/org-scope";
+import { assertOrgManager, assertOrgOwner, createId, getOrgContext, slugify } from "../../lib/scope";
 
 import type {
   CreateOrganizationInput,

@@ -1,48 +1,52 @@
 import { useQuery } from "@tanstack/react-query";
-import { useSearch } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import { orpc } from "@/shared/api/orpc";
+import { resolveSelectedOrganizationId } from "@/shared/lib/organization";
 import { useOrganizationStore } from "@/shared/stores/organization";
 
 export const useSelectedOrganizationId = () => {
-  const search = useSearch({ strict: false });
   const storedOrganizationId = useOrganizationStore((state) => state.selectedOrganizationId);
   const organizationsQuery = useQuery(orpc.organization.listMyOrganizations.queryOptions());
-  const organizations = organizationsQuery.data ?? [];
+  const organizations = organizationsQuery.data;
 
-  const searchOrganizationId =
-    "organizationId" in search && typeof search.organizationId === "string"
-      ? search.organizationId
-      : undefined;
-
-  return searchOrganizationId ?? storedOrganizationId ?? organizations[0]?.id ?? null;
+  return resolveSelectedOrganizationId(
+    storedOrganizationId,
+    organizations,
+    organizationsQuery.isSuccess,
+  );
 };
 
-export const useSyncOrganizationSelection = (
-  organizations: Array<{ id: string }>,
-  searchOrganizationId?: string,
-) => {
+export const useOrganizationContext = () => {
+  const storedOrganizationId = useOrganizationStore((state) => state.selectedOrganizationId);
+  const organizationsQuery = useQuery(orpc.organization.listMyOrganizations.queryOptions());
+  const organizations = organizationsQuery.data;
+  const organizationId = resolveSelectedOrganizationId(
+    storedOrganizationId,
+    organizations,
+    organizationsQuery.isSuccess,
+  );
+
+  return {
+    organizationId,
+    isOrganizationLoading: organizationsQuery.isLoading || !organizationsQuery.isSuccess,
+  };
+};
+
+export const useSyncOrganizationSelection = (organizations: Array<{ id: string }>) => {
   const { selectedOrganizationId, setSelectedOrganizationId } = useOrganizationStore();
-  const firstOrganizationId = organizations[0]?.id ?? null;
 
   useEffect(() => {
-    if (searchOrganizationId) {
-      if (searchOrganizationId !== selectedOrganizationId) {
-        setSelectedOrganizationId(searchOrganizationId);
-      }
-      return;
-    }
+    const validatedOrganizationId = resolveSelectedOrganizationId(
+      selectedOrganizationId,
+      organizations,
+      true,
+    );
 
-    if (!selectedOrganizationId && firstOrganizationId) {
-      setSelectedOrganizationId(firstOrganizationId);
+    if (validatedOrganizationId !== selectedOrganizationId) {
+      setSelectedOrganizationId(validatedOrganizationId);
     }
-  }, [
-    firstOrganizationId,
-    searchOrganizationId,
-    selectedOrganizationId,
-    setSelectedOrganizationId,
-  ]);
+  }, [organizations, selectedOrganizationId, setSelectedOrganizationId]);
 
-  return selectedOrganizationId ?? firstOrganizationId;
+  return resolveSelectedOrganizationId(selectedOrganizationId, organizations, true);
 };

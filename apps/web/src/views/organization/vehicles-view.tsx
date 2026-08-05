@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { ColumnDef } from "@tanstack/react-table";
 import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
-import { useEffect, useState } from "react";
 
 import { CreateOrganizationVehicleDialog } from "@/features/vehicle/ui/create-organization-vehicle-dialog";
 import { DeleteOrganizationVehicleDialog } from "@/features/vehicle/ui/delete-organization-vehicle-dialog";
@@ -15,7 +14,7 @@ import { orpc } from "@/shared/api/orpc";
 import { getClientName } from "@/shared/lib/client";
 import { isQueryContentLoading } from "@/shared/lib/query";
 import { DEFAULT_PAGE_SIZE } from "@/shared/lib/pagination";
-import { useDebouncedValue } from "@/shared/hooks/use-debounce";
+import { useTableFilters } from "@/shared/hooks/use-table-filters";
 import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
@@ -48,13 +47,7 @@ type VehicleRow = {
 export const VehiclesView = () => {
   const organizationId = useSelectedOrganizationId();
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const debouncedSearch = useDebouncedValue(search);
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch]);
+  const { search, debouncedSearch, page, setSearch, setPage } = useTableFilters();
 
   const vehiclesQuery = useQuery({
     ...orpc.vehicle.listVehicles.queryOptions({
@@ -72,7 +65,6 @@ export const VehiclesView = () => {
     navigate({
       to: "/dashboard/vehicles/$vehicleId",
       params: { vehicleId },
-      search: { organizationId: organizationId! },
     });
   };
 

@@ -3,7 +3,7 @@ import { useMemo } from "react";
 
 import { getBookingDisplaySegments } from "@/features/booking/lib/utils";
 import { formatBookingTimeRange } from "@/features/booking/lib/utils";
-import { type WorkingHoursEntry } from "@autolab/api/lib/working-hours";
+import { type WorkingHoursEntry } from "@autolab/api/lib/schedule";
 import { cn } from "@autolab/ui/lib/utils";
 
 type Props = {

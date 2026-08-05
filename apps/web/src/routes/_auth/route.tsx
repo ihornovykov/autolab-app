@@ -2,24 +2,14 @@ import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 import { resolveAuthContext } from "@/features/auth/lib/utils";
 
-const AuthLayout = () => {
-  return <Outlet />;
-};
+const AuthLayout = () => <Outlet />;
 
 export const Route = createFileRoute("/_auth")({
   component: AuthLayout,
-  beforeLoad: async ({ location }) => {
-    const { session, onboardingStatus } = await resolveAuthContext();
-    if (!session) {
-      throw redirect({
-        to: "/auth/sign-in",
-      });
+  beforeLoad: async () => {
+    const { session } = await resolveAuthContext();
+    if (session) {
+      throw redirect({ to: "/dashboard" });
     }
-
-    if (location.pathname !== "/onboarding" && onboardingStatus.needsOnboarding) {
-      throw redirect({ to: "/onboarding" });
-    }
-
-    return { session };
   },
 });

@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
-import { useEffect, useState } from "react";
 
 import { CreateClientDialog } from "@/features/client/ui/create-client-dialog";
 import { ClientDetailSheet } from "@/features/client/ui/client-detail-sheet";
@@ -12,7 +11,7 @@ import { formatDate } from "@/shared/lib/date";
 import { getClientDisplayName } from "@/shared/lib/client";
 import { isQueryContentLoading } from "@/shared/lib/query";
 import { DEFAULT_PAGE_SIZE } from "@/shared/lib/pagination";
-import { useDebouncedValue } from "@/shared/hooks/use-debounce";
+import { useTableFilters } from "@/shared/hooks/use-table-filters";
 import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
@@ -36,13 +35,7 @@ type ClientRow = {
 
 export const ClientsView = () => {
   const organizationId = useSelectedOrganizationId();
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const debouncedSearch = useDebouncedValue(search);
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch]);
+  const { search, debouncedSearch, page, setSearch, setPage } = useTableFilters();
 
   const clientsQuery = useQuery({
     ...orpc.client.listClients.queryOptions({

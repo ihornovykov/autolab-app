@@ -1,5 +1,4 @@
 import { useForm } from "@tanstack/react-form";
-import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -19,11 +18,7 @@ const changePasswordSchema = z
     path: ["confirmNewPassword"],
   });
 
-type Props = {
-  hasPassword: boolean;
-};
-
-export const ChangePasswordForm = ({ hasPassword }: Props) => {
+export const ChangePasswordForm = () => {
   const form = useForm({
     defaultValues: {
       currentPassword: "",
@@ -52,21 +47,6 @@ export const ChangePasswordForm = ({ hasPassword }: Props) => {
       onSubmit: changePasswordSchema,
     },
   });
-
-  if (!hasPassword) {
-    return (
-      <div className="space-y-2">
-        <h3 className="text-sm font-medium">Пароль</h3>
-        <p className="text-sm text-muted-foreground">
-          Ви увійшли через Google. Щоб встановити пароль, скористайтеся{" "}
-          <Link to="/auth/forgot-password" className="underline underline-offset-4">
-            сторінкою відновлення пароля
-          </Link>
-          .
-        </p>
-      </div>
-    );
-  }
 
   return (
     <form

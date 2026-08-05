@@ -4,7 +4,7 @@ import {
   DEFAULT_WORKING_HOURS,
   resolveCalendarSegments,
   type WorkingHoursEntry,
-} from "@autolab/api/lib/working-hours";
+} from "@autolab/api/lib/schedule";
 import { type DateRangeFilterValue } from "@autolab/ui/components/date-range-picker";
 
 import {

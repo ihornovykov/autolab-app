@@ -19,7 +19,6 @@ import { cn } from "@autolab/ui/lib/utils";
 
 type Props = {
   bookings: BookingRow[];
-  organizationId: string;
   page: number;
   totalPages: number;
   total: number;
@@ -56,7 +55,6 @@ const AnalyticsBookingMobileCard = ({
 
 export const AnalyticsBookingsTable = ({
   bookings,
-  organizationId,
   page,
   totalPages,
   total,
@@ -70,7 +68,6 @@ export const AnalyticsBookingsTable = ({
     navigate({
       to: "/dashboard/organization/bookings/$bookingId",
       params: { bookingId },
-      search: { organizationId },
     });
   };
 

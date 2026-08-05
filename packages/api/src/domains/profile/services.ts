@@ -2,33 +2,28 @@ import { db } from "@autolab/db";
 import { accounts } from "@autolab/db/schema/auth";
 import { profileWorkingHours } from "@autolab/db/schema/profile-working-hours";
 import { profiles } from "@autolab/db/schema/profile";
+import { auth } from "@autolab/auth";
 import { ORPCError } from "@orpc/server";
 import { and, eq, inArray } from "drizzle-orm";
 
 import type { Context } from "../../context";
-import { DEFAULT_WORKING_HOURS, mapDbWorkingHours } from "../../lib/working-hours";
-import { createId } from "../../lib/org-scope";
+import { DEFAULT_WORKING_HOURS, mapDbWorkingHours } from "../../lib/schedule";
+import { createId } from "../../lib/scope";
 import { listMyOrganizations } from "../organization/services";
 
-import { isProfileComplete } from "./lib/is-profile-complete";
+import { isProfileComplete, fromDbTime, toDbTime } from "./utils";
 
 import type {
   GetProfileOutput,
   GetWorkingHoursOutput,
+  LinkEmailAccountInput,
+  LinkEmailAccountOutput,
   OnboardingStatusOutput,
   UpdateProfileInput,
   UpdateProfileOutput,
   UpdateWorkingHoursInput,
   UpdateWorkingHoursOutput,
 } from "./validation";
-
-const toDbTime = (time: string | null) => {
-  if (!time) return null;
-  const normalized = time.slice(0, 5);
-  return `${normalized}:00`;
-};
-
-const fromDbTime = (time: string | null) => (time ? time.slice(0, 5) : null);
 
 export const seedDefaultProfileWorkingHours = async (profileId: string) => {
   await db.insert(profileWorkingHours).values(
@@ -84,6 +79,33 @@ export const getMyProfile = async (context: Context): Promise<GetProfileOutput> 
     email: session.user.email,
     hasPassword: !!credentialAccount?.password,
   };
+};
+
+export const linkEmailAccount = async (
+  context: Context,
+  input: LinkEmailAccountInput,
+): Promise<LinkEmailAccountOutput> => {
+  const userId = context.session?.user.id;
+  if (!userId) {
+    throw new ORPCError("UNAUTHORIZED", { message: "Unauthorized" });
+  }
+
+  const credentialAccount = await getCredentialAccount(userId);
+  if (credentialAccount?.password) {
+    throw new ORPCError("BAD_REQUEST", { message: "Email вже підключено" });
+  }
+
+  try {
+    await auth.api.setPassword({
+      body: { newPassword: input.newPassword },
+      headers: context.headers,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Не вдалося підключити email";
+    throw new ORPCError("BAD_REQUEST", { message });
+  }
+
+  return { success: true };
 };
 
 export const updateProfile = async (

@@ -1,17 +1,10 @@
 import type { QueryClient } from "@tanstack/react-query";
 
-import { orpc } from "@/shared/api/orpc";
 import { createCalendarBookingsInput, getCalendarFetchRange } from "@/features/calendar/lib/utils";
+import { orpc } from "@/shared/api/orpc";
+import { resolveSelectedOrganizationId } from "@/shared/lib/organization";
 import { DEFAULT_PAGE_SIZE } from "@/shared/lib/pagination";
-
-type DashboardSearch = {
-  organizationId?: string;
-};
-
-type LoaderSearchContext = {
-  search?: unknown;
-  parentMatchPromise?: Promise<{ search: unknown } | undefined>;
-};
+import { useOrganizationStore } from "@/shared/stores/organization";
 
 type OrganizationSummary = { id: string };
 
@@ -35,39 +28,28 @@ export const prefetchOrganizations = (queryClient: QueryClient) => {
   void queryClient.prefetchQuery(organizationListQueryOptions());
 };
 
-export const resolveOrganizationId = (
-  queryClient: QueryClient,
-  search: DashboardSearch,
-): string | undefined => {
+export const resolveOrganizationId = (queryClient: QueryClient): string | undefined => {
   const organizations = getCachedOrganizations(queryClient);
-  return search.organizationId ?? organizations?.[0]?.id;
-};
+  if (!organizations?.length) return undefined;
 
-export const resolveLoaderSearch = async ({
-  search,
-  parentMatchPromise,
-}: LoaderSearchContext): Promise<DashboardSearch> => {
-  if (search && typeof search === "object" && "organizationId" in search) {
-    return search as DashboardSearch;
-  }
-
-  const parent = await parentMatchPromise;
-  return (parent?.search ?? {}) as DashboardSearch;
+  const storedOrganizationId = useOrganizationStore.getState().selectedOrganizationId;
+  return (
+    resolveSelectedOrganizationId(storedOrganizationId, organizations, true) ?? undefined
+  );
 };
 
 export const prefetchOrganizationQuery = (
   queryClient: QueryClient,
-  search: DashboardSearch,
   prefetch: (organizationId: string) => void,
 ) => {
-  const organizationId = resolveOrganizationId(queryClient, search);
+  const organizationId = resolveOrganizationId(queryClient);
   if (organizationId) {
     prefetch(organizationId);
     return;
   }
 
   void queryClient.prefetchQuery(organizationListQueryOptions()).then(() => {
-    const resolvedOrganizationId = resolveOrganizationId(queryClient, search);
+    const resolvedOrganizationId = resolveOrganizationId(queryClient);
     if (resolvedOrganizationId) prefetch(resolvedOrganizationId);
   });
 };

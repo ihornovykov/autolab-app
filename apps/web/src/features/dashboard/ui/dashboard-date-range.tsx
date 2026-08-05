@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import { DASHBOARD_DATE_PRESETS } from "@/features/dashboard/lib/constants";
 import type { DashboardDatePreset } from "@/features/dashboard/lib/types";
-import { getPresetDateRange } from "@/features/dashboard/lib/utils";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { Calendar } from "@autolab/ui/components/calendar";
 import type { DateRangeFilterValue } from "@autolab/ui/components/date-range-picker";
@@ -122,7 +121,6 @@ export const DashboardDateRange = ({
             onClick={() => {
               if (item.id === "custom") return;
               onPresetChange(item.id);
-              onValueChange(getPresetDateRange(item.id));
             }}
           >
             {item.label}

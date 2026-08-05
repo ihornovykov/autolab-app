@@ -20,6 +20,6 @@ const requireAuth = o.middleware(async ({ context, next }) => {
 export const protectedProcedure = publicProcedure.use(requireAuth);
 
 export type { AuthenticatedContext } from "./context";
-export type { OrgContext } from "./lib/org-scope";
+export type { OrgContext } from "./lib/scope";
 
 export const orgProcedure = protectedProcedure;

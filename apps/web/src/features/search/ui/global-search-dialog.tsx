@@ -7,6 +7,7 @@ import { getSearchResultNavigation } from "@/features/search/lib/utils";
 import { SearchResultItem } from "@/features/search/ui/search-result-item";
 import { orpc } from "@/shared/api/orpc";
 import { useDebouncedValue } from "@/shared/hooks/use-debounce";
+import { useOrganizationStore } from "@/shared/stores/organization";
 import { Loader } from "@/shared/ui/loader";
 import { Dialog } from "@autolab/ui/components/sheet";
 import { Input } from "@autolab/ui/components/input";
@@ -19,6 +20,9 @@ type Props = {
 
 export const GlobalSearchDialog = ({ open, onOpenChange, organizationId }: Props) => {
   const navigate = useNavigate();
+  const setSelectedOrganizationId = useOrganizationStore(
+    (state) => state.setSelectedOrganizationId,
+  );
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebouncedValue(query, 250);
   const trimmedQuery = debouncedQuery.trim();
@@ -42,9 +46,21 @@ export const GlobalSearchDialog = ({ open, onOpenChange, organizationId }: Props
   const showEmpty = trimmedQuery.length >= 2 && !isLoading && results.length === 0;
 
   const handleSelect = (item: (typeof results)[number]) => {
-    const target = getSearchResultNavigation(item, organizationId);
+    const target = getSearchResultNavigation(item);
     onOpenChange(false);
-    navigate(target);
+
+    if ("selectOrganizationId" in target) {
+      setSelectedOrganizationId(target.selectOrganizationId);
+      navigate({ to: target.to });
+      return;
+    }
+
+    if ("params" in target) {
+      navigate({ to: target.to, params: target.params });
+      return;
+    }
+
+    navigate({ to: target.to });
   };
 
   return (

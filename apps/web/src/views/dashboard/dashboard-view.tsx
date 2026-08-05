@@ -8,12 +8,10 @@ import {
   UsersIcon,
   WalletIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { toListBookingsDateRange } from "@/features/booking/lib/utils";
-import { DEFAULT_DASHBOARD_PRESET } from "@/features/dashboard/lib/constants";
-import type { DashboardDatePreset } from "@/features/dashboard/lib/types";
-import { getDefaultDashboardDateRange } from "@/features/dashboard/lib/utils";
+import { useDashboardFilters } from "@/features/dashboard/hooks/use-dashboard-filters";
 import { AnalyticsBookingsTable } from "@/features/dashboard/ui/analytics-bookings-table";
 import { AnalyticsChartsSection } from "@/features/dashboard/ui/analytics-charts-section";
 import { DashboardDateRange } from "@/features/dashboard/ui/dashboard-date-range";
@@ -26,21 +24,20 @@ import { formatPrice } from "@/shared/lib/money";
 import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { Heading, PageContainer } from "@/shared/ui/page-container";
-import type { DateRangeFilterValue } from "@autolab/ui/components/date-range-picker";
 
 const DASHBOARD_BOOKINGS_PAGE_SIZE = 10;
 
 export const DashboardView = () => {
   const organizationId = useSelectedOrganizationId();
-  const [preset, setPreset] = useState<DashboardDatePreset>(DEFAULT_DASHBOARD_PRESET);
-  const [dateRange, setDateRange] = useState<DateRangeFilterValue | null>(
-    getDefaultDashboardDateRange,
-  );
-  const [bookingsPage, setBookingsPage] = useState(1);
-
-  useEffect(() => {
-    setBookingsPage(1);
-  }, [dateRange]);
+  const {
+    preset,
+    dateRange,
+    bookingsPage,
+    setPreset,
+    setDateRange,
+    setBookingsPage,
+    applyPreset,
+  } = useDashboardFilters();
 
   const analyticsInput = useMemo(() => {
     const range = toListBookingsDateRange(dateRange);
@@ -105,7 +102,13 @@ export const DashboardView = () => {
         <DashboardDateRange
           preset={preset}
           value={dateRange}
-          onPresetChange={setPreset}
+          onPresetChange={(nextPreset) => {
+            if (nextPreset === "custom") {
+              setPreset(nextPreset);
+              return;
+            }
+            applyPreset(nextPreset);
+          }}
           onValueChange={setDateRange}
           className="w-full min-w-0 lg:flex-1"
         />
@@ -178,7 +181,6 @@ export const DashboardView = () => {
               startTime: new Date(booking.startTime),
               endTime: new Date(booking.endTime),
             }))}
-            organizationId={organizationId}
             page={bookings?.page ?? bookingsPage}
             totalPages={bookings?.totalPages ?? 0}
             total={bookings?.total ?? 0}

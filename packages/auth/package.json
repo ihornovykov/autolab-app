@@ -12,6 +12,7 @@
   "scripts": {},
   "dependencies": {
     "@autolab/db": "workspace:*",
+    "@autolab/email": "workspace:*",
     "@autolab/env": "workspace:*",
     "@better-auth/core": "catalog:",
     "@polar-sh/better-auth": "catalog:",

@@ -6,9 +6,9 @@ import { ORPCError } from "@orpc/server";
 import { and, count, desc, eq, inArray } from "drizzle-orm";
 
 import type { AuthenticatedContext } from "../../index";
-import { assertOrgManager, createId, getOrgContext } from "../../lib/org-scope";
+import { assertOrgManager, createId, getOrgContext } from "../../lib/scope";
 import { buildPaginatedResult, getOffset, searchPattern } from "../../lib/pagination";
-import { orHomoglyphs } from "../../lib/search-normalize";
+import { orHomoglyphs } from "../../lib/normalize";
 import { getWorkingHoursForUserId } from "../profile/services";
 
 import type { z } from "zod";

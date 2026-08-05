@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 type OrganizationStore = {
   selectedOrganizationId: string | null;
@@ -13,6 +13,9 @@ export const useOrganizationStore = create<OrganizationStore>()(
       setSelectedOrganizationId: (organizationId) =>
         set({ selectedOrganizationId: organizationId }),
     }),
-    { name: "autolab-selected-org" },
+    {
+      name: "organization/v1",
+      storage: createJSONStorage(() => localStorage),
+    },
   ),
 );

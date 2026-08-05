@@ -6,13 +6,12 @@ import {
   getExtendedCalendarPrefetchRanges,
   getCalendarFetchRange,
 } from "@/features/calendar/lib/utils";
-import { useCalendarStore } from "@/features/calendar/lib/stores";
+import { useCalendarFilters } from "@/features/calendar/hooks/use-calendar-filters";
 import { orpc } from "@/shared/api/orpc";
 
 export const useCalendarBookings = (organizationId: string | null) => {
   const queryClient = useQueryClient();
-  const view = useCalendarStore((state) => state.view);
-  const currentDate = useCalendarStore((state) => state.currentDate);
+  const { view, currentDate } = useCalendarFilters();
 
   const range = useMemo(() => getCalendarFetchRange(view, currentDate), [view, currentDate]);
   const prefetchRanges = useMemo(

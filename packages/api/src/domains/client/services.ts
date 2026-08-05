@@ -7,10 +7,10 @@ import { ORPCError } from "@orpc/server";
 import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 
 import type { AuthenticatedContext } from "../../context";
-import { mapBooking } from "../booking/services";
-import { createId, getOrgContext } from "../../lib/org-scope";
+import { mapBooking } from "../booking/utils";
+import { createId, getOrgContext } from "../../lib/scope";
 import { buildPaginatedResult, getOffset, searchPattern } from "../../lib/pagination";
-import { orHomoglyphs } from "../../lib/search-normalize";
+import { orHomoglyphs } from "../../lib/normalize";
 
 import type { z } from "zod";
 

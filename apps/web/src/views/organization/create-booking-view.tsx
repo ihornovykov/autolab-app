@@ -24,21 +24,14 @@ export const CreateBookingView = () => {
   const { employees, services, isLoading, isPending, submitBooking } = useCreateBooking(
     organizationId!,
     () =>
-      navigate({
-        to: "/dashboard/organization/bookings",
-        search: { organizationId: organizationId! },
-      }),
+      navigate({ to: "/dashboard/organization/bookings" }),
   );
 
   if (!organizationId) return null;
 
   const canSubmit = !!vehicleId && employees.length > 0 && services.length > 0 && !isPending;
 
-  const handleBack = () =>
-    navigate({
-      to: "/dashboard/organization/bookings",
-      search: { organizationId },
-    });
+  const handleBack = () => navigate({ to: "/dashboard/organization/bookings" });
 
   return (
     <PageContainer className="space-y-6">

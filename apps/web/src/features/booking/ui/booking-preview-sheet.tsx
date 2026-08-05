@@ -1,11 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import {
-  ArrowUpRightIcon,
-  CalendarIcon,
-  PencilIcon,
-  Trash2Icon,
-  UserIcon,
-} from "lucide-react";
+import { ArrowUpRightIcon, CalendarIcon, PencilIcon, Trash2Icon, UserIcon } from "lucide-react";
 
 import { mapBookingToHistoryItem } from "@/features/calendar/lib/utils";
 import { type CalendarEvent } from "@/features/calendar/lib/types";
@@ -53,9 +47,7 @@ export const BookingPreviewSheet = ({
 
   const handleEdit = () => {
     sheets.close();
-    sheets.open(
-      <EditVehicleBookingSheet booking={historyItem} organizationId={organizationId} />,
-    );
+    sheets.open(<EditVehicleBookingSheet booking={historyItem} organizationId={organizationId} />);
   };
 
   const handleDelete = () => {
@@ -69,7 +61,6 @@ export const BookingPreviewSheet = ({
     navigate({
       to: "/dashboard/organization/bookings/$bookingId",
       params: { bookingId },
-      search: { organizationId },
     });
     sheets.close();
   };
@@ -91,17 +82,18 @@ export const BookingPreviewSheet = ({
         </div>
       }
     >
-      <div className="relative -mx-6 -mt-5 border-b px-6 pb-4 pt-6 pr-12">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="absolute right-12 top-5"
-          icon={<ArrowUpRightIcon />}
-          onClick={handleOpenDetails}
-        >
-          Деталі
-        </Button>
+      <div className="relative -mx-6 -mt-5 border-b px-6 pb-4 pt-6">
+        <div className="mb-4 flex justify-end pr-8">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            icon={<ArrowUpRightIcon />}
+            onClick={handleOpenDetails}
+          >
+            Деталі
+          </Button>
+        </div>
         <div className="flex items-start gap-4">
           <VehicleMakeIcon make={vehicle?.make ?? ""} className="size-14 shrink-0" />
           <div className="min-w-0 flex-1">

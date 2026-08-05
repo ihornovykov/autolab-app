@@ -7,6 +7,8 @@ import { createMiddleware } from "@tanstack/react-start";
 import { evlogErrorHandler } from "evlog/nitro/v3";
 import { ThemeProvider } from "next-themes";
 
+import { NuqsProvider } from "@/shared/ui/nuqs-provider";
+
 import type { orpc } from "@/shared/api/orpc";
 import { DialogHost } from "@/shared/ui/dialog-host";
 import { SheetHost } from "@/shared/ui/sheet-host";
@@ -25,12 +27,14 @@ const RootDocument = () => (
     </head>
     <body>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        <Outlet />
-        <DialogHost />
-        <SheetHost />
-        <Toaster richColors position="bottom-right" />
-        <TanStackRouterDevtools position="bottom-left" />
-        <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />
+        <NuqsProvider>
+          <Outlet />
+          <DialogHost />
+          <SheetHost />
+          <Toaster richColors position="bottom-right" />
+          <TanStackRouterDevtools position="bottom-left" />
+          <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />
+        </NuqsProvider>
       </ThemeProvider>
       <Scripts />
     </body>

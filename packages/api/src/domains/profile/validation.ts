@@ -52,6 +52,18 @@ export const updateWorkingHoursOutputSchema = workingHoursOutputSchema;
 export type UpdateWorkingHoursInput = z.infer<typeof updateWorkingHoursInputSchema>;
 export type UpdateWorkingHoursOutput = z.infer<typeof updateWorkingHoursOutputSchema>;
 
+export const linkEmailAccountInputSchema = z.object({
+  newPassword: z.string().min(8, "Пароль має містити щонайменше 8 символів"),
+});
+
+export type LinkEmailAccountInput = z.infer<typeof linkEmailAccountInputSchema>;
+
+export const linkEmailAccountOutputSchema = z.object({
+  success: z.literal(true),
+});
+
+export type LinkEmailAccountOutput = z.infer<typeof linkEmailAccountOutputSchema>;
+
 export const onboardingStatusOutputSchema = z.object({
   needsOnboarding: z.boolean(),
   isProfileComplete: z.boolean(),

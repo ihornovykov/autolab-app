@@ -28,6 +28,16 @@ export const createQueryClient = () => {
   });
 };
 
+let queryClientRef: QueryClient | null = null;
+
+export const registerQueryClient = (queryClient: QueryClient) => {
+  queryClientRef = queryClient;
+};
+
+export const clearQueryClientCache = () => {
+  queryClientRef?.clear();
+};
+
 const getORPCClient = createIsomorphicFn()
   .server(() =>
     createRouterClient(appRouter, {

@@ -6,16 +6,16 @@ import { services } from "@autolab/db/schema/service";
 import { vehicles } from "@autolab/db/schema/vehicle";
 import { ORPCError } from "@orpc/server";
 import dayjs from "dayjs";
-import { and, asc, count, desc, eq, gte, inArray, lt, lte, ne, or, sql, sum } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, lt, lte, ne, or, sql, sum } from "drizzle-orm";
 
 import type { AuthenticatedContext } from "../../context";
 import { getWorkingHoursForUserId, getWorkingHoursForUserIds } from "../profile/services";
-import { buildAnalyticsReportFilename, buildBookingReceiptFilename } from "../../lib/pdf-filename";
-import { createId, getOrgContext } from "../../lib/org-scope";
+import { buildAnalyticsReportFilename, buildBookingReceiptFilename } from "../../lib/filename";
+import { createId, getOrgContext } from "../../lib/scope";
 import { buildPaginatedResult, getOffset, searchPattern } from "../../lib/pagination";
-import { ilikeHomoglyph } from "../../lib/search-normalize";
-import { buildVehicleSearchCondition } from "../../lib/vehicle-search";
-import { DEFAULT_WORKING_HOURS, resolveBookingEndTime } from "../../lib/working-hours";
+import { ilikeHomoglyph } from "../../lib/normalize";
+import { buildVehicleSearchCondition } from "../../lib/vehicle";
+import { DEFAULT_WORKING_HOURS, resolveBookingEndTime } from "../../lib/schedule";
 
 import type { z } from "zod";
 
@@ -40,94 +40,20 @@ import type {
 } from "../vehicle/validation";
 import { getOrganizationById } from "../organization/services";
 import { getVehicleById } from "../vehicle/services";
-import { collectOrganizationAnalytics } from "./lib/analytics";
-
-const bookingWith = {
-  vehicle: true as const,
-  employee: { with: { user: { columns: { name: true } } } },
-  bookingServices: { with: { service: true as const } },
-};
-
-export const mapBooking = (
-  row: {
-    id: string;
-    organizationId: string;
-    employeeId: string;
-    vehicleId: string;
-    startTime: Date;
-    endTime: Date;
-    allowsOvertime: boolean;
-    status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
-    notes: string | null;
-    totalPrice: string;
-    createdAt: Date;
-    updatedAt: Date;
-    vehicle?: {
-      id: string;
-      make: string;
-      model: string;
-      year: number;
-      licensePlate: string | null;
-    };
-    employee?: {
-      id: string;
-      userId: string;
-      role: "TECHNICIAN" | "MANAGER" | "OWNER";
-      user?: unknown;
-    } | null;
-    bookingServices?: Array<{
-      quantity: number;
-      unitPrice: string;
-      duration: number;
-      service: {
-        id: string;
-        title: string;
-        description: string | null;
-        price: string;
-        duration: number;
-        category: string | null;
-      };
-    }>;
-  },
-  options?: {
-    employeeWorkingHours?: typeof DEFAULT_WORKING_HOURS;
-  },
-) => ({
-  id: row.id,
-  organizationId: row.organizationId,
-  employeeId: row.employeeId,
-  vehicleId: row.vehicleId,
-  startTime: row.startTime,
-  endTime: row.endTime,
-  allowsOvertime: row.allowsOvertime,
-  status: row.status,
-  notes: row.notes,
-  totalPrice: row.totalPrice,
-  createdAt: row.createdAt,
-  updatedAt: row.updatedAt,
-  vehicle: row.vehicle,
-  services: row.bookingServices?.map((bs) => ({
-    ...bs.service,
-    quantity: bs.quantity,
-    unitPrice: bs.unitPrice,
-  })),
-  employee: row.employee
-    ? {
-        id: row.employee.id,
-        userId: row.employee.userId,
-        role: row.employee.role,
-        name: (row.employee.user as { name?: string } | undefined)?.name,
-      }
-    : undefined,
-  employeeWorkingHours: options?.employeeWorkingHours,
-});
-
-type ResolvedBookingItem = {
-  serviceId: string;
-  quantity: number;
-  unitPrice: string;
-  duration: number;
-};
+import {
+  assertEndTimeAfterStart,
+  bookingWith,
+  buildBookingReceiptPdf,
+  buildOrganizationAnalyticsPdf,
+  calculateBookingDuration,
+  collectOrganizationAnalytics,
+  getListBookingsOrder,
+  mapBooking,
+  mapReportBooking,
+  mapVehicleBookingListItem,
+  reportBookingWith,
+} from "./utils";
+import type { ResolvedBookingItem } from "./utils";
 
 const resolveBookingItems = async (
   organizationId: string,
@@ -169,9 +95,6 @@ const resolveBookingItems = async (
   return { total: total.toFixed(2), duration, items: resolved, selected };
 };
 
-const calculateBookingDuration = (items: ResolvedBookingItem[]) =>
-  items.reduce((sum, item) => sum + item.duration * item.quantity, 0);
-
 const resolveEndTimeForBooking = async (
   employeeId: string,
   startTime: Date,
@@ -206,17 +129,6 @@ const attachWorkingHours = async <T extends { employee?: { userId: string } | nu
       ? (hoursMap.get(row.employee.userId) ?? DEFAULT_WORKING_HOURS)
       : DEFAULT_WORKING_HOURS,
   }));
-};
-
-const getListBookingsOrder = (
-  sort: z.infer<typeof listBookingsInputSchema>["sort"],
-  includePast?: boolean,
-) => {
-  if (sort === "upcoming") {
-    return includePast ? [desc(bookings.startTime)] : [asc(bookings.startTime)];
-  }
-
-  return sort === "asc" ? [asc(bookings.startTime)] : [desc(bookings.startTime)];
 };
 
 export const listBookings = async (
@@ -359,24 +271,9 @@ export const listVehicleBookings = async (
   });
 
   const withHours = await attachWorkingHours(rows);
-  const items = withHours.map(({ row, employeeWorkingHours }) => {
-    const mapped = mapBooking(row, { employeeWorkingHours });
-    return {
-      id: mapped.id,
-      organizationId: mapped.organizationId,
-      employeeId: mapped.employeeId,
-      vehicleId: mapped.vehicleId,
-      startTime: mapped.startTime,
-      endTime: mapped.endTime,
-      allowsOvertime: mapped.allowsOvertime,
-      status: mapped.status,
-      notes: mapped.notes,
-      totalPrice: mapped.totalPrice,
-      createdAt: mapped.createdAt,
-      updatedAt: mapped.updatedAt,
-      services: mapped.services ?? [],
-    };
-  });
+  const items = withHours.map(({ row, employeeWorkingHours }) =>
+    mapVehicleBookingListItem(mapBooking(row, { employeeWorkingHours })),
+  );
 
   return buildPaginatedResult(items, total, page, pageSize);
 };
@@ -421,7 +318,6 @@ export const generateBookingReceiptPdf = async (
     vehicleId: booking.vehicleId,
   });
 
-  const { buildBookingReceiptPdf } = await import("./lib/receipt-pdf");
   const pdfBuffer = await buildBookingReceiptPdf({
     booking: {
       id: booking.id,
@@ -464,14 +360,6 @@ export const generateBookingReceiptPdf = async (
     }),
     contentType: "application/pdf" as const,
   };
-};
-
-const assertEndTimeAfterStart = (startTime: Date, endTime: Date) => {
-  if (!endTime.getTime() || endTime <= startTime) {
-    throw new ORPCError("BAD_REQUEST", {
-      message: "End time must be after start time",
-    });
-  }
 };
 
 export const createBooking = async (
@@ -741,12 +629,6 @@ export const listOrganizationAnalyticsBookings = async (
   return buildPaginatedResult(items, totalResult[0]?.count ?? 0, page, pageSize);
 };
 
-const reportBookingWith = {
-  vehicle: { with: { client: true as const } },
-  employee: { with: { user: { columns: { name: true } } } },
-  bookingServices: { with: { service: { columns: { title: true } } } },
-};
-
 export const exportOrganizationAnalyticsPdf = async (
   context: AuthenticatedContext,
   input: z.infer<typeof organizationAnalyticsInputSchema>,
@@ -775,7 +657,6 @@ export const exportOrganizationAnalyticsPdf = async (
     throw new ORPCError("NOT_FOUND", { message: "Organization not found" });
   }
 
-  const { buildOrganizationAnalyticsPdf, mapReportBooking } = await import("./lib/analytics-pdf");
   const pdfBuffer = await buildOrganizationAnalyticsPdf({
     organization: {
       name: organization.name,

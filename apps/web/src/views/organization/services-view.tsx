@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { ClipboardListIcon, PlusIcon } from "lucide-react";
-import { useEffect, useState } from "react";
 
 import { CreateServiceDialog } from "@/features/service/ui/create-service-dialog";
 import { EditServiceSheet } from "@/features/service/ui/edit-service-sheet";
@@ -8,7 +7,7 @@ import { ServiceCard, ServiceCardGridSkeleton } from "@/features/service/ui/serv
 import { SERVICES_PAGE_SIZE } from "@/features/service/lib/constants";
 import { orpc } from "@/shared/api/orpc";
 import { isQueryContentLoading } from "@/shared/lib/query";
-import { useDebouncedValue } from "@/shared/hooks/use-debounce";
+import { useTableFilters } from "@/shared/hooks/use-table-filters";
 import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
@@ -30,13 +29,7 @@ type ServiceRow = {
 
 export const ServicesView = () => {
   const organizationId = useSelectedOrganizationId();
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const debouncedSearch = useDebouncedValue(search);
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch]);
+  const { search, debouncedSearch, page, setSearch, setPage } = useTableFilters();
 
   const servicesQuery = useQuery({
     ...orpc.service.listServices.queryOptions({

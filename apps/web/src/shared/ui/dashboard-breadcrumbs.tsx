@@ -11,9 +11,6 @@ import {
 import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { cn } from "@autolab/ui/lib/utils";
 
-const getOrganizationSearch = (organizationId: string | null, requiresOrganizationSearch?: boolean) =>
-  requiresOrganizationSearch && organizationId ? { organizationId } : undefined;
-
 export const DashboardBreadcrumbs = () => {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const params = useParams({ strict: false });
@@ -57,7 +54,6 @@ export const DashboardBreadcrumbs = () => {
       <ol className="flex min-w-0 items-center gap-1.5 sm:gap-2.5">
         {crumbs.map((crumb, index) => {
           const isLast = index === crumbs.length - 1;
-          const search = getOrganizationSearch(organizationId, crumb.requiresOrganizationSearch);
 
           return (
             <li key={`${crumb.label}-${index}`} className="flex min-w-0 items-center gap-1.5 sm:gap-2.5">
@@ -65,7 +61,6 @@ export const DashboardBreadcrumbs = () => {
               {crumb.to && !isLast ? (
                 <Link
                   to={crumb.to}
-                  search={search}
                   className="max-w-[96px] truncate transition-colors hover:text-foreground sm:max-w-[140px] md:max-w-[180px]"
                 >
                   {crumb.label}

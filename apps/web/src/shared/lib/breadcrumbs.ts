@@ -1,7 +1,6 @@
 export type DashboardBreadcrumbItem = {
   label: string;
   to?: string;
-  requiresOrganizationSearch?: boolean;
 };
 
 type DynamicBreadcrumbLabels = {
@@ -12,39 +11,32 @@ type DynamicBreadcrumbLabels = {
 const overviewCrumb = {
   label: "Організація",
   to: "/dashboard",
-  requiresOrganizationSearch: true,
 } satisfies DashboardBreadcrumbItem;
 
 const organizationPages: Record<string, Omit<DashboardBreadcrumbItem, "to"> & { to: string }> = {
   "/dashboard/organization/employees": {
     label: "Працівники",
     to: "/dashboard/organization/employees",
-    requiresOrganizationSearch: true,
   },
   "/dashboard/organization/clients": {
     label: "Клієнти",
     to: "/dashboard/organization/clients",
-    requiresOrganizationSearch: true,
   },
   "/dashboard/organization/services": {
     label: "Послуги",
     to: "/dashboard/organization/services",
-    requiresOrganizationSearch: true,
   },
   "/dashboard/organization/vehicles": {
     label: "Авто",
     to: "/dashboard/organization/vehicles",
-    requiresOrganizationSearch: true,
   },
   "/dashboard/organization/bookings": {
     label: "Записи",
     to: "/dashboard/organization/bookings",
-    requiresOrganizationSearch: true,
   },
   "/dashboard/organization/calendar": {
     label: "Календар",
     to: "/dashboard/organization/calendar",
-    requiresOrganizationSearch: true,
   },
 };
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { normalizeHomoglyphs } from "./search-normalize";
+import { normalizeHomoglyphs } from "./normalize";
 
 export const paginationInputSchema = z.object({
   page: z.number().int().min(1).default(1),

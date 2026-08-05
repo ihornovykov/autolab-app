@@ -10,7 +10,6 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import type { ReactElement } from "react";
 
-import { useOrganizationStore } from "@/shared/stores/organization";
 import { UserAvatar } from "@/shared/ui/user-avatar";
 
 type Props = {
@@ -31,14 +30,10 @@ export const UserDropdown = ({
   children,
 }: Props) => {
   const navigate = useNavigate();
-  const { selectedOrganizationId } = useOrganizationStore();
 
   const handleSettingsClick = () => {
     onNavigate?.();
-    navigate({
-      to: "/dashboard/account/settings",
-      search: selectedOrganizationId ? { organizationId: selectedOrganizationId } : undefined,
-    });
+    navigate({ to: "/dashboard/account/settings" });
   };
 
   const handleSignOut = () => {

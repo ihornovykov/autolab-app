@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { mapBookingsToCalendarEvents } from "@/features/calendar/lib/utils";
 import { isQueryContentLoading } from "@/shared/lib/query";
 import { useCalendarBookings } from "@/features/calendar/hooks/use-calendar-bookings";
-import { useCalendarStore } from "@/features/calendar/lib/stores";
+import { useCalendarFilters } from "@/features/calendar/hooks/use-calendar-filters";
 import { EventCalendar } from "@/features/calendar/ui/event-calendar";
 import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { Heading, PageContainer } from "@/shared/ui/page-container";
@@ -12,8 +12,7 @@ import { Calendar } from "@autolab/ui/components/calendar";
 
 export const CalendarView = () => {
   const organizationId = useSelectedOrganizationId();
-  const currentDate = useCalendarStore((state) => state.currentDate);
-  const setCurrentDate = useCalendarStore((state) => state.setCurrentDate);
+  const { currentDate, setCurrentDate } = useCalendarFilters();
   const bookingsQuery = useCalendarBookings(organizationId);
 
   const events = useMemo(

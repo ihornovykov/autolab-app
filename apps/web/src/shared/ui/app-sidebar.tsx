@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import type * as React from "react";
 
-import { useOrganizationStore } from "@/shared/stores/organization";
 import { Logo } from "@/shared/ui/logo";
 import { OrganizationSwitcher } from "@/shared/ui/organization-switcher";
 import { NavUser } from "@/shared/ui/nav-user";
@@ -48,9 +47,6 @@ export const AppSidebar = ({ organizations, user, onSignOut, ...props }: Props) 
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { isMobile, setOpenMobile } = useSidebar();
-  const { selectedOrganizationId } = useOrganizationStore();
-  const selectedOrg =
-    organizations.find((org) => org.id === selectedOrganizationId) ?? organizations[0];
 
   const closeMobile = () => {
     if (isMobile) setOpenMobile(false);
@@ -81,11 +77,7 @@ export const AppSidebar = ({ organizations, user, onSignOut, ...props }: Props) 
               return (
                 <SidebarMenuItem key={to}>
                   <SidebarMenuButton asChild tooltip={label} isActive={isActive}>
-                    <Link
-                      to={to}
-                      search={selectedOrg ? { organizationId: selectedOrg.id } : undefined}
-                      onClick={closeMobile}
-                    >
+                    <Link to={to} onClick={closeMobile}>
                       <Icon />
                       <span>{label}</span>
                     </Link>

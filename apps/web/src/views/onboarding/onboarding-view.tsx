@@ -64,10 +64,7 @@ export const OnboardingView = () => {
         ]);
         setSelectedOrganizationId(organization.id);
         toast.success("Ласкаво просимо до Autolab!");
-        navigate({
-          to: "/dashboard",
-          search: { organizationId: organization.id },
-        });
+        navigate({ to: "/dashboard" });
       },
       onError: (error) => {
         toast.error(error.message ?? "Не вдалося створити організацію");

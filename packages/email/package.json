@@ -1,0 +1,33 @@
+{
+  "name": "@autolab/email",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*"
+    }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "preview": "email dev --dir src/templates"
+  },
+  "dependencies": {
+    "@autolab/env": "workspace:*",
+    "@react-email/components": "^0.0.31",
+    "@react-email/render": "^1.0.5",
+    "nodemailer": "^9.0.4",
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "@autolab/config": "workspace:*",
+    "@react-email/preview-server": "4.3.2",
+    "@types/nodemailer": "^8.0.1",
+    "@types/react": "catalog:",
+    "react-email": "^4.0.13",
+    "typescript": "catalog:"
+  }
+}

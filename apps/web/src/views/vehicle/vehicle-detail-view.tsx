@@ -7,6 +7,7 @@ import { CreateVehicleBookingDialog } from "@/features/booking/ui/create-vehicle
 import { DeleteOrganizationVehicleDialog } from "@/features/vehicle/ui/delete-organization-vehicle-dialog";
 import { EditOrganizationVehicleSheet } from "@/features/vehicle/ui/edit-organization-vehicle-sheet";
 import {
+  VehicleDetailContentSkeleton,
   VehicleDetailSection,
   VehicleLicensePlateDisplay,
   VehicleServiceHistory,
@@ -18,7 +19,7 @@ import { orpc } from "@/shared/api/orpc";
 import { getClientName } from "@/shared/lib/client";
 import { isQueryContentLoading } from "@/shared/lib/query";
 import { DEFAULT_PAGE_SIZE } from "@/shared/lib/pagination";
-import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
+import { useOrganizationContext } from "@/shared/hooks/use-organization";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
 import { PageContainer } from "@/shared/ui/page-container";
@@ -32,8 +33,8 @@ const formatEngineVolume = (value: number) => {
 };
 
 export const VehicleDetailView = () => {
-  const { vehicleId } = useParams({ from: "/_auth/dashboard/vehicles/$vehicleId" });
-  const organizationId = useSelectedOrganizationId();
+  const { vehicleId } = useParams({ from: "/_app/dashboard/vehicles/$vehicleId" });
+  const { organizationId, isOrganizationLoading } = useOrganizationContext();
   const navigate = useNavigate();
   const router = useRouter();
   const [bookingsPage, setBookingsPage] = useState(1);
@@ -57,6 +58,14 @@ export const VehicleDetailView = () => {
     enabled: !!organizationId,
   });
 
+  if (isOrganizationLoading || isQueryContentLoading(vehicleQuery)) {
+    return (
+      <PageContainer>
+        <VehicleDetailContentSkeleton />
+      </PageContainer>
+    );
+  }
+
   if (!organizationId) return null;
 
   const vehicle = vehicleQuery.data;
@@ -74,10 +83,7 @@ export const VehicleDetailView = () => {
         vehicle={vehicle}
         organizationId={organizationId}
         onDeleted={() =>
-          navigate({
-            to: "/dashboard/organization/vehicles",
-            search: { organizationId },
-          })
+          navigate({ to: "/dashboard/organization/vehicles" })
         }
       />,
     );
@@ -91,10 +97,7 @@ export const VehicleDetailView = () => {
         make={vehicle.make}
         model={vehicle.model}
         onDeleted={() =>
-          navigate({
-            to: "/dashboard/organization/vehicles",
-            search: { organizationId },
-          })
+          navigate({ to: "/dashboard/organization/vehicles" })
         }
       />,
     );
@@ -110,7 +113,6 @@ export const VehicleDetailView = () => {
     navigate({
       to: "/dashboard/organization/bookings/$bookingId",
       params: { bookingId },
-      search: { organizationId },
     });
   };
 

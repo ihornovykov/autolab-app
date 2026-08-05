@@ -1,10 +1,11 @@
 import { env } from "@autolab/env/server";
 import { drizzle } from "drizzle-orm/node-postgres";
 
+import { resolveDatabaseUrl } from "./lib/database-url";
 import * as schema from "./schema";
 
 export function createDb() {
-  return drizzle(env.DATABASE_URL, { schema });
+  return drizzle(resolveDatabaseUrl(env.DATABASE_URL), { schema });
 }
 
 export const db = createDb();

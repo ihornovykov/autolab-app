@@ -1,17 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { PlusIcon } from "lucide-react";
-import { useEffect, useState } from "react";
 
 import { employeeRoleOptions } from "@/features/employee/lib/constants";
 import type { EmployeeRole } from "@/features/employee/lib/types";
+import { useEmployeesFilters } from "@/features/employee/hooks/use-employees-filters";
 import { InviteEmployeeDialog } from "@/features/employee/ui/invite-employee-dialog";
 import { EditEmployeeSheet } from "@/features/employee/ui/edit-employee-sheet";
 import { orpc } from "@/shared/api/orpc";
 import { formatDate } from "@/shared/lib/date";
 import { isQueryContentLoading } from "@/shared/lib/query";
 import { DEFAULT_PAGE_SIZE } from "@/shared/lib/pagination";
-import { useDebouncedValue } from "@/shared/hooks/use-debounce";
 import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
@@ -41,14 +40,8 @@ type EmployeeRow = {
 
 export const EmployeesView = () => {
   const organizationId = useSelectedOrganizationId();
-  const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<EmployeeRole[]>([]);
-  const [page, setPage] = useState(1);
-  const debouncedSearch = useDebouncedValue(search);
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, roleFilter]);
+  const { search, debouncedSearch, page, roleFilter, setSearch, setPage, setRoleFilter } =
+    useEmployeesFilters();
 
   const employeesQuery = useQuery({
     ...orpc.employee.listEmployees.queryOptions({

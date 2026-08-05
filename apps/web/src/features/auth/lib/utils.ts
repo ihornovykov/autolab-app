@@ -1,8 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { isPolarEnabled } from "@autolab/auth/lib/payments";
-import { client } from "@/shared/api/orpc";
+import { clearQueryClientCache, client } from "@/shared/api/orpc";
 import { authMiddleware } from "@/shared/middleware/auth";
+import { useOrganizationStore } from "@/shared/stores/organization";
 
 const defaultOnboardingStatus = {
   needsOnboarding: false,
@@ -37,6 +38,8 @@ let cachedAt = 0;
 export const clearAuthContextCache = () => {
   cachedAuthContext = null;
   cachedAt = 0;
+  clearQueryClientCache();
+  useOrganizationStore.getState().setSelectedOrganizationId(null);
 };
 
 export const resolveAuthContext = async (): Promise<AuthContext> => {

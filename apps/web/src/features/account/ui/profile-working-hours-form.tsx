@@ -61,14 +61,6 @@ export const ProfileWorkingHoursForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <h3 className="text-sm font-medium">Графік роботи</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Вкажіть години, коли ви доступні для записів. Робота поза цим часом переноситься на
-          наступний робочий день.
-        </p>
-      </div>
-
       <WorkingHoursEditor days={days} onChange={setDays} formError={formError ?? undefined} />
 
       <div className="flex justify-end border-t border-border pt-4">

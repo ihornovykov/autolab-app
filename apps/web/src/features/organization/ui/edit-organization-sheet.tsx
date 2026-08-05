@@ -106,12 +106,7 @@ export const EditOrganizationSheet = ({ organization }: Props) => {
             >
               Закрити
             </Button>
-            <Button
-              type="submit"
-              form={FORM_ID}
-              size="default"
-              loading={updateMutation.isPending}
-            >
+            <Button type="submit" form={FORM_ID} size="default" loading={updateMutation.isPending}>
               Зберегти зміни
             </Button>
           </div>

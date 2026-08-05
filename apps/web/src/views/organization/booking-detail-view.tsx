@@ -3,6 +3,7 @@ import { useNavigate, useParams, useRouter } from "@tanstack/react-router";
 import { ArrowLeftIcon, CalendarIcon, PencilIcon, Trash2Icon, UserIcon } from "lucide-react";
 
 import { mapBookingToHistoryItem } from "@/features/calendar/lib/utils";
+import { BookingDetailSkeleton } from "@/features/booking/ui/booking-detail-skeleton";
 import { BookingDiscountDisplay } from "@/features/booking/ui/booking-discount-display";
 import { DeleteVehicleBookingDialog } from "@/features/booking/ui/delete-vehicle-booking-dialog";
 import { EditVehicleBookingSheet } from "@/features/booking/ui/edit-vehicle-booking-sheet";
@@ -13,7 +14,8 @@ import { VehicleMakeIcon } from "@/features/vehicle/ui/vehicle-make-icon";
 import { LicencePlate } from "@/features/vehicle/ui/licence-plate";
 import { orpc } from "@/shared/api/orpc";
 import { formatPrice } from "@/shared/lib/money";
-import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
+import { isQueryContentLoading } from "@/shared/lib/query";
+import { useOrganizationContext } from "@/shared/hooks/use-organization";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
 import { PageContainer } from "@/shared/ui/page-container";
@@ -24,9 +26,9 @@ import { Button } from "@autolab/ui/components/button";
 
 export const BookingDetailView = () => {
   const { bookingId } = useParams({
-    from: "/_auth/dashboard/organization/bookings/$bookingId",
+    from: "/_app/dashboard/organization/bookings/$bookingId",
   });
-  const organizationId = useSelectedOrganizationId();
+  const { organizationId, isOrganizationLoading } = useOrganizationContext();
   const navigate = useNavigate();
   const router = useRouter();
 
@@ -48,6 +50,14 @@ export const BookingDetailView = () => {
     }),
     enabled: !!organizationId && !!booking?.vehicleId,
   });
+
+  if (isOrganizationLoading || isQueryContentLoading(bookingQuery)) {
+    return (
+      <PageContainer>
+        <BookingDetailSkeleton />
+      </PageContainer>
+    );
+  }
 
   if (!organizationId) return null;
 
@@ -77,10 +87,7 @@ export const BookingDetailView = () => {
         organizationId={organizationId}
         bookingId={booking.id}
         onDeleted={() =>
-          navigate({
-            to: "/dashboard/organization/bookings",
-            search: { organizationId },
-          })
+          navigate({ to: "/dashboard/organization/bookings" })
         }
       />,
     );
@@ -91,7 +98,6 @@ export const BookingDetailView = () => {
     navigate({
       to: "/dashboard/vehicles/$vehicleId",
       params: { vehicleId: vehicle.id },
-      search: { organizationId },
     });
   };
 

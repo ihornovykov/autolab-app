@@ -15,7 +15,7 @@ export const DataTableSearch = ({
   placeholder = "Пошук",
   className,
 }: Props) => (
-  <div className={cn("relative isolate w-full md:max-w-sm", className)}>
+  <div className={cn("relative w-full p-px md:max-w-sm", className)}>
     <Input
       placeholder={placeholder}
       value={value}

@@ -1,20 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { CalendarDaysIcon, PlusIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
-import { type BookingStatusFilter } from "@/features/booking/lib/types";
-import { groupBookingsByDate } from "@/features/booking/lib/utils";
-import { BookingListCard, BookingListSkeleton } from "@/features/booking/ui/booking-list-card";
+import { useBookingsFilters } from "@/features/booking/hooks/use-bookings-filters";
 import { BOOKINGS_PAGE_SIZE } from "@/features/booking/lib/constants";
-import {
-  hasDateRangeFilter,
-  toListBookingsDateRange,
-} from "@/features/booking/lib/utils";
+import { groupBookingsByDate, hasDateRangeFilter, toListBookingsDateRange } from "@/features/booking/lib/utils";
+import { BookingListCard, BookingListSkeleton } from "@/features/booking/ui/booking-list-card";
 import { orpc } from "@/shared/api/orpc";
-import { isQueryContentLoading } from "@/shared/lib/query";
-import { useDebouncedValue } from "@/shared/hooks/use-debounce";
 import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
+import { isQueryContentLoading } from "@/shared/lib/query";
 import { DataTableLayout } from "@/shared/ui/data-table-layout";
 import { DataTablePagination } from "@/shared/ui/data-table-pagination";
 import { DataTableSearch } from "@/shared/ui/data-table-search";
@@ -26,27 +21,31 @@ import { DateRangePicker, type DateRangeFilterValue } from "@autolab/ui/componen
 import { Label } from "@autolab/ui/components/label";
 import { Tabs, TabsList, TabsTrigger } from "@autolab/ui/components/tabs";
 
-const STATUS_TABS: Array<{ value: BookingStatusFilter; label: string }> = [
+const STATUS_TABS = [
   { value: "ALL", label: "Усі" },
   { value: "PENDING", label: "Заплановано" },
   { value: "IN_PROGRESS", label: "В роботі" },
   { value: "COMPLETED", label: "Виконано" },
-];
+] as const;
 
 export const BookingsView = () => {
   const organizationId = useSelectedOrganizationId();
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<BookingStatusFilter>("ALL");
-  const [showCancelled, setShowCancelled] = useState(false);
-  const [showPast, setShowPast] = useState(false);
-  const [dateRange, setDateRange] = useState<DateRangeFilterValue | null>(null);
-  const [page, setPage] = useState(1);
-  const debouncedSearch = useDebouncedValue(search);
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, status, showCancelled, showPast, dateRange]);
+  const {
+    search,
+    debouncedSearch,
+    page,
+    status,
+    showPast,
+    showCancelled,
+    dateRange,
+    setSearch,
+    setPage,
+    setStatus,
+    setShowPast,
+    setShowCancelled,
+    setDateRange,
+  } = useBookingsFilters();
 
   const bookingsQuery = useQuery({
     ...orpc.booking.listBookings.queryOptions({
@@ -74,15 +73,11 @@ export const BookingsView = () => {
     navigate({
       to: "/dashboard/organization/bookings/$bookingId",
       params: { bookingId },
-      search: { organizationId: organizationId! },
     });
   };
 
   const handleCreateBooking = () => {
-    navigate({
-      to: "/dashboard/organization/bookings/new",
-      search: { organizationId: organizationId! },
-    });
+    navigate({ to: "/dashboard/organization/bookings/new" });
   };
 
   if (!organizationId) return null;
@@ -113,7 +108,7 @@ export const BookingsView = () => {
             />
             <DateRangePicker
               value={dateRange}
-              onChange={setDateRange}
+              onChange={(value: DateRangeFilterValue | null) => setDateRange(value)}
               placeholder="Дата або період"
               className="w-full md:w-52"
             />
@@ -148,7 +143,7 @@ export const BookingsView = () => {
         <div className="flex min-h-0 flex-1 flex-col gap-4">
           <Tabs
             value={status}
-            onValueChange={(value) => setStatus(value as BookingStatusFilter)}
+            onValueChange={(value) => setStatus(value as typeof status)}
             className="shrink-0"
           >
             <TabsList>

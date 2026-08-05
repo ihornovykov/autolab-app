@@ -4,11 +4,14 @@ import {
   getMyProfile,
   getMyWorkingHours,
   getOnboardingStatus,
+  linkEmailAccount,
   updateMyWorkingHours,
   updateProfile,
 } from "./services";
 import {
   getProfileOutputSchema,
+  linkEmailAccountInputSchema,
+  linkEmailAccountOutputSchema,
   onboardingStatusOutputSchema,
   updateProfileInputSchema,
   updateProfileOutputSchema,
@@ -30,6 +33,11 @@ export const profileRoutes = {
     .input(updateProfileInputSchema)
     .output(updateProfileOutputSchema)
     .handler(async ({ context, input }) => updateProfile(context, input)),
+
+  linkEmailAccount: protectedProcedure
+    .input(linkEmailAccountInputSchema)
+    .output(linkEmailAccountOutputSchema)
+    .handler(async ({ context, input }) => linkEmailAccount(context, input)),
 
   getMyWorkingHours: protectedProcedure
     .output(workingHoursOutputSchema)

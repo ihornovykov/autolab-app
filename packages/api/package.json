@@ -21,6 +21,7 @@
     "dayjs": "^1.11.21",
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.1",
+    "ky": "^2.0.2",
     "pdfkit": "^0.19.1",
     "zod": "catalog:"
   },

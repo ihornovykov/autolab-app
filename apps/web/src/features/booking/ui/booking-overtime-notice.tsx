@@ -6,7 +6,7 @@ import {
   hasAfterHoursPortions,
   resolveCalendarSegments,
   type WorkingHoursEntry,
-} from "@autolab/api/lib/working-hours";
+} from "@autolab/api/lib/schedule";
 import { Checkbox } from "@autolab/ui/components/checkbox";
 import { Label } from "@autolab/ui/components/label";
 import { cn } from "@autolab/ui/lib/utils";

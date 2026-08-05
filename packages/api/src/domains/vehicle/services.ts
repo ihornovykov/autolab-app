@@ -4,13 +4,13 @@ import { vehicles } from "@autolab/db/schema/vehicle";
 import { ORPCError } from "@orpc/server";
 import { and, count, desc, eq, inArray, or } from "drizzle-orm";
 
-import { resolveModels } from "./catalog";
+import { resolveModels } from "./utils";
 
 import type { AuthenticatedContext, Context } from "../../context";
-import { createId, getOrgContext } from "../../lib/org-scope";
+import { createId, getOrgContext } from "../../lib/scope";
 import { buildPaginatedResult, getOffset, searchPattern } from "../../lib/pagination";
-import { orHomoglyphs } from "../../lib/search-normalize";
-import { buildVehicleSearchCondition } from "../../lib/vehicle-search";
+import { orHomoglyphs } from "../../lib/normalize";
+import { buildVehicleSearchCondition } from "../../lib/vehicle";
 
 import type { z } from "zod";
 

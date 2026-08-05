@@ -12,12 +12,7 @@ import { CreateOrganizationDialog } from "@/features/organization/ui/create-orga
 import { dialogs } from "@/shared/stores/dialogs";
 import { useOrganizationStore } from "@/shared/stores/organization";
 import { OrganizationLogo } from "@/shared/ui/organization-logo";
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/shared/ui/sidebar";
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/shared/ui/sidebar";
 
 type Org = { id: string; name: string; logo?: string | null; address?: string | null };
 
@@ -75,9 +70,7 @@ export const OrganizationSwitcher = ({ organizations }: Props) => {
               />
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">
-                {selectedOrg?.name ?? "Не знайдено"}
-              </span>
+              <span className="truncate font-medium">{selectedOrg?.name ?? "Не знайдено"}</span>
             </div>
             {organizations.length ? (
               <ChevronsUpDown className="ml-auto size-4" />

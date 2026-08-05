@@ -8,6 +8,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 
 import { isPolarEnabled, polarClient } from "./lib/payments";
+import { sendResetPasswordEmail, sendVerificationEmail } from "@autolab/email";
 
 const createId = () => crypto.randomUUID();
 
@@ -29,12 +30,20 @@ export function createAuth() {
       enabled: true,
       requireEmailVerification: false,
       sendResetPassword: async ({ user, url }) => {
-        console.info(`[auth] Password reset for ${user.email}: ${url}`);
+        await sendResetPasswordEmail({
+          to: user.email,
+          resetUrl: url,
+          userName: user.name,
+        });
       },
     },
     emailVerification: {
       sendVerificationEmail: async ({ user, url }) => {
-        console.info(`[auth] Verification email for ${user.email}: ${url}`);
+        await sendVerificationEmail({
+          to: user.email,
+          verifyUrl: url,
+          userName: user.name,
+        });
       },
     },
     socialProviders: isGoogleAuthEnabled()
@@ -45,6 +54,13 @@ export function createAuth() {
           },
         }
       : undefined,
+    account: {
+      accountLinking: {
+        enabled: true,
+        trustedProviders: isGoogleAuthEnabled() ? ["google"] : [],
+        allowDifferentEmails: true,
+      },
+    },
     databaseHooks: {
       user: {
         create: {

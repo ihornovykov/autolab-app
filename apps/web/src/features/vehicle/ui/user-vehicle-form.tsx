@@ -160,10 +160,7 @@ export const UserVehicleForm = ({
 
     if (!makeId || isModelsLoading) return;
 
-    form.setFieldValue(
-      "modelId",
-      resolveInitialOptionValue(initialVehicle.model, modelOptions),
-    );
+    form.setFieldValue("modelId", resolveInitialOptionValue(initialVehicle.model, modelOptions));
   }, [form, initialVehicle, makeId, isModelsLoading, modelOptions]);
 
   const handleMakeChange = (nextMakeValue: string) => {

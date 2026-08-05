@@ -21,7 +21,7 @@ import {
 import { buildSlotStartTime } from "@/features/calendar/lib/utils";
 import { type CalendarEvent, type CalendarView } from "@/features/calendar/lib/types";
 import { getViewTitle, viewHandlers } from "@/features/calendar/lib/utils";
-import { useCalendarStore } from "@/features/calendar/lib/stores";
+import { useCalendarFilters } from "@/features/calendar/hooks/use-calendar-filters";
 import { CalendarActionsProvider } from "@/features/calendar/ui/calendar-actions-context";
 import { CalendarDndProvider } from "@/features/calendar/ui/calendar-dnd-context";
 import { CreateBookingDialog } from "@/features/calendar/ui/create-booking-dialog";
@@ -60,10 +60,7 @@ export const EventCalendar = ({
   className,
 }: Props) => {
   const queryClient = useQueryClient();
-  const view = useCalendarStore((state) => state.view);
-  const currentDate = useCalendarStore((state) => state.currentDate);
-  const setView = useCalendarStore((state) => state.setView);
-  const setCurrentDate = useCalendarStore((state) => state.setCurrentDate);
+  const { view, currentDate, setView, setCurrentDate } = useCalendarFilters();
 
   const bookingsById = useMemo(
     () => new Map(bookings.map((booking) => [booking.id, booking])),

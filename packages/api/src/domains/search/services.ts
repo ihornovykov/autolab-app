@@ -8,59 +8,25 @@ import { profiles } from "@autolab/db/schema/profile";
 import { services } from "@autolab/db/schema/service";
 import { vehicles } from "@autolab/db/schema/vehicle";
 import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
-import dayjs from "dayjs";
 
 import type { AuthenticatedContext } from "../../context";
-import { getOrgContext } from "../../lib/org-scope";
+import { getOrgContext } from "../../lib/scope";
 import { normalizeSearch, searchPattern } from "../../lib/pagination";
-import { ilikeHomoglyph, orHomoglyphs } from "../../lib/search-normalize";
-import { buildVehicleSearchCondition } from "../../lib/vehicle-search";
+import { ilikeHomoglyph, orHomoglyphs } from "../../lib/normalize";
+import { buildVehicleSearchCondition } from "../../lib/vehicle";
 
 import type { z } from "zod";
 
 import type { GlobalSearchResult, globalSearchInputSchema } from "./validation";
-
-const MATCH_LIMIT = 5;
-const RELATED_LIMIT = 3;
-
-type SearchCollector = {
-  items: GlobalSearchResult[];
-  seen: Set<string>;
-  limit: number;
-};
-
-const addResult = (
-  collector: SearchCollector,
-  item: GlobalSearchResult,
-) => {
-  const key = `${item.type}:${item.id}`;
-  if (collector.seen.has(key) || collector.items.length >= collector.limit) return false;
-
-  collector.seen.add(key);
-  collector.items.push(item);
-  return true;
-};
-
-const formatBookingMeta = (startTime: Date, totalPrice: string) =>
-  `${dayjs(startTime).format("D MMM YYYY, HH:mm")} · ${totalPrice} грн`;
-
-const vehicleSearchColumns = {
-  make: vehicles.make,
-  model: vehicles.model,
-  licensePlate: vehicles.licensePlate,
-  vin: vehicles.vin,
-};
-
-const vehicleExistsMatch = (rawSearch: string) => {
-  const match = buildVehicleSearchCondition(vehicleSearchColumns, rawSearch);
-  return match
-    ? sql`exists (
-        select 1 from ${vehicles}
-        where ${vehicles.id} = ${bookings.vehicleId}
-        and ${match}
-      )`
-    : sql`false`;
-};
+import {
+  MATCH_LIMIT,
+  RELATED_LIMIT,
+  addResult,
+  formatBookingMeta,
+  vehicleExistsMatch,
+  vehicleSearchColumns,
+  type SearchCollector,
+} from "./utils";
 
 const searchOrganizations = async (
   userId: string,
