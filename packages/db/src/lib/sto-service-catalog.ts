@@ -1,9 +1,6 @@
-import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import { sql } from "drizzle-orm";
 
+import stoServiceCatalog from "../seeds/data/sto-service-catalog.json";
 import { services } from "../schema/service";
 import type { createDb } from "../index";
 
@@ -21,9 +18,6 @@ type CreateDefaultServicesOptions = {
   createServiceId?: (index: number) => string;
 };
 
-const scriptDir = dirname(fileURLToPath(import.meta.url));
-const catalogPath = resolve(scriptDir, "../seeds/data/sto-service-catalog.csv");
-
 const chunk = <T>(items: T[], size: number) => {
   const chunks: T[][] = [];
   for (let index = 0; index < items.length; index += size) {
@@ -32,32 +26,7 @@ const chunk = <T>(items: T[], size: number) => {
   return chunks;
 };
 
-const parseCatalogRow = (line: string): StoCatalogRow => {
-  const parts = line.split(",");
-  const duration = Number(parts.pop());
-  const price = Number(parts.pop()).toFixed(2);
-  const category = parts.shift() ?? "Інше";
-  const title = parts.shift() ?? "";
-  const description = parts.join(",");
-
-  return {
-    category,
-    title,
-    description,
-    price,
-    duration: Number.isFinite(duration) ? duration : 60,
-  };
-};
-
-export const loadStoServiceCatalogRows = (): StoCatalogRow[] => {
-  const content = readFileSync(catalogPath, "utf-8");
-  return content
-    .trim()
-    .split("\n")
-    .slice(1)
-    .filter(Boolean)
-    .map(parseCatalogRow);
-};
+export const loadStoServiceCatalogRows = (): StoCatalogRow[] => stoServiceCatalog;
 
 export const createStableCatalogServiceId = (index: number) =>
   `catalog-service-${String(index + 1).padStart(3, "0")}`;
