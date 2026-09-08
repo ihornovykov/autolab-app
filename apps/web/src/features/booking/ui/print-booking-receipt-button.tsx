@@ -34,11 +34,14 @@ export const PrintBookingReceiptButton = ({ organizationId, bookingId }: Props) 
     <Button
       type="button"
       variant="outline"
+      size="icon-sm"
+      className="sm:h-9 sm:w-auto sm:px-4"
       icon={printMutation.isPending ? <Loader2 className="animate-spin" /> : <PrinterIcon />}
+      aria-label="Друк акта"
       disabled={printMutation.isPending}
       onClick={() => printMutation.mutate()}
     >
-      Друк акта
+      <span className="hidden sm:inline">Друк акта</span>
     </Button>
   );
 };

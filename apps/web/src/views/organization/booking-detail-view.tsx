@@ -102,13 +102,26 @@ export const BookingDetailView = () => {
         >
           Назад
         </Button>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <CopyBookingLinkButton organizationId={organizationId} bookingId={booking.id} />
           <PrintBookingReceiptButton organizationId={organizationId} bookingId={booking.id} />
-          <Button variant="outline" icon={<PencilIcon />} onClick={handleEdit}>
-            Редагувати
+          <Button
+            variant="outline"
+            size="icon-sm"
+            className="sm:h-9 sm:w-auto sm:px-4"
+            icon={<PencilIcon />}
+            aria-label="Редагувати"
+            onClick={handleEdit}
+          >
+            <span className="hidden sm:inline">Редагувати</span>
           </Button>
-          <Button variant="destructive" size="icon" onClick={handleDelete}>
+          <Button
+            variant="destructive"
+            size="icon-sm"
+            className="sm:size-9"
+            aria-label="Видалити"
+            onClick={handleDelete}
+          >
             <Trash2Icon />
           </Button>
         </div>
