@@ -174,7 +174,7 @@ export const openPdfBlob = (blob: Blob) => {
 export const printPdfBlob = (blob: Blob) => {
   const url = URL.createObjectURL(blob);
   const iframe = document.createElement("iframe");
-  iframe.setAttribute("title", "Друк квитанції");
+  iframe.setAttribute("title", "Друк акта");
   Object.assign(iframe.style, {
     position: "fixed",
     right: "0",

@@ -1,10 +1,15 @@
 import type { DateRangeFilterValue } from "@autolab/ui/components/date-range-picker";
 import dayjs from "dayjs";
-import { createParser, parseAsInteger, parseAsString } from "nuqs";
+import { createParser, parseAsInteger } from "nuqs";
 
 export const parseAsPage = parseAsInteger.withDefault(1);
 
-export const parseAsSearchQuery = parseAsString.withDefault("");
+export const parseAsSearchQuery = createParser({
+  parse: (value) => value.trim(),
+  serialize: (value) => value.trim(),
+}).withDefault("");
+
+export const toSearchQueryParam = (value: string) => value.trim() || null;
 
 export const parseAsDateParam = createParser({
   parse: (value) => (dayjs(value, "YYYY-MM-DD", true).isValid() ? value : null),

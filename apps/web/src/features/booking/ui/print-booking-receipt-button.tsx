@@ -26,7 +26,7 @@ export const PrintBookingReceiptButton = ({ organizationId, bookingId }: Props) 
       printPdfBlob(blob);
     },
     onError: () => {
-      toast.error("Не вдалося згенерувати квитанцію.");
+      toast.error("Не вдалося згенерувати акт.");
     },
   });
 
@@ -38,7 +38,7 @@ export const PrintBookingReceiptButton = ({ organizationId, bookingId }: Props) 
       disabled={printMutation.isPending}
       onClick={() => printMutation.mutate()}
     >
-      Друк квитанції
+      Друк акта
     </Button>
   );
 };

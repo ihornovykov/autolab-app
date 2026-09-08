@@ -8,6 +8,7 @@ import {
   parseAsPage,
   parseAsSearchQuery,
   toDateRangeFilter,
+  toSearchQueryParam,
 } from "@/shared/lib/nuqs-parsers";
 import type { DateRangeFilterValue } from "@autolab/ui/components/date-range-picker";
 
@@ -40,7 +41,7 @@ export const useBookingsFilters = () => {
     showPast: filters.past,
     showCancelled: filters.cancelled,
     dateRange,
-    setSearch: (value: string) => setFilters({ q: value || null, page: 1 }),
+    setSearch: (value: string) => setFilters({ q: toSearchQueryParam(value), page: 1 }),
     setPage: (page: number) => setFilters({ page }),
     setStatus: (status: BookingStatusFilter) => setFilters({ status, page: 1 }),
     setShowPast: (showPast: boolean) => setFilters({ past: showPast || null, page: 1 }),

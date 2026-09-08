@@ -42,7 +42,7 @@ export const CreateVehicleBookingDialog = ({ organizationId, vehicleId }: Props)
             form={CREATE_BOOKING_FORM_ID}
             icon={<PlusIcon />}
             loading={isPending}
-            disabled={isLoading || employees.length === 0 || services.length === 0}
+            disabled={isLoading || employees.length === 0}
           >
             Створити
           </Button>
@@ -54,10 +54,6 @@ export const CreateVehicleBookingDialog = ({ organizationId, vehicleId }: Props)
       ) : employees.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border/60 px-4 py-8 text-center text-sm text-muted-foreground">
           Додайте активного працівника, щоб створити запис.
-        </p>
-      ) : services.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border/60 px-4 py-8 text-center text-sm text-muted-foreground">
-          Додайте послуги до прайс-листа, щоб створити запис.
         </p>
       ) : (
         <VehicleBookingForm

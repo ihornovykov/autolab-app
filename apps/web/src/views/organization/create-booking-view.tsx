@@ -29,7 +29,7 @@ export const CreateBookingView = () => {
 
   if (!organizationId) return null;
 
-  const canSubmit = !!vehicleId && employees.length > 0 && services.length > 0 && !isPending;
+  const canSubmit = !!vehicleId && employees.length > 0 && !isPending;
 
   const handleBack = () => navigate({ to: "/dashboard/organization/bookings" });
 
@@ -56,10 +56,6 @@ export const CreateBookingView = () => {
         ) : employees.length === 0 ? (
           <p className="rounded-xl border border-dashed border-border/60 px-4 py-8 text-center text-sm text-muted-foreground">
             Додайте активного працівника, щоб створити запис.
-          </p>
-        ) : services.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-border/60 px-4 py-8 text-center text-sm text-muted-foreground">
-            Додайте послуги до прайс-листа, щоб створити запис.
           </p>
         ) : (
           <>

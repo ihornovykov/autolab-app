@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { useEnsureClient } from "@/features/client/hooks/use-ensure-client";
 import { DeleteOrganizationVehicleDialog } from "@/features/vehicle/ui/delete-organization-vehicle-dialog";
 import { UserVehicleForm, UserVehicleFormSkeleton } from "@/features/vehicle/ui/user-vehicle-form";
 import { VehicleMakeIcon } from "@/features/vehicle/ui/vehicle-make-icon";
@@ -40,6 +41,7 @@ type Props = {
 
 export const EditOrganizationVehicleSheet = ({ vehicle, organizationId, onDeleted }: Props) => {
   const queryClient = useQueryClient();
+  const { ensureClientId, isEnsuringClient } = useEnsureClient(organizationId);
 
   const clientsQuery = useQuery({
     ...orpc.client.listClients.queryOptions({ input: createSelectListInput(organizationId) }),
@@ -76,7 +78,7 @@ export const EditOrganizationVehicleSheet = ({ vehicle, organizationId, onDelete
     label: getClientName(client),
   }));
 
-  const isBusy = updateMutation.isPending;
+  const isBusy = updateMutation.isPending || isEnsuringClient;
 
   return (
     <Sheet
@@ -129,14 +131,22 @@ export const EditOrganizationVehicleSheet = ({ vehicle, organizationId, onDelete
           clients={clients}
           initialClientId={vehicle.client?.id}
           initialVehicle={vehicle}
-          onSubmit={(values) => {
-            const { clientId, ...vehicleValues } = values;
-            updateMutation.mutate({
-              organizationId,
-              vehicleId: vehicle.id,
-              clientId,
-              ...vehicleValues,
-            });
+          onSubmit={async (values) => {
+            const { clientId, newClient, ...vehicleValues } = values;
+
+            try {
+              const nextClientId = await ensureClientId({ clientId, newClient });
+              updateMutation.mutate({
+                organizationId,
+                vehicleId: vehicle.id,
+                clientId: nextClientId,
+                ...vehicleValues,
+              });
+            } catch (error) {
+              toast.error(
+                error instanceof Error ? error.message : "Не вдалося створити клієнта",
+              );
+            }
           }}
         />
       )}

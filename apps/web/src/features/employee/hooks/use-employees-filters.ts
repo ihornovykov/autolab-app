@@ -2,7 +2,7 @@ import { parseAsArrayOf, parseAsStringLiteral, useQueryStates } from "nuqs";
 
 import type { EmployeeRole } from "@/features/employee/lib/types";
 import { useDebouncedValue } from "@/shared/hooks/use-debounce";
-import { parseAsPage, parseAsSearchQuery } from "@/shared/lib/nuqs-parsers";
+import { parseAsPage, parseAsSearchQuery, toSearchQueryParam } from "@/shared/lib/nuqs-parsers";
 
 export const employeesFilterParams = {
   q: parseAsSearchQuery,
@@ -21,7 +21,7 @@ export const useEmployeesFilters = () => {
     debouncedSearch,
     page: filters.page,
     roleFilter: filters.roles as EmployeeRole[],
-    setSearch: (value: string) => setFilters({ q: value || null, page: 1 }),
+    setSearch: (value: string) => setFilters({ q: toSearchQueryParam(value), page: 1 }),
     setPage: (page: number) => setFilters({ page }),
     setRoleFilter: (roles: EmployeeRole[]) =>
       setFilters({ roles: roles.length > 0 ? roles : null, page: 1 }),

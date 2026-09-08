@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
 import { toast } from "sonner";
 
+import { useEnsureClient } from "@/features/client/hooks/use-ensure-client";
 import { UserVehicleForm, UserVehicleFormSkeleton } from "@/features/vehicle/ui/user-vehicle-form";
 import { orpc } from "@/shared/api/orpc";
 import { createSelectListInput } from "@/shared/lib/pagination";
@@ -18,6 +19,7 @@ type Props = {
 
 export const CreateOrganizationVehicleDialog = ({ organizationId }: Props) => {
   const queryClient = useQueryClient();
+  const { ensureClientId, isEnsuringClient } = useEnsureClient(organizationId);
 
   const clientsQuery = useQuery({
     ...orpc.client.listClients.queryOptions({ input: createSelectListInput(organizationId) }),
@@ -41,6 +43,8 @@ export const CreateOrganizationVehicleDialog = ({ organizationId }: Props) => {
     label: getClientName(client),
   }));
 
+  const isBusy = createMutation.isPending || isEnsuringClient;
+
   return (
     <Dialog
       open
@@ -53,7 +57,7 @@ export const CreateOrganizationVehicleDialog = ({ organizationId }: Props) => {
           <Button
             type="button"
             variant="outline"
-            disabled={createMutation.isPending || clientsQuery.isLoading}
+            disabled={isBusy || clientsQuery.isLoading}
             onClick={() => dialogs.close()}
           >
             Скасувати
@@ -62,8 +66,8 @@ export const CreateOrganizationVehicleDialog = ({ organizationId }: Props) => {
             type="submit"
             form={FORM_ID}
             icon={<PlusIcon />}
-            loading={createMutation.isPending}
-            disabled={clientsQuery.isLoading || clients.length === 0}
+            loading={isBusy}
+            disabled={clientsQuery.isLoading}
           >
             Додати
           </Button>
@@ -72,21 +76,25 @@ export const CreateOrganizationVehicleDialog = ({ organizationId }: Props) => {
     >
       {clientsQuery.isLoading ? (
         <UserVehicleFormSkeleton />
-      ) : clients.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border/60 px-4 py-8 text-center text-sm text-muted-foreground">
-          Спочатку додайте клієнта, щоб прив&apos;язати до нього автомобіль.
-        </p>
       ) : (
         <UserVehicleForm
           formId={FORM_ID}
           clients={clients}
-          onSubmit={(values) => {
-            const { clientId, ...vehicle } = values;
-            createMutation.mutate({
-              organizationId,
-              clientId,
-              ...vehicle,
-            });
+          onSubmit={async (values) => {
+            const { clientId, newClient, ...vehicle } = values;
+
+            try {
+              const nextClientId = await ensureClientId({ clientId, newClient });
+              createMutation.mutate({
+                organizationId,
+                clientId: nextClientId,
+                ...vehicle,
+              });
+            } catch (error) {
+              toast.error(
+                error instanceof Error ? error.message : "Не вдалося створити клієнта",
+              );
+            }
           }}
         />
       )}

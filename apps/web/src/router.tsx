@@ -1,7 +1,8 @@
-import { createRouter as createTanStackRouter } from "@tanstack/react-router";
+import { createBrowserHistory, createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 
 import { createQueryClient, orpc, registerQueryClient } from "@/shared/api/orpc";
+import { decodeUnicodeHref, parseSearch, stringifySearch } from "@/shared/lib/search-params";
 
 import { routeTree } from "./routeTree.gen";
 
@@ -14,6 +15,11 @@ export const getRouter = () => {
     scrollRestoration: true,
     defaultPreload: "intent",
     defaultPreloadStaleTime: 30_000,
+    parseSearch,
+    stringifySearch,
+    ...(typeof document === "undefined"
+      ? {}
+      : { history: createBrowserHistory({ createHref: decodeUnicodeHref }) }),
     context: { orpc, queryClient },
     defaultNotFoundComponent: () => <div>Not Found</div>,
   });

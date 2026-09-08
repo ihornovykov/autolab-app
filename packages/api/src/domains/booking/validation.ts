@@ -67,6 +67,60 @@ export const getBookingInputSchema = z.object({
 
 export const getBookingOutputSchema = bookingWithRelationsSchema.nullable();
 
+export const createBookingShareTokenOutputSchema = z.object({
+  url: z.string().url(),
+});
+
+export const getPublicBookingInputSchema = z.object({
+  token: z.string().min(1),
+});
+
+export const publicBookingServiceSchema = z.object({
+  title: z.string(),
+  description: z.string().nullable().optional(),
+  price: z.string(),
+  duration: z.number(),
+  category: z.string().nullable().optional(),
+  quantity: z.number().int().positive(),
+  unitPrice: z.string(),
+});
+
+export const publicBookingOutputSchema = z
+  .object({
+    status: z.enum(["PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED"]),
+    startTime: z.date(),
+    endTime: z.date(),
+    allowsOvertime: z.boolean(),
+    notes: z.string().nullable(),
+    totalPrice: z.string(),
+    organization: z.object({
+      name: z.string(),
+    }),
+    client: z
+      .object({
+        name: z.string(),
+      })
+      .nullable(),
+    employee: z
+      .object({
+        name: z.string(),
+      })
+      .nullable(),
+    vehicle: z
+      .object({
+        make: z.string(),
+        model: z.string(),
+        year: z.number(),
+        licensePlate: z.string().nullable(),
+        bodyStyle: z.string().nullable().optional(),
+        engine: z.string().nullable().optional(),
+        engineVolume: z.number().nullable().optional(),
+      })
+      .nullable(),
+    services: z.array(publicBookingServiceSchema),
+  })
+  .nullable();
+
 export const getBookingReceiptPdfInputSchema = getBookingInputSchema;
 
 export const getBookingReceiptPdfOutputSchema = z.object({

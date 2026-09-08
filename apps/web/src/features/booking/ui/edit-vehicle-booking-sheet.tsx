@@ -130,7 +130,7 @@ export const EditVehicleBookingSheet = ({ booking, organizationId }: Props) => {
               type="submit"
               form={FORM_ID}
               loading={isBusy}
-              disabled={isLoading || employees.length === 0 || services.length === 0}
+              disabled={isLoading || employees.length === 0}
             >
               Зберегти зміни
             </Button>

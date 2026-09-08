@@ -9,7 +9,7 @@ import PDFDocument from "pdfkit";
 import { and, asc, count, desc, eq, gte, lte, sql, sum } from "drizzle-orm";
 
 import { getClientName } from "../../lib/client";
-import { formatBookingTimeRange, formatDuration } from "../../lib/date";
+import { formatBookingTimeRange } from "../../lib/date";
 import {
   getBrandFontRegistrationKey,
   resolveBrandFontData,
@@ -46,6 +46,84 @@ export type ResolvedBookingItem = {
   unitPrice: string;
   duration: number;
 };
+
+export const publicBookingWith = {
+  organization: true as const,
+  vehicle: { with: { client: true as const } },
+  employee: { with: { user: { columns: { name: true } } } },
+  bookingServices: { with: { service: true as const } },
+};
+
+export const mapPublicBooking = (row: {
+  startTime: Date;
+  endTime: Date;
+  allowsOvertime: boolean;
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+  notes: string | null;
+  totalPrice: string;
+  organization?: { name: string } | null;
+  vehicle?: {
+    make: string;
+    model: string;
+    year: number;
+    licensePlate: string | null;
+    bodyStyle?: string | null;
+    engine?: string | null;
+    engineVolume?: number | null;
+    client?: {
+      firstName: string;
+      lastName?: string | null;
+      middleName?: string | null;
+    } | null;
+  } | null;
+  employee?: {
+    user?: { name?: string | null } | null;
+  } | null;
+  bookingServices?: Array<{
+    quantity: number;
+    unitPrice: string;
+    service: {
+      title: string;
+      description: string | null;
+      price: string;
+      duration: number;
+      category: string | null;
+    };
+  }>;
+}) => ({
+  status: row.status,
+  startTime: row.startTime,
+  endTime: row.endTime,
+  allowsOvertime: row.allowsOvertime,
+  notes: row.notes,
+  totalPrice: row.totalPrice,
+  organization: {
+    name: row.organization?.name ?? "",
+  },
+  client: row.vehicle?.client ? { name: getClientName(row.vehicle.client) } : null,
+  employee: row.employee?.user?.name ? { name: row.employee.user.name } : null,
+  vehicle: row.vehicle
+    ? {
+        make: row.vehicle.make,
+        model: row.vehicle.model,
+        year: row.vehicle.year,
+        licensePlate: row.vehicle.licensePlate,
+        bodyStyle: row.vehicle.bodyStyle,
+        engine: row.vehicle.engine,
+        engineVolume: row.vehicle.engineVolume,
+      }
+    : null,
+  services:
+    row.bookingServices?.map((item) => ({
+      title: item.service.title,
+      description: item.service.description,
+      price: item.service.price,
+      duration: item.service.duration,
+      category: item.service.category,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+    })) ?? [],
+});
 
 export const mapBooking = (
   row: {
@@ -395,12 +473,6 @@ COMPLETED: "Виконано",
   CANCELLED: "Скасовано",
 } as const;
 
-const roleLabels = {
-  OWNER: "Власник",
-  MANAGER: "Менеджер",
-  TECHNICIAN: "Працівник",
-} as const;
-
 const computeReceiptSubtotal = (services: ReceiptService[]) =>
   services.reduce(
     (sum, service) => sum + Number(service.unitPrice ?? service.price) * (service.quantity ?? 1),
@@ -446,7 +518,7 @@ type ReceiptOrganization = {
 
 type ReceiptEmployee = {
   name?: string;
-  role: keyof typeof roleLabels;
+  role: "OWNER" | "MANAGER" | "TECHNICIAN";
 };
 
 export type BookingReceiptPdfInput = {
@@ -504,7 +576,7 @@ const renderReceiptPdfToBuffer = (
     doc.registerFont(brandFontKey, resolveBrandFontData(AUTOLAB_BRAND));
     doc.font("regular");
 
-    const { booking, organization, vehicle, employee } = input;
+    const { booking, organization, vehicle } = input;
     const { orgLogoBuffer, autolabLogoBuffer } = assets;
     let y = MARGIN;
 
@@ -544,9 +616,8 @@ const renderReceiptPdfToBuffer = (
 
     const colNo = MARGIN;
     const colTitle = MARGIN + 28;
-    const colDuration = PAGE_WIDTH - MARGIN - 150;
     const colPrice = PAGE_WIDTH - MARGIN - 70;
-    const titleWidth = colDuration - colTitle - 8;
+    const titleWidth = colPrice - colTitle - 8;
     const tableWidth = CONTENT_WIDTH;
 
     const drawTableHeader = () => {
@@ -554,7 +625,6 @@ const renderReceiptPdfToBuffer = (
       doc.font("bold").fontSize(8).fillColor("#111111");
       doc.text("№", colNo + 6, y + 7, { width: 20 });
       doc.text("ПОСЛУГА / ОПИС РОБІТ", colTitle + 4, y + 7, { width: titleWidth });
-      doc.text("ТРИВАЛІСТЬ", colDuration, y + 7, { width: 70, align: "right" });
       doc.text("ВАРТІСТЬ", colPrice, y + 7, { width: 64, align: "right" });
       y += 22;
     };
@@ -643,36 +713,15 @@ const renderReceiptPdfToBuffer = (
       .font("bold")
       .fontSize(14)
       .fillColor("#111111")
-      .text("КВИТАНЦІЯ ПРО ВИКОНАНІ РОБОТИ", MARGIN, y, {
+      .text("АКТ ВИКОНАНИХ РОБІТ", MARGIN, y, {
         width: CONTENT_WIDTH,
         align: "center",
       });
     y += 28;
 
     const columnWidth = CONTENT_WIDTH / 2 - 8;
-    drawLabelValue("Номер запису", booking.id, MARGIN, y, columnWidth);
-    drawLabelValue(
-      "Дата видачі",
-      dayjs().format("D MMMM YYYY, HH:mm"),
-      MARGIN + columnWidth + 16,
-      y,
-      columnWidth,
-    );
+    drawLabelValue("Дата видачі", dayjs().format("D MMMM YYYY, HH:mm"), MARGIN, y, columnWidth);
     y += 38;
-    const totalDuration =
-      booking.services?.reduce(
-        (sum, service) => sum + service.duration * (service.quantity ?? 1),
-        0,
-      ) ?? 0;
-    drawLabelValue("Статус", statusLabels[booking.status], MARGIN, y, columnWidth);
-    drawLabelValue(
-      "Загальна тривалість",
-      totalDuration ? formatDuration(totalDuration) : "—",
-      MARGIN + columnWidth + 16,
-      y,
-      columnWidth,
-    );
-    y += 42;
 
     doc.font("bold").fontSize(10).fillColor("#111111").text("КЛІЄНТ", MARGIN, y);
     y += 14;
@@ -701,35 +750,6 @@ const renderReceiptPdfToBuffer = (
     y += 38;
     drawLabelValue("VIN", vehicle?.vin ?? "—", MARGIN, y, columnWidth);
     y += 42;
-
-    doc.font("bold").fontSize(10).fillColor("#111111").text("ВИКОНАННЯ РОБІТ", MARGIN, y);
-    y += 14;
-    drawLabelValue(
-      "Дата та час",
-      formatBookingTimeRange(booking.startTime, booking.endTime),
-      MARGIN,
-      y,
-      columnWidth,
-    );
-    const employeeName = employee?.name ?? "—";
-    const employeeRole = employee ? roleLabels[employee.role] : "—";
-    drawLabelValue(
-      "Майстер",
-      `${employeeName} (${employeeRole})`,
-      MARGIN + columnWidth + 16,
-      y,
-      columnWidth,
-    );
-    y += 38;
-
-    if (booking.allowsOvertime) {
-      doc
-        .font("regular")
-        .fontSize(10)
-        .fillColor("#666666")
-        .text("Дозволено понаднормове обслуговування", MARGIN, y);
-      y += 18;
-    }
 
     doc.font("bold").fontSize(10).fillColor("#111111").text("ПЕРЕЛІК ПОСЛУГ", MARGIN, y);
     y += 16;
@@ -786,16 +806,12 @@ const renderReceiptPdfToBuffer = (
           .font("regular")
           .fontSize(10)
           .fillColor("#111111")
-          .text(formatDuration(service.duration * (service.quantity ?? 1)), colDuration, y + 8, {
-            width: 70,
-            align: "right",
-          });
-        doc.text(
-          formatPrice(Number(service.unitPrice ?? service.price) * (service.quantity ?? 1)),
-          colPrice,
-          y + 8,
-          { width: 64, align: "right" },
-        );
+          .text(
+            formatPrice(Number(service.unitPrice ?? service.price) * (service.quantity ?? 1)),
+            colPrice,
+            y + 8,
+            { width: 64, align: "right" },
+          );
         y += rowHeight;
       });
     }

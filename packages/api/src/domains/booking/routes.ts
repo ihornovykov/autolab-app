@@ -1,14 +1,16 @@
 import { z } from "zod";
 
-import { orgProcedure } from "../..";
+import { orgProcedure, publicProcedure } from "../..";
 
 import {
   createBooking,
+  createBookingShareToken,
   deleteBooking,
   exportOrganizationAnalyticsPdf,
   generateBookingReceiptPdf,
   getBookingById,
   getDashboardStats,
+  getPublicBooking,
   getOrganizationAnalytics,
   listBookings,
   listOrganizationAnalyticsBookings,
@@ -26,6 +28,9 @@ import {
   exportOrganizationAnalyticsPdfOutputSchema,
   getBookingInputSchema,
   getBookingOutputSchema,
+  createBookingShareTokenOutputSchema,
+  getPublicBookingInputSchema,
+  publicBookingOutputSchema,
   getBookingReceiptPdfInputSchema,
   getBookingReceiptPdfOutputSchema,
   listBookingsInputSchema,
@@ -59,6 +64,16 @@ export const bookingRoutes = {
     .input(getBookingInputSchema)
     .output(getBookingOutputSchema)
     .handler(async ({ context, input }) => getBookingById(context, input)),
+
+  createBookingShareToken: orgProcedure
+    .input(getBookingInputSchema)
+    .output(createBookingShareTokenOutputSchema)
+    .handler(async ({ context, input }) => createBookingShareToken(context, input)),
+
+  getPublicBooking: publicProcedure
+    .input(getPublicBookingInputSchema)
+    .output(publicBookingOutputSchema)
+    .handler(async ({ input }) => getPublicBooking(input)),
 
   getBookingReceiptPdf: orgProcedure
     .input(getBookingReceiptPdfInputSchema)

@@ -24,8 +24,7 @@ export const CreateBookingDialog = ({ organizationId, initialStartTime }: Props)
     () => dialogs.close(),
   );
 
-  const canSubmit =
-    !!vehicleId && employees.length > 0 && services.length > 0 && !isPending;
+  const canSubmit = !!vehicleId && employees.length > 0 && !isPending;
 
   return (
     <Dialog
@@ -67,10 +66,6 @@ export const CreateBookingDialog = ({ organizationId, initialStartTime }: Props)
       ) : employees.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border/60 px-4 py-8 text-center text-sm text-muted-foreground">
           Додайте активного працівника, щоб створити запис.
-        </p>
-      ) : services.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border/60 px-4 py-8 text-center text-sm text-muted-foreground">
-          Додайте послуги до прайс-листа, щоб створити запис.
         </p>
       ) : (
         <div className="space-y-4">

@@ -7,6 +7,21 @@ type Client = {
   email?: string | null;
 };
 
+export const splitClientNameQuery = (query: string) => {
+  const parts = query.trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length === 0) return { firstName: "", lastName: "", middleName: "" };
+  if (parts.length === 1) return { firstName: parts[0] ?? "", lastName: "", middleName: "" };
+  if (parts.length === 2)
+    return { lastName: parts[0] ?? "", firstName: parts[1] ?? "", middleName: "" };
+
+  return {
+    lastName: parts[0] ?? "",
+    firstName: parts[1] ?? "",
+    middleName: parts.slice(2).join(" "),
+  };
+};
+
 export const filterClients = <T extends Client>(clients: T[], search: string) => {
   const query = search.trim().toLowerCase();
   if (!query) return clients;

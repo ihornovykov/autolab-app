@@ -209,6 +209,14 @@ export const VehicleBookingForm = ({
   showStatus = false,
   allowTotalPriceOverride = false,
 }: Props) => {
+  const [createdServices, setCreatedServices] = useState<BookingServiceCatalogItem[]>([]);
+  const catalog = useMemo(() => {
+    const existingIds = new Set(services.map((service) => service.id));
+    return [...services, ...createdServices.filter((service) => !existingIds.has(service.id))];
+  }, [createdServices, services]);
+  const catalogRef = useRef(catalog);
+  catalogRef.current = catalog;
+
   const defaultStartTime =
     initialValues?.startTime ??
     dayjs().add(1, "hour").minute(0).second(0).format("YYYY-MM-DDTHH:mm");
@@ -226,7 +234,7 @@ export const VehicleBookingForm = ({
       startTime: defaultStartTime,
       endTime:
         initialValues?.endTime ??
-        computeEndTimeFromItems(defaultStartTime, defaultItems, services),
+        computeEndTimeFromItems(defaultStartTime, defaultItems, catalog),
       allowsOvertime: initialValues?.allowsOvertime ?? false,
       notes: initialValues?.notes ?? "",
       status: initialValues?.status ?? "PENDING",
@@ -249,8 +257,13 @@ export const VehicleBookingForm = ({
   });
 
   const syncEndTime = (startTime: string, items: BookingServiceLineItem[]) => {
-    form.setFieldValue("endTime", computeEndTimeFromItems(startTime, items, services));
+    form.setFieldValue("endTime", computeEndTimeFromItems(startTime, items, catalogRef.current));
   };
+
+  useEffect(() => {
+    if (createdServices.length === 0) return;
+    syncEndTime(form.getFieldValue("startTime"), form.getFieldValue("items"));
+  }, [createdServices, form]);
 
   const employeeId = useStore(form.store, (state) => state.values.employeeId);
   const startTimeValue = useStore(form.store, (state) => state.values.startTime);
@@ -320,8 +333,14 @@ export const VehicleBookingForm = ({
       <form.Field name="items">
         {(field) => (
           <BookingServicePicker
-            services={services}
+            organizationId={organizationId}
+            services={catalog}
             value={field.state.value}
+            onServiceCreated={(service) =>
+              setCreatedServices((current) =>
+                current.some((item) => item.id === service.id) ? current : [...current, service],
+              )
+            }
             onChange={(value) => {
               field.handleChange(value);
               syncEndTime(form.getFieldValue("startTime"), value);

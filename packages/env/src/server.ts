@@ -12,6 +12,7 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().min(1),
     BETTER_AUTH_SECRET: z.string().min(32),
+    BOOKING_SHARE_SECRET: z.string().min(32).optional(),
     BETTER_AUTH_URL: z.url(),
     CORS_ORIGIN: z.url(),
     POLAR_ACCESS_TOKEN: z.string().min(1).optional(),

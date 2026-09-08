@@ -1,24 +1,53 @@
-import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { MinusIcon, PlusCircleIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import type {
   BookingServiceCatalogItem,
   BookingServiceLineItem,
 } from "@/features/booking/lib/types";
+import { SERVICE_CATEGORIES } from "@/features/service/lib/constants";
+import { useCreateCatalogService } from "@/features/service/hooks/use-create-catalog-service";
 import { formatPrice } from "@/shared/lib/money";
 import { Badge } from "@autolab/ui/components/badge";
 import { Button } from "@autolab/ui/components/button";
 import { Input } from "@autolab/ui/components/input";
+import { Label } from "@autolab/ui/components/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@autolab/ui/components/select";
 import { cn } from "@autolab/ui/lib/utils";
 
 export type { BookingServiceCatalogItem, BookingServiceLineItem };
 
 type Props = {
+  organizationId: string;
   services: BookingServiceCatalogItem[];
   value: BookingServiceLineItem[];
   onChange: (value: BookingServiceLineItem[]) => void;
+  onServiceCreated: (service: BookingServiceCatalogItem) => void;
   error?: string;
 };
+
+type ServiceDraft = {
+  title: string;
+  category: string;
+  price: string;
+  duration: string;
+};
+
+type ServiceDraftErrors = {
+  title?: string;
+  price?: string;
+  duration?: string;
+};
+
+const DEFAULT_SERVICE_CATEGORY = "Інше";
+const DEFAULT_SERVICE_DURATION = "60";
 
 const normalizePrice = (value: string) => {
   const normalized = value.trim().replace(/\s/g, "").replace(",", ".");
@@ -67,9 +96,40 @@ const UnitPriceInput = ({ value, onChange }: UnitPriceInputProps) => {
   );
 };
 
-export const BookingServicePicker = ({ services, value, onChange, error }: Props) => {
+const createEmptyDraft = (title = "", category = DEFAULT_SERVICE_CATEGORY): ServiceDraft => ({
+  title,
+  category,
+  price: "",
+  duration: DEFAULT_SERVICE_DURATION,
+});
+
+const validateServiceDraft = (draft: ServiceDraft): ServiceDraftErrors => {
+  const errors: ServiceDraftErrors = {};
+  const price = Number(draft.price.trim().replace(",", "."));
+  const duration = Number(draft.duration);
+
+  if (!draft.title.trim()) errors.title = "Назва обов'язкова";
+  if (!draft.price.trim() || Number.isNaN(price) || price <= 0) errors.price = "Некоректна ціна";
+  if (!draft.duration.trim() || !Number.isInteger(duration) || duration <= 0)
+    errors.duration = "Тривалість має бути більше 0";
+
+  return errors;
+};
+
+export const BookingServicePicker = ({
+  organizationId,
+  services,
+  value,
+  onChange,
+  onServiceCreated,
+  error,
+}: Props) => {
+  const { createCatalogService, isCreatingService } = useCreateCatalogService(organizationId);
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [isCreating, setIsCreating] = useState(services.length === 0);
+  const [draft, setDraft] = useState<ServiceDraft>(() => createEmptyDraft());
+  const [draftErrors, setDraftErrors] = useState<ServiceDraftErrors>({});
 
   const categories = useMemo(() => {
     const unique = new Set(services.map((service) => service.category?.trim() || "Інше"));
@@ -112,20 +172,60 @@ export const BookingServicePicker = ({ services, value, onChange, error }: Props
     );
   }, [serviceMap, value]);
 
-  const addService = (serviceId: string) => {
-    if (value.some((item) => item.serviceId === serviceId)) return;
-
-    const service = serviceMap.get(serviceId);
-    if (!service) return;
+  const appendService = (service: BookingServiceCatalogItem) => {
+    if (value.some((item) => item.serviceId === service.id)) return;
 
     onChange([
       ...value,
       {
-        serviceId,
+        serviceId: service.id,
         quantity: 1,
         unitPrice: normalizePrice(service.price),
       },
     ]);
+  };
+
+  const addService = (serviceId: string) => {
+    const service = serviceMap.get(serviceId);
+    if (!service) return;
+    appendService(service);
+  };
+
+  const handleStartCreate = (title = "") => {
+    setDraft(createEmptyDraft(title, categoryFilter ?? DEFAULT_SERVICE_CATEGORY));
+    setDraftErrors({});
+    setIsCreating(true);
+  };
+
+  const handleCancelCreate = () => {
+    setIsCreating(false);
+    setDraftErrors({});
+  };
+
+  const handleCreateService = async () => {
+    const nextErrors = validateServiceDraft(draft);
+    setDraftErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    try {
+      const service = await createCatalogService({
+        title: draft.title.trim(),
+        price: normalizePrice(draft.price),
+        duration: Number(draft.duration),
+        category: draft.category || DEFAULT_SERVICE_CATEGORY,
+      });
+
+      onServiceCreated(service);
+      appendService(service);
+      setSearch("");
+      setIsCreating(false);
+      setDraft(createEmptyDraft());
+      setDraftErrors({});
+    } catch (createError) {
+      toast.error(
+        createError instanceof Error ? createError.message : "Не вдалося створити послугу",
+      );
+    }
   };
 
   const updateItem = (
@@ -158,81 +258,200 @@ export const BookingServicePicker = ({ services, value, onChange, error }: Props
       <div>
         <p className="text-sm font-medium">Послуги *</p>
         <p className="text-xs text-muted-foreground">
-          Оберіть категорію, знайдіть послугу та налаштуйте кількість і ціну
+          Оберіть категорію, знайдіть послугу або додайте власну
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className={cn(
-            "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-            !categoryFilter
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-border bg-background text-muted-foreground hover:bg-muted",
-          )}
-          onClick={() => setCategoryFilter(null)}
-        >
-          Усі
-        </button>
-        {categories.map((category) => (
+      {categories.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
           <button
-            key={category}
             type="button"
             className={cn(
               "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-              categoryFilter === category
+              !categoryFilter
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border bg-background text-muted-foreground hover:bg-muted",
             )}
-            onClick={() => setCategoryFilter((current) => (current === category ? null : category))}
+            onClick={() => setCategoryFilter(null)}
           >
-            {category}
+            Усі
           </button>
-        ))}
-      </div>
+          {categories.map((category) => (
+            <button
+              key={category}
+              type="button"
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                categoryFilter === category
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background text-muted-foreground hover:bg-muted",
+              )}
+              onClick={() =>
+                setCategoryFilter((current) => (current === category ? null : category))
+              }
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
-      <Input
-        placeholder="Пошук послуги..."
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-      />
+      {services.length > 0 ? (
+        <Input
+          placeholder="Пошук послуги..."
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+      ) : null}
 
-      <div className="max-h-44 space-y-1 overflow-auto rounded-lg border border-border/60 p-1">
-        {filteredServices.length > 0 ? (
-          filteredServices.map((service) => {
-            const isSelected = value.some((item) => item.serviceId === service.id);
+      {services.length > 0 ? (
+        <div className="max-h-44 space-y-1 overflow-auto rounded-lg border border-border/60 p-1">
+          {filteredServices.length > 0 ? (
+            filteredServices.map((service) => {
+              const isSelected = value.some((item) => item.serviceId === service.id);
 
-            return (
+              return (
+                <button
+                  key={service.id}
+                  type="button"
+                  disabled={isSelected}
+                  className={cn(
+                    "flex w-full items-center justify-between gap-3 rounded-md px-2 py-2 text-left text-sm transition-colors",
+                    isSelected
+                      ? "cursor-not-allowed bg-muted/50 text-muted-foreground"
+                      : "cursor-pointer hover:bg-accent",
+                  )}
+                  onClick={() => addService(service.id)}
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{service.title}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {service.category ?? "Інше"}
+                    </p>
+                  </div>
+                  <div className="shrink-0 text-right text-xs text-muted-foreground">
+                    <p className="font-medium text-foreground">{formatPrice(service.price)}</p>
+                    <p>{service.duration} хв</p>
+                  </div>
+                </button>
+              );
+            })
+          ) : (
+            <div className="space-y-2 px-2 py-4 text-center">
+              <p className="text-sm text-muted-foreground">Послуг не знайдено</p>
               <button
-                key={service.id}
                 type="button"
-                disabled={isSelected}
-                className={cn(
-                  "flex w-full items-start justify-between gap-3 rounded-md px-2 py-2 text-left text-sm transition-colors",
-                  isSelected
-                    ? "cursor-not-allowed bg-muted/50 text-muted-foreground"
-                    : "cursor-pointer hover:bg-accent",
-                )}
-                onClick={() => addService(service.id)}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+                onClick={() => handleStartCreate(search.trim())}
               >
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{service.title}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {service.category ?? "Інше"}
-                  </p>
-                </div>
-                <div className="shrink-0 text-right text-xs text-muted-foreground">
-                  <p className="font-medium text-foreground">{formatPrice(service.price)}</p>
-                  <p>{service.duration} хв</p>
-                </div>
+                <PlusIcon className="size-3.5" />
+                {search.trim() ? `Створити послугу «${search.trim()}»` : "Додати власну послугу"}
               </button>
-            );
-          })
-        ) : (
-          <p className="px-2 py-6 text-center text-sm text-muted-foreground">Послуг не знайдено</p>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {isCreating ? (
+        <div className="space-y-3 rounded-xl border border-border/60 bg-muted/15 p-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">Нова послуга</p>
+              <p className="text-xs text-muted-foreground">
+                Її буде додано до прайс-листа і до цього запису
+              </p>
+            </div>
+            {services.length > 0 ? (
+              <Button type="button" variant="secondary" size="sm" onClick={handleCancelCreate}>
+                Скасувати
+              </Button>
+            ) : null}
+          </div>
+
+          <Input
+            autoFocus
+            label="Назва *"
+            placeholder="Заміна лампи"
+            value={draft.title}
+            onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
+            error={draftErrors.title}
+          />
+
+          <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-3">
+            <div className="space-y-1">
+              <Label>Категорія</Label>
+              <Select
+                value={draft.category}
+                onValueChange={(value) =>
+                  setDraft((current) => ({
+                    ...current,
+                    category: value ?? DEFAULT_SERVICE_CATEGORY,
+                  }))
+                }
+                items={SERVICE_CATEGORIES.map((category) => ({
+                  value: category,
+                  label: category,
+                }))}
+              >
+                <SelectTrigger className="mb-0">
+                  <SelectValue placeholder="Категорія" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SERVICE_CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Input
+              label="Ціна (₴) *"
+              placeholder="800"
+              type="text"
+              inputMode="decimal"
+              value={draft.price}
+              onChange={(event) =>
+                setDraft((current) => ({ ...current, price: event.target.value }))
+              }
+              error={draftErrors.price}
+            />
+            <Input
+              label="Тривалість (хв) *"
+              placeholder="60"
+              type="number"
+              inputMode="numeric"
+              min="1"
+              value={draft.duration}
+              onChange={(event) =>
+                setDraft((current) => ({ ...current, duration: event.target.value }))
+              }
+              error={draftErrors.duration}
+            />
+          </div>
+
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              size="sm"
+              icon={<PlusIcon />}
+              loading={isCreatingService}
+              onClick={handleCreateService}
+            >
+              Додати послугу
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+          onClick={() => handleStartCreate(search.trim())}
+        >
+          <PlusCircleIcon className="size-3.5" />
+          Послуги немає в списку
+        </button>
+      )}
 
       {value.length > 0 ? (
         <div className="space-y-2">

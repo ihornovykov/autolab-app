@@ -23,7 +23,7 @@ export const buildBookingReceiptFilename = (input: {
     ? sanitizeFilenamePart(input.licensePlate)
     : sanitizeFilenamePart([input.make, input.model].filter(Boolean).join(" "));
 
-  return `kvytantsiia-${date}-${vehicleLabel}.pdf`;
+  return `akt-${date}-${vehicleLabel}.pdf`;
 };
 
 export const buildAnalyticsReportFilename = (input: {

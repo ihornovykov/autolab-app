@@ -1,7 +1,10 @@
 import { useForm } from "@tanstack/react-form";
+import { UserPlusIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import z from "zod";
 
+import type { ClientFormValues } from "@/features/client/ui/client-form";
+import { splitClientNameQuery } from "@/features/client/lib/utils";
 import {
   bodyStyleOptions,
   fuelOptions,
@@ -19,6 +22,7 @@ import { range } from "@/shared/lib/arrays";
 import { formatFieldErrors } from "@/shared/lib/errors";
 import { YearInput } from "@/features/vehicle/ui/year-input";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
+import { Button } from "@autolab/ui/components/button";
 import { Input } from "@autolab/ui/components/input";
 import { Skeleton } from "@autolab/ui/components/skeleton";
 
@@ -46,7 +50,9 @@ type InitialVehicle = {
 
 type Props = {
   formId: string;
-  onSubmit: (values: UserVehicleFormValues & { clientId?: string }) => void;
+  onSubmit: (
+    values: UserVehicleFormValues & { clientId?: string; newClient?: ClientFormValues },
+  ) => void;
   initialVehicle?: InitialVehicle;
   initialClientId?: string;
   clients?: Array<{ id: string; label: string }>;
@@ -71,9 +77,27 @@ const buildVehicleFormSchema = (requireClient: boolean) =>
         return value !== "" && !Number.isNaN(parsed) && parsed > 0;
       }, "Об'єм двигуна обов'язковий"),
       clientId: z.string(),
+      isCreatingClient: z.boolean(),
+      clientFirstName: z.string(),
+      clientLastName: z.string(),
+      clientMiddleName: z.string(),
+      clientPhone: z.string(),
     })
     .superRefine((data, ctx) => {
-      if (requireClient && !data.clientId.trim()) {
+      if (!requireClient) return;
+
+      if (data.isCreatingClient) {
+        if (!data.clientFirstName.trim()) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Ім'я обов'язкове",
+            path: ["clientFirstName"],
+          });
+        }
+        return;
+      }
+
+      if (!data.clientId.trim()) {
         ctx.addIssue({
           code: "custom",
           message: "Клієнт обов'язковий",
@@ -89,7 +113,8 @@ export const UserVehicleForm = ({
   initialClientId,
   clients,
 }: Props) => {
-  const requireClient = Boolean(clients?.length);
+  const requireClient = clients !== undefined;
+  const hasExistingClients = Boolean(clients?.length);
   const [makeId, setMakeId] = useState("");
 
   const clientOptions = useMemo(
@@ -113,6 +138,11 @@ export const UserVehicleForm = ({
         ? String(initialVehicle.engineVolume)
         : ("" as string | number),
       clientId: initialClientId ?? "",
+      isCreatingClient: requireClient && !hasExistingClients && !initialClientId,
+      clientFirstName: "",
+      clientLastName: "",
+      clientMiddleName: "",
+      clientPhone: "",
     },
     validators: {
       onSubmit: buildVehicleFormSchema(requireClient),
@@ -123,7 +153,7 @@ export const UserVehicleForm = ({
 
       if (!make || !model) return;
 
-      onSubmit({
+      await onSubmit({
         make,
         model,
         year: value.year,
@@ -132,10 +162,31 @@ export const UserVehicleForm = ({
         bodyStyle: findOptionLabel(value.bodyStyleId, bodyStyleOptions) ?? "",
         engine: findOptionLabel(value.engineId, fuelOptions) ?? "",
         engineVolume: Number(value.engineVolume),
-        clientId: value.clientId || undefined,
+        clientId: value.isCreatingClient ? undefined : value.clientId || undefined,
+        newClient: value.isCreatingClient
+          ? {
+              firstName: value.clientFirstName.trim(),
+              lastName: value.clientLastName.trim() || undefined,
+              middleName: value.clientMiddleName.trim() || undefined,
+              phone: value.clientPhone.trim() || undefined,
+            }
+          : undefined,
       });
     },
   });
+
+  const handleStartCreateClient = (query = "") => {
+    const parsed = splitClientNameQuery(query);
+    form.setFieldValue("isCreatingClient", true);
+    form.setFieldValue("clientId", "");
+    if (parsed.firstName) form.setFieldValue("clientFirstName", parsed.firstName);
+    if (parsed.lastName) form.setFieldValue("clientLastName", parsed.lastName);
+    if (parsed.middleName) form.setFieldValue("clientMiddleName", parsed.middleName);
+  };
+
+  const handleCancelCreateClient = () => {
+    form.setFieldValue("isCreatingClient", false);
+  };
 
   useEffect(() => {
     if (!initialVehicle || isMakesLoading) return;
@@ -180,21 +231,109 @@ export const UserVehicleForm = ({
     >
       <div className="grid grid-cols-1 gap-x-3 gap-y-4 md:grid-cols-2">
         {requireClient ? (
-          <form.Field name="clientId">
-            {(field) => (
-              <div className="md:col-span-2">
-                <SearchableSelect
-                  label="Клієнт *"
-                  placeholder="Оберіть клієнта"
-                  searchPlaceholder="Пошук клієнта..."
-                  options={clientOptions}
-                  value={field.state.value}
-                  onValueChange={(value) => field.handleChange(value)}
-                  error={formatFieldErrors(field.state.meta.errors)}
-                />
-              </div>
-            )}
-          </form.Field>
+          <form.Subscribe selector={(state) => state.values.isCreatingClient}>
+            {(isCreatingClient) =>
+              isCreatingClient ? (
+                <div className="md:col-span-2 space-y-3 rounded-xl border border-border/60 bg-muted/15 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium">Новий клієнт</p>
+                      <p className="text-xs text-muted-foreground">
+                        Власника буде створено разом з автомобілем
+                      </p>
+                    </div>
+                    {hasExistingClients ? (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleCancelCreateClient}
+                      >
+                        Скасувати
+                      </Button>
+                    ) : null}
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-x-3 gap-y-4 md:grid-cols-2">
+                    <form.Field name="clientFirstName">
+                      {(field) => (
+                        <Input
+                          autoFocus
+                          label="Ім'я *"
+                          placeholder="Іван"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          error={formatFieldErrors(field.state.meta.errors)}
+                        />
+                      )}
+                    </form.Field>
+                    <form.Field name="clientLastName">
+                      {(field) => (
+                        <Input
+                          label="Прізвище"
+                          placeholder="Іваненко"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                        />
+                      )}
+                    </form.Field>
+                    <form.Field name="clientMiddleName">
+                      {(field) => (
+                        <Input
+                          label="По батькові"
+                          placeholder="Іванович"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                        />
+                      )}
+                    </form.Field>
+                    <form.Field name="clientPhone">
+                      {(field) => (
+                        <Input
+                          label="Номер телефону"
+                          placeholder="+380 XX XXX XX XX"
+                          type="tel"
+                          inputMode="tel"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                        />
+                      )}
+                    </form.Field>
+                  </div>
+                </div>
+              ) : (
+                <form.Field name="clientId">
+                  {(field) => (
+                    <div className="md:col-span-2 space-y-2">
+                      <SearchableSelect
+                        label="Клієнт *"
+                        placeholder="Оберіть клієнта"
+                        searchPlaceholder="Пошук клієнта..."
+                        emptyText="Клієнта не знайдено"
+                        options={clientOptions}
+                        value={field.state.value}
+                        onValueChange={(value) => field.handleChange(value)}
+                        error={formatFieldErrors(field.state.meta.errors)}
+                        action={{
+                          label: (query) =>
+                            query ? `Створити клієнта «${query}»` : "Додати нового клієнта",
+                          onSelect: handleStartCreateClient,
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="inline-flex self-end items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+                        onClick={() => handleStartCreateClient()}
+                      >
+                        <UserPlusIcon className="size-3.5" />
+                        Додати клієнта
+                      </button>
+                    </div>
+                  )}
+                </form.Field>
+              )
+            }
+          </form.Subscribe>
         ) : null}
         <form.Field name="licensePlate">
           {(field) => (

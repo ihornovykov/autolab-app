@@ -11,6 +11,11 @@ import { and, count, desc, eq, gte, inArray, lt, lte, ne, or, sql, sum } from "d
 import type { AuthenticatedContext } from "../../context";
 import { getWorkingHoursForUserId, getWorkingHoursForUserIds } from "../profile/services";
 import { buildAnalyticsReportFilename, buildBookingReceiptFilename } from "../../lib/filename";
+import {
+  buildBookingShareUrl,
+  decryptBookingShareToken,
+  encryptBookingShareToken,
+} from "../../lib/booking-share-token";
 import { createId, getOrgContext } from "../../lib/scope";
 import { buildPaginatedResult, getOffset, searchPattern } from "../../lib/pagination";
 import { ilikeHomoglyph } from "../../lib/normalize";
@@ -25,6 +30,7 @@ import type {
   dashboardStatsOutputSchema,
   getBookingInputSchema,
   getBookingReceiptPdfInputSchema,
+  getPublicBookingInputSchema,
   listBookingsInputSchema,
   listBookingsOutputSchema,
   organizationAnalyticsBookingsInputSchema,
@@ -43,6 +49,8 @@ import { getVehicleById } from "../vehicle/services";
 import {
   assertEndTimeAfterStart,
   bookingWith,
+  publicBookingWith,
+  mapPublicBooking,
   buildBookingReceiptPdf,
   buildOrganizationAnalyticsPdf,
   calculateBookingDuration,
@@ -295,6 +303,31 @@ export const getBookingById = async (
     : DEFAULT_WORKING_HOURS;
 
   return mapBooking(row, { employeeWorkingHours: schedule });
+};
+
+export const createBookingShareToken = async (
+  context: AuthenticatedContext,
+  input: z.infer<typeof getBookingInputSchema>,
+) => {
+  const booking = await getBookingById(context, input);
+  if (!booking) {
+    throw new ORPCError("NOT_FOUND", { message: "Booking not found" });
+  }
+
+  return { url: buildBookingShareUrl(encryptBookingShareToken(booking.id)) };
+};
+
+export const getPublicBooking = async (input: z.infer<typeof getPublicBookingInputSchema>) => {
+  const bookingId = decryptBookingShareToken(input.token);
+  if (!bookingId) return null;
+
+  const row = await db.query.bookings.findFirst({
+    where: eq(bookings.id, bookingId),
+    with: publicBookingWith,
+  });
+
+  if (!row) return null;
+  return mapPublicBooking(row);
 };
 
 export const generateBookingReceiptPdf = async (

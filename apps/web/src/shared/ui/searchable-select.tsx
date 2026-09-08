@@ -1,11 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { ChevronDown, Loader2, Plus } from "lucide-react";
 
 import { Label } from "@autolab/ui/components/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@autolab/ui/components/popover";
 import { cn } from "@autolab/ui/lib/utils";
 
 export type SearchableSelectOption = { value: string; label: string };
+
+type SearchableSelectAction = {
+  label: string | ((query: string) => string);
+  onSelect: (query: string) => void;
+};
 
 type SearchableSelectProps = {
   label?: string;
@@ -19,6 +24,7 @@ type SearchableSelectProps = {
   emptyText?: string;
   allowCustom?: boolean;
   customOptionLabel?: (query: string) => string;
+  action?: SearchableSelectAction;
   error?: string;
   className?: string;
 };
@@ -35,6 +41,7 @@ export const SearchableSelect = ({
   emptyText = "Нічого не знайдено",
   allowCustom = false,
   customOptionLabel = (query) => `Використати «${query}»`,
+  action,
   error,
   className,
 }: SearchableSelectProps) => {
@@ -81,6 +88,15 @@ export const SearchableSelect = ({
     setIsOpen(false);
     setQuery("");
   };
+
+  const handleActionSelect = () => {
+    action?.onSelect(trimmedQuery);
+    setIsOpen(false);
+    setQuery("");
+  };
+
+  const actionLabel =
+    typeof action?.label === "function" ? action.label(trimmedQuery) : action?.label;
 
   return (
     <div className={cn("space-y-1", className)}>
@@ -143,9 +159,23 @@ export const SearchableSelect = ({
                 </li>
               ))
             ) : showCustomOption ? null : (
-              <li className="px-2 py-6 text-center text-sm text-muted-foreground">{emptyText}</li>
+              <li className={cn("px-2 text-center text-sm text-muted-foreground", action ? "py-3" : "py-6")}>
+                {emptyText}
+              </li>
             )}
           </ul>
+          {action ? (
+            <div className="border-t border-input p-1">
+              <button
+                type="button"
+                className="flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm font-medium text-primary transition-colors hover:bg-accent hover:text-accent-foreground"
+                onClick={handleActionSelect}
+              >
+                <Plus className="size-4 shrink-0" />
+                <span className="truncate">{actionLabel}</span>
+              </button>
+            </div>
+          ) : null}
         </PopoverContent>
       </Popover>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
