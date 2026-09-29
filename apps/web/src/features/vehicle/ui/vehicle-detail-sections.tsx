@@ -6,7 +6,6 @@ import { LicencePlate } from "@/features/vehicle/ui/licence-plate";
 import { range } from "@/shared/lib/arrays";
 import { formatDate } from "@/shared/lib/date";
 import { formatPrice } from "@/shared/lib/money";
-import { StatusLight } from "@/shared/ui/status-light";
 import { Badge } from "@autolab/ui/components/badge";
 import { Skeleton } from "@autolab/ui/components/skeleton";
 import { cn } from "@autolab/ui/lib/utils";
@@ -65,8 +64,7 @@ export const VehicleServiceHistory = ({ bookings, isLoading, onBookingClick }: P
               "cursor-pointer hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           )}
         >
-          <div className="flex items-start justify-between gap-4">
-            <StatusLight status={booking.status} className="text-sm font-medium" />
+          <div className="flex items-start justify-end">
             <p className="shrink-0 text-base font-semibold tabular-nums">
               {formatPrice(booking.totalPrice)}
             </p>

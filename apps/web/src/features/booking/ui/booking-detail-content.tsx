@@ -7,7 +7,6 @@ import { VehicleCard } from "@/features/vehicle/ui/vehicle-card";
 import { VehicleMakeIcon } from "@/features/vehicle/ui/vehicle-make-icon";
 import { formatPrice } from "@/shared/lib/money";
 import { RoleBadge } from "@/shared/ui/role-badge";
-import { StatusLight } from "@/shared/ui/status-light";
 import { Badge } from "@autolab/ui/components/badge";
 
 export type BookingDetailService = {
@@ -82,10 +81,11 @@ export const BookingDetailContent = ({
               <h1 className="text-3xl font-bold tracking-tight">
                 {vehicle ? `${vehicle.make} ${vehicle.model}` : "Запис"}
               </h1>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                {vehicle?.year ? <Badge variant="secondary">{vehicle.year} рік</Badge> : null}
-                <StatusLight status={booking.status} />
-              </div>
+              {vehicle?.year ? (
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <Badge variant="secondary">{vehicle.year} рік</Badge>
+                </div>
+              ) : null}
               {vehicle?.licensePlate ? (
                 <div className="mt-3">
                   <LicencePlate plateNumber={vehicle.licensePlate} />

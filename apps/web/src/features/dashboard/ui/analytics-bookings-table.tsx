@@ -4,7 +4,6 @@ import type { BookingRow } from "@/features/booking/lib/types";
 import { formatDate } from "@/shared/lib/date";
 import { formatPrice } from "@/shared/lib/money";
 import { DataTablePagination } from "@/shared/ui/data-table-pagination";
-import { StatusLight } from "@/shared/ui/status-light";
 import { Card, CardContent, CardHeader, CardTitle } from "@autolab/ui/components/card";
 import { Skeleton } from "@autolab/ui/components/skeleton";
 import {
@@ -40,10 +39,9 @@ const AnalyticsBookingMobileCard = ({
     className="flex w-full flex-col gap-2 border-b border-border/60 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-muted/20"
   >
     <div className="flex items-start justify-between gap-3">
-      <StatusLight status={booking.status} className="text-sm font-medium" />
+      <p className="text-sm text-muted-foreground">{formatDate(booking.startTime, "datetime")}</p>
       <p className="shrink-0 text-sm font-semibold tabular-nums">{formatPrice(booking.totalPrice)}</p>
     </div>
-    <p className="text-sm text-muted-foreground">{formatDate(booking.startTime, "datetime")}</p>
     <p className="text-sm font-medium">
       {booking.vehicle ? `${booking.vehicle.make} ${booking.vehicle.model}` : "—"}
     </p>
@@ -103,7 +101,6 @@ export const AnalyticsBookingsTable = ({
                   <TableHeader>
                     <TableRow>
                       <TableHead>Дата</TableHead>
-                      <TableHead>Статус</TableHead>
                       <TableHead>Авто</TableHead>
                       <TableHead>Майстер</TableHead>
                       <TableHead className="text-right">Сума</TableHead>
@@ -115,9 +112,6 @@ export const AnalyticsBookingsTable = ({
                           <TableRow key={index}>
                             <TableCell>
                               <Skeleton className="h-4 w-28" />
-                            </TableCell>
-                            <TableCell>
-                              <Skeleton className="h-4 w-24" />
                             </TableCell>
                             <TableCell>
                               <Skeleton className="h-4 w-32" />
@@ -138,9 +132,6 @@ export const AnalyticsBookingsTable = ({
                           >
                             <TableCell className="whitespace-nowrap">
                               {formatDate(booking.startTime, "datetime")}
-                            </TableCell>
-                            <TableCell>
-                              <StatusLight status={booking.status} />
                             </TableCell>
                             <TableCell>
                               {booking.vehicle

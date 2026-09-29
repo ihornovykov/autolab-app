@@ -50,6 +50,7 @@ export type VehicleBookingFormValues = {
 type EmployeeOption = {
   id: string;
   label: string;
+  role?: "TECHNICIAN" | "MANAGER" | "OWNER";
 };
 
 type InitialValues = Partial<VehicleBookingFormValues> & {
@@ -199,6 +200,14 @@ const validateEndTimeAfterStart = ({
   return undefined;
 };
 
+const resolveDefaultEmployeeId = (employees: EmployeeOption[], initialId?: string) => {
+  if (initialId) return initialId;
+  if (employees.length === 1) return employees[0]?.id ?? "";
+  const technicians = employees.filter((employee) => employee.role === "TECHNICIAN");
+  if (technicians.length === 1) return technicians[0]?.id ?? "";
+  return "";
+};
+
 export const VehicleBookingForm = ({
   formId,
   organizationId,
@@ -229,7 +238,7 @@ export const VehicleBookingForm = ({
 
   const form = useForm({
     defaultValues: {
-      employeeId: initialValues?.employeeId ?? "",
+      employeeId: resolveDefaultEmployeeId(employees, initialValues?.employeeId),
       items: defaultItems,
       startTime: defaultStartTime,
       endTime:
@@ -264,6 +273,13 @@ export const VehicleBookingForm = ({
     if (createdServices.length === 0) return;
     syncEndTime(form.getFieldValue("startTime"), form.getFieldValue("items"));
   }, [createdServices, form]);
+
+  useEffect(() => {
+    if (initialValues?.employeeId) return;
+    const defaultEmployeeId = resolveDefaultEmployeeId(employees);
+    if (!defaultEmployeeId || form.getFieldValue("employeeId")) return;
+    form.setFieldValue("employeeId", defaultEmployeeId);
+  }, [employees, form, initialValues?.employeeId]);
 
   const employeeId = useStore(form.store, (state) => state.values.employeeId);
   const startTimeValue = useStore(form.store, (state) => state.values.startTime);

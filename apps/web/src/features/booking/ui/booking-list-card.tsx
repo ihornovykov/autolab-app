@@ -7,7 +7,6 @@ import { LicencePlate } from "@/features/vehicle/ui/licence-plate";
 import { VehicleMakeIcon } from "@/features/vehicle/ui/vehicle-make-icon";
 import { range } from "@/shared/lib/arrays";
 import { formatPrice } from "@/shared/lib/money";
-import { StatusLight } from "@/shared/ui/status-light";
 import { Badge } from "@autolab/ui/components/badge";
 import { Skeleton } from "@autolab/ui/components/skeleton";
 import { cn } from "@autolab/ui/lib/utils";
@@ -53,7 +52,6 @@ export const BookingListCard = ({ booking, employeeName, onClick, className }: P
         </div>
 
         <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-          <StatusLight status={booking.status} className="text-sm" />
           <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
             <ClockIcon className="size-3.5 shrink-0 opacity-70" />
             {formatBookingTimeShort(booking.startTime, booking.endTime)}

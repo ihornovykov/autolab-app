@@ -13,7 +13,6 @@ import { formatPrice } from "@/shared/lib/money";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
 import { RoleBadge } from "@/shared/ui/role-badge";
-import { StatusLight } from "@/shared/ui/status-light";
 import { Badge } from "@autolab/ui/components/badge";
 import { Button } from "@autolab/ui/components/button";
 import { Sheet } from "@autolab/ui/components/sheet";
@@ -102,7 +101,6 @@ export const BookingPreviewSheet = ({
             </p>
             <h2 className="text-xl font-semibold leading-tight tracking-tight">{vehicleTitle}</h2>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <StatusLight status={booking.status} />
               {vehicle?.year ? <Badge variant="secondary">{vehicle.year} рік</Badge> : null}
               {calendarEvent && calendarEvent.segmentCount > 1 ? (
                 <Badge variant="outline" className="font-normal">

@@ -41,6 +41,7 @@ export const useCreateBooking = (organizationId: string, onSuccess?: () => void)
     .map((employee) => ({
       id: employee.id,
       label: employee.user.name,
+      role: employee.role,
     }));
 
   const services = (servicesQuery.data?.items ?? []).map((service) => ({

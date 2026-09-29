@@ -19,14 +19,6 @@ import { Button } from "@autolab/ui/components/button";
 import { Checkbox } from "@autolab/ui/components/checkbox";
 import { DateRangePicker, type DateRangeFilterValue } from "@autolab/ui/components/date-range-picker";
 import { Label } from "@autolab/ui/components/label";
-import { Tabs, TabsList, TabsTrigger } from "@autolab/ui/components/tabs";
-
-const STATUS_TABS = [
-  { value: "ALL", label: "Усі" },
-  { value: "PENDING", label: "Заплановано" },
-  { value: "IN_PROGRESS", label: "В роботі" },
-  { value: "COMPLETED", label: "Виконано" },
-] as const;
 
 export const BookingsView = () => {
   const organizationId = useSelectedOrganizationId();
@@ -41,7 +33,6 @@ export const BookingsView = () => {
     dateRange,
     setSearch,
     setPage,
-    setStatus,
     setShowPast,
     setShowCancelled,
     setDateRange,
@@ -141,20 +132,6 @@ export const BookingsView = () => {
         }
       >
         <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <Tabs
-            value={status}
-            onValueChange={(value) => setStatus(value as typeof status)}
-            className="shrink-0"
-          >
-            <TabsList>
-              {STATUS_TABS.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value}>
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border bg-card">
             <div className="min-h-0 flex-1 overflow-y-auto p-4">
               {isLoading ? (

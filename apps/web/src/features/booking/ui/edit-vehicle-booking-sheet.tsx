@@ -17,7 +17,6 @@ import { formatDate } from "@/shared/lib/date";
 import { formatPrice } from "@/shared/lib/money";
 import { dialogs } from "@/shared/stores/dialogs";
 import { sheets } from "@/shared/stores/sheets";
-import { StatusLight } from "@/shared/ui/status-light";
 import { Badge } from "@autolab/ui/components/badge";
 import { Button } from "@autolab/ui/components/button";
 import { Sheet } from "@autolab/ui/components/sheet";
@@ -63,6 +62,7 @@ export const EditVehicleBookingSheet = ({ booking, organizationId }: Props) => {
     .map((employee) => ({
       id: employee.id,
       label: employee.user.name,
+      role: employee.role,
     }));
 
   const services = (servicesQuery.data?.items ?? []).map((service) => ({
@@ -139,12 +139,7 @@ export const EditVehicleBookingSheet = ({ booking, organizationId }: Props) => {
       }
     >
       <div className="mb-5 space-y-3 rounded-xl border border-border/60 bg-muted/20 p-3">
-        <div className="flex items-start justify-between gap-3">
-          <StatusLight status={booking.status} className="text-sm font-medium" />
-          <p className="shrink-0 text-sm font-semibold tabular-nums">
-            {formatPrice(booking.totalPrice)}
-          </p>
-        </div>
+        <p className="text-sm font-semibold tabular-nums">{formatPrice(booking.totalPrice)}</p>
         <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
           <CalendarIcon className="size-4 shrink-0 opacity-70" />
           {formatDate(booking.startTime)}
@@ -166,7 +161,6 @@ export const EditVehicleBookingSheet = ({ booking, organizationId }: Props) => {
         <VehicleBookingForm
           formId={FORM_ID}
           organizationId={organizationId}
-          showStatus
           allowTotalPriceOverride
           employees={employees}
           services={services}
