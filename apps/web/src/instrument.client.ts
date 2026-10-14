@@ -8,6 +8,9 @@ if (dsn) {
     dsn,
     environment: env.VITE_SENTRY_ENVIRONMENT ?? "development",
     tracesSampleRate: 0,
+    integrations: [Sentry.replayIntegration()],
+    replaysSessionSampleRate: 0,
+    replaysOnErrorSampleRate: 1,
     initialScope: {
       tags: { runtime: "browser" },
     },
