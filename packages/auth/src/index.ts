@@ -24,6 +24,8 @@ const platformAdmin = ac.newRole({
   session: ["list", "revoke"],
 });
 
+const publicSuffixes = new Set(["vercel.app", "now.sh", "netlify.app"]);
+
 const sharedCookieDomain = () => {
   if (!env.ADMIN_ORIGIN) return undefined;
   const shopHost = new URL(env.CORS_ORIGIN).hostname;
@@ -34,7 +36,17 @@ const sharedCookieDomain = () => {
   if (shopParts.length < 2 || adminParts.length < 2) return undefined;
   const parent = shopParts.slice(-2).join(".");
   if (parent !== adminParts.slice(-2).join(".")) return undefined;
+  if (publicSuffixes.has(parent)) return undefined;
   return parent;
+};
+
+const crossSiteCookieAttributes = () => {
+  if (!env.ADMIN_ORIGIN || sharedCookieDomain()) return undefined;
+  const admin = new URL(env.ADMIN_ORIGIN);
+  const shop = new URL(env.CORS_ORIGIN);
+  if (admin.origin === shop.origin) return undefined;
+  if (admin.protocol !== "https:" || shop.protocol !== "https:") return undefined;
+  return { sameSite: "none" as const, secure: true };
 };
 
 export function createAuth() {
@@ -51,9 +63,17 @@ export function createAuth() {
       },
     }),
     trustedOrigins: [env.CORS_ORIGIN, ...(env.ADMIN_ORIGIN ? [env.ADMIN_ORIGIN] : [])],
-    advanced: sharedCookieDomain()
-      ? { crossSubDomainCookies: { enabled: true, domain: sharedCookieDomain() } }
-      : undefined,
+    advanced: (() => {
+      const cookieDomain = sharedCookieDomain();
+      const crossSiteCookies = crossSiteCookieAttributes();
+      if (!cookieDomain && !crossSiteCookies) return undefined;
+      return {
+        ...(cookieDomain
+          ? { crossSubDomainCookies: { enabled: true, domain: cookieDomain } }
+          : {}),
+        ...(crossSiteCookies ? { defaultCookieAttributes: crossSiteCookies } : {}),
+      };
+    })(),
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
