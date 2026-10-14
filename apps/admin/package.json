@@ -13,7 +13,7 @@
     "@orpc/client": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/tanstack-query": "^1.13.14",
-    "@tanstack/react-query": "^5.99.0",
+    "@tanstack/react-query": "5.104.2",
     "@tanstack/react-router": "^1.168.22",
     "better-auth": "catalog:",
     "lucide-react": "^1.52.0",

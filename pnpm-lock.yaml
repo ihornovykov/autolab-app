@@ -107,8 +107,8 @@ importers:
         specifier: ^1.13.14
         version: 1.14.6(@opentelemetry/api@1.9.1)(@orpc/client@1.14.6(@opentelemetry/api@1.9.1))(@tanstack/query-core@5.104.2)
       '@tanstack/react-query':
-        specifier: ^5.99.0
-        version: 5.101.0(react@19.2.7)
+        specifier: 5.104.2
+        version: 5.104.2(react@19.2.7)
       '@tanstack/react-router':
         specifier: ^1.168.22
         version: 1.170.16(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -3890,9 +3890,6 @@ packages:
     resolution: {integrity: sha512-y/xtNPNt/YeyoVxE/JCx+T7yjEzpezmbb+toK8DDD1P4m7Kzs5YR956+7OKexG3f8aXgC3rLZl7b1V+yNUSy5w==}
     engines: {node: '>=18'}
 
-  '@tanstack/query-core@5.101.0':
-    resolution: {integrity: sha512-cQetA74EB+seWySv1TTKr828TnP0u39m6LykwDXIo84SNortpDkp30TMEjkqtYCNP9c40uT/iwl6MLiufEt0Ow==}
-
   '@tanstack/query-core@5.104.2':
     resolution: {integrity: sha512-/qbsxJK5c3Ve1aFIULWYNcT2jeRUAiD4HME6Eu2ZdpofHoVgAjpkQhLg5xHuOoBkTPQUJLfP7zOxy0qsBcqROA==}
 
@@ -3913,11 +3910,6 @@ packages:
     peerDependencies:
       '@tanstack/react-query': ^5.104.2
       '@types/react': ^19.2.15
-      react: ^18 || ^19
-
-  '@tanstack/react-query@5.101.0':
-    resolution: {integrity: sha512-rLlJXSpkqfizLWgkR5+eLeIk0MvTx/meEIR7LRjxic+qxiQP8zVjq7BqQkiCMNLQBlLfuOLqqr6KO5GtrDlmSg==}
-    peerDependencies:
       react: ^18 || ^19
 
   '@tanstack/react-query@5.104.2':
@@ -10791,8 +10783,6 @@ snapshots:
 
   '@tanstack/pacer-lite@0.1.1': {}
 
-  '@tanstack/query-core@5.101.0': {}
-
   '@tanstack/query-core@5.104.2': {}
 
   '@tanstack/query-devtools@5.104.2(csstype@3.2.3)':
@@ -10829,11 +10819,6 @@ snapshots:
       react: 19.2.7
     transitivePeerDependencies:
       - csstype
-
-  '@tanstack/react-query@5.101.0(react@19.2.7)':
-    dependencies:
-      '@tanstack/query-core': 5.101.0
-      react: 19.2.7
 
   '@tanstack/react-query@5.104.2(react@19.2.7)':
     dependencies:
@@ -13054,7 +13039,7 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  minimizer-webpack-plugin@5.6.1(esbuild@0.25.10)(postcss@8.5.15)(webpack@5.109.2(esbuild@0.25.10)(postcss@8.5.15)):
+  minimizer-webpack-plugin@5.6.1(esbuild@0.28.1)(postcss@8.5.15)(webpack@5.109.2(esbuild@0.25.10)(postcss@8.5.15)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
@@ -13062,7 +13047,7 @@ snapshots:
       terser: 5.49.1
       webpack: 5.109.2(esbuild@0.28.1)(postcss@8.5.15)
     optionalDependencies:
-      esbuild: 0.25.10
+      esbuild: 0.28.1
       postcss: 8.5.15
 
   minimizer-webpack-plugin@5.6.1(esbuild@0.28.1)(webpack@5.109.2(esbuild@0.28.1)):
@@ -14843,7 +14828,7 @@ snapshots:
       events: 3.3.0
       graceful-fs: 4.2.11
       mime-db: 1.54.0
-      minimizer-webpack-plugin: 5.6.1(esbuild@0.25.10)(postcss@8.5.15)(webpack@5.109.2(esbuild@0.25.10)(postcss@8.5.15))
+      minimizer-webpack-plugin: 5.6.1(esbuild@0.28.1)(postcss@8.5.15)(webpack@5.109.2(esbuild@0.25.10)(postcss@8.5.15))
       neo-async: 2.6.2
       schema-utils: 4.3.3
       tapable: 2.3.3
