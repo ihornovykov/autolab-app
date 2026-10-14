@@ -92,7 +92,7 @@ export const LinkEmailAccountDialog = ({ email }: Props) => {
           form.handleSubmit();
         }}
       >
-        <Input label="Email" type="email" value={email} disabled readOnly />
+        <Input label="Email" type="email" placeholder="name@example.com" value={email} disabled readOnly />
         <form.Field name="newPassword">
           {(field) => (
             <Input

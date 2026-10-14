@@ -10,10 +10,13 @@ import { createIsomorphicFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { toast } from "sonner";
 
+import { captureUntypedError } from "@/shared/lib/sentry";
+
 export const createQueryClient = () => {
   return new QueryClient({
     queryCache: new QueryCache({
       onError: (error, query) => {
+        captureUntypedError(error);
         toast.error(`Error: ${error.message}`, {
           action: {
             label: "retry",

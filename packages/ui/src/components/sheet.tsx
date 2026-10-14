@@ -51,7 +51,7 @@ export const Sheet = ({
         data-state="open"
         style={style}
         className={cn(
-          "fixed z-50 flex flex-col overflow-hidden bg-background shadow-lg transition ease-in-out duration-300",
+          "fixed z-50 flex flex-col overflow-hidden bg-background text-left shadow-lg transition ease-in-out duration-300",
           side === "left" && "animate-in slide-in-from-left",
           side === "right" && "animate-in slide-in-from-right",
           side === "top" && "animate-in slide-in-from-top",
@@ -92,7 +92,7 @@ type DialogProps = {
   onOpenChange: (open: boolean) => void;
   title?: string;
   description?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
   footer?: React.ReactNode;
 };
@@ -118,7 +118,7 @@ export const Dialog = ({
       />
       <div
         className={cn(
-          "relative z-10 flex max-h-[90vh] w-full max-w-lg translate-y-0 flex-col overflow-hidden rounded-xl border bg-background shadow-lg duration-200 animate-in fade-in-0 zoom-in-95",
+          "relative z-10 flex max-h-[90vh] w-full max-w-lg translate-y-0 flex-col overflow-hidden rounded-xl border bg-background text-left shadow-lg duration-200 animate-in fade-in-0 zoom-in-95",
           className,
         )}
       >
@@ -138,7 +138,7 @@ export const Dialog = ({
             {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
           </div>
         ) : null}
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">{children}</div>
+        {children ? <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">{children}</div> : null}
         {footer ? <div className="shrink-0 border-t bg-muted/20 px-6 py-4">{footer}</div> : null}
       </div>
     </div>

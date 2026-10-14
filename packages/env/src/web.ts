@@ -5,6 +5,9 @@ export const env = createEnv({
   clientPrefix: "VITE_",
   client: {
     VITE_SIMPLE_ICONS_URL: z.url().optional(),
+    VITE_ADMIN_ORIGIN: z.url().optional(),
+    VITE_SENTRY_DSN: z.string().min(1).optional(),
+    VITE_SENTRY_ENVIRONMENT: z.string().min(1).optional(),
   },
   runtimeEnv: (import.meta as any).env,
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,

@@ -1,3 +1,4 @@
+import { adminRoutes } from "../domains/admin/routes";
 import { bookingRoutes } from "../domains/booking/routes";
 import { clientRoutes } from "../domains/client/routes";
 import { employeeRoutes } from "../domains/employee/routes";
@@ -20,6 +21,7 @@ export const appRouter = {
   vehicle: vehicleRoutes,
   booking: bookingRoutes,
   search: searchRoutes,
+  admin: adminRoutes,
 };
 
 export type AppRouter = typeof appRouter;

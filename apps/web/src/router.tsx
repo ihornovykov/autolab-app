@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/tanstackstart-react";
 import { createBrowserHistory, createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 
@@ -23,6 +24,10 @@ export const getRouter = () => {
     context: { orpc, queryClient },
     defaultNotFoundComponent: () => <div>Not Found</div>,
   });
+
+  if (!router.isServer) {
+    Sentry.addIntegration(Sentry.tanstackRouterBrowserTracingIntegration(router));
+  }
 
   setupRouterSsrQueryIntegration({
     router,

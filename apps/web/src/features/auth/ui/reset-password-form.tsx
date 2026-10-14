@@ -63,6 +63,7 @@ export const ResetPasswordForm = ({ token }: Props) => {
             label="Новий пароль"
             type="password"
             password
+            placeholder="Мінімум 8 символів"
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
             error={formatFieldErrors(field.state.meta.errors)}
@@ -76,6 +77,7 @@ export const ResetPasswordForm = ({ token }: Props) => {
             label="Підтвердження паролю"
             type="password"
             password
+            placeholder="Повторіть новий пароль"
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
             error={formatFieldErrors(field.state.meta.errors)}

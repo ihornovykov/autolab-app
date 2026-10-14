@@ -59,6 +59,7 @@ export const OrganizationForm = ({ onSubmit, isSubmitting, embedded }: Props) =>
             <Label htmlFor={field.name}>Назва *</Label>
             <Input
               id={field.name}
+              placeholder="AutoLab СТО"
               value={field.state.value}
               onChange={(e) => field.handleChange(e.target.value)}
               required
@@ -72,6 +73,7 @@ export const OrganizationForm = ({ onSubmit, isSubmitting, embedded }: Props) =>
             <Label htmlFor={field.name}>Адреса</Label>
             <Input
               id={field.name}
+              placeholder="вул. Хрещатик, 1, Київ"
               value={field.state.value}
               onChange={(e) => field.handleChange(e.target.value)}
             />
@@ -84,6 +86,7 @@ export const OrganizationForm = ({ onSubmit, isSubmitting, embedded }: Props) =>
             <Label htmlFor={field.name}>Опис</Label>
             <Textarea
               id={field.name}
+              placeholder="Короткий опис вашої організації та послуг"
               value={field.state.value}
               onChange={(e) => field.handleChange(e.target.value)}
             />

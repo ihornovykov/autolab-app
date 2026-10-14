@@ -100,7 +100,6 @@ export const createClient = async (
   input: z.infer<typeof createClientInputSchema>,
 ) => {
   await getOrgContext(context, input.organizationId);
-
   const [client] = await db
     .insert(clients)
     .values({
@@ -126,7 +125,6 @@ export const updateClient = async (
   input: z.infer<typeof updateClientInputSchema>,
 ) => {
   await getOrgContext(context, input.organizationId);
-
   const { clientId, organizationId, ...data } = input;
 
   const [updated] = await db
@@ -152,7 +150,6 @@ export const deleteClient = async (
   input: { organizationId: string; clientId: string },
 ) => {
   await getOrgContext(context, input.organizationId);
-
   await db
     .delete(clients)
     .where(and(eq(clients.id, input.clientId), eq(clients.organizationId, input.organizationId)));

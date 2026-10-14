@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: autolab-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: autolab
+      POSTGRES_PASSWORD: autolab
+      POSTGRES_DB: autolab
+    volumes:
+      - autolab_pg:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U autolab -d autolab"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  autolab_pg:
