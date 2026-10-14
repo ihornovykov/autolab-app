@@ -118,6 +118,7 @@ export const ProfileForm = ({ profile }: Props) => {
             <Input
               label="Email"
               type="email"
+              placeholder="name@example.com"
               value={field.state.value}
               disabled
               readOnly

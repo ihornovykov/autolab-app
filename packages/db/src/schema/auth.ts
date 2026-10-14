@@ -9,13 +9,17 @@ export const users = pgTable(
     email: text("email").notNull(),
     emailVerified: boolean("email_verified").default(false).notNull(),
     image: text("image"),
+    role: text("role").default("user").notNull(),
+    banned: boolean("banned").default(false).notNull(),
+    banReason: text("ban_reason"),
+    banExpires: timestamp("ban_expires"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (table) => [unique("uq_users_email").on(table.email)],
+  (table) => [unique("uq_users_email").on(table.email), index("idx_users_role").on(table.role)],
 );
 
 export const sessions = pgTable(
@@ -31,6 +35,7 @@ export const sessions = pgTable(
       .notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
+    impersonatedBy: text("impersonated_by"),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -38,6 +43,7 @@ export const sessions = pgTable(
   (table) => [
     unique("uq_sessions_token").on(table.token),
     index("idx_sessions_user_id").on(table.userId),
+    index("idx_sessions_impersonated_by").on(table.impersonatedBy),
   ],
 );
 
@@ -81,11 +87,6 @@ export const verifications = pgTable(
   },
   (table) => [index("idx_verifications_identifier").on(table.identifier)],
 );
-
-export const usersRelations = relations(users, ({ many }) => ({
-  sessions: many(sessions),
-  accounts: many(accounts),
-}));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, {

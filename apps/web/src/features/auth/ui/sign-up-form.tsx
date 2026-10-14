@@ -82,6 +82,7 @@ export const SignUpForm = () => {
             label="Пароль"
             type="password"
             password
+            placeholder="Мінімум 8 символів"
             value={field.state.value}
             onChange={(e) => field.handleChange(e.target.value)}
             error={formatFieldErrors(field.state.meta.errors)}
@@ -95,6 +96,7 @@ export const SignUpForm = () => {
             label="Підтвердження паролю"
             type="password"
             password
+            placeholder="Повторіть пароль"
             value={field.state.value}
             onChange={(e) => field.handleChange(e.target.value)}
             error={formatFieldErrors(field.state.meta.errors)}

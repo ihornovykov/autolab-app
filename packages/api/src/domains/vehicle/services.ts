@@ -131,7 +131,6 @@ export const createVehicle = async (
   input: z.infer<typeof createVehicleInputSchema>,
 ) => {
   await getOrgContext(context, input.organizationId);
-
   if (input.clientId) {
     const client = await db.query.clients.findFirst({
       where: and(eq(clients.id, input.clientId), eq(clients.organizationId, input.organizationId)),

@@ -83,6 +83,7 @@ const UnitPriceInput = ({ value, onChange }: UnitPriceInputProps) => {
     <Input
       type="text"
       inputMode="decimal"
+      placeholder="800,00"
       className="h-8 tabular-nums"
       value={isEditing ? draft : formatPriceOnBlur(value)}
       onFocus={() => setDraft(formatPriceForEdit(value))}
@@ -504,6 +505,7 @@ export const BookingServicePicker = ({
                       <Input
                         type="text"
                         inputMode="decimal"
+                        placeholder="1"
                         min={1}
                         max={99}
                         className="h-8 w-12 text-center"
