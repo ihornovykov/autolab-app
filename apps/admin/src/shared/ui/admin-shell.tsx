@@ -1,6 +1,7 @@
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -221,10 +222,12 @@ const UserFooter = ({
       }
     />
     <DropdownMenuContent align="end" side="top" sideOffset={8} className="min-w-56 rounded-lg">
-      <DropdownMenuLabel className="font-normal">
-        <span className="block truncate font-semibold">{user.name}</span>
-        <span className="block truncate text-xs text-muted-foreground">{user.email}</span>
-      </DropdownMenuLabel>
+      <DropdownMenuGroup>
+        <DropdownMenuLabel className="font-normal">
+          <span className="block truncate font-semibold">{user.name}</span>
+          <span className="block truncate text-xs text-muted-foreground">{user.email}</span>
+        </DropdownMenuLabel>
+      </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuItem onClick={onSignOut}>
         <LogOutIcon className="opacity-60" />
