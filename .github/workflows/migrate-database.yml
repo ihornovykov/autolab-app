@@ -1,0 +1,49 @@
+name: Migrate database
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+concurrency:
+  group: migrate-database-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    name: Migrate ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @autolab/db...
+
+      - name: Apply migrations
+        working-directory: packages/db
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "DATABASE_URL is missing on the ${{ github.ref_name }} GitHub environment."
+            exit 1
+          fi
+          pnpm exec drizzle-kit migrate
