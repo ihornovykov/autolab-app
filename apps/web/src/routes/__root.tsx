@@ -1,16 +1,23 @@
 import { Toaster } from "@autolab/ui/components/sonner";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
+import {
+  HeadContent,
+  Outlet,
+  Scripts,
+  createRootRouteWithContext,
+  type ErrorComponentProps,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { createMiddleware } from "@tanstack/react-start";
 import { evlogErrorHandler } from "evlog/nitro/v3";
 import { ThemeProvider } from "next-themes";
-
-import { NuqsProvider } from "@/shared/ui/nuqs-provider";
+import { useEffect } from "react";
 
 import type { orpc } from "@/shared/api/orpc";
+import { captureUnexpectedError } from "@/shared/lib/sentry";
 import { DialogHost } from "@/shared/ui/dialog-host";
+import { NuqsProvider } from "@/shared/ui/nuqs-provider";
 import { SheetHost } from "@/shared/ui/sheet-host";
 
 import appCss from "@/shared/styles/index.css?url";
@@ -41,7 +48,16 @@ const RootDocument = () => (
   </html>
 );
 
+const RootError = ({ error }: ErrorComponentProps) => {
+  useEffect(() => {
+    captureUnexpectedError(error);
+  }, [error]);
+
+  return <div>Something went wrong</div>;
+};
+
 export const Route = createRootRouteWithContext<RouterAppContext>()({
+  errorComponent: RootError,
   server: {
     middleware: [createMiddleware().server(evlogErrorHandler)],
   },
