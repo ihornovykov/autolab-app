@@ -15,7 +15,8 @@ import { ThemeProvider } from "next-themes";
 import { useEffect } from "react";
 
 import type { orpc } from "@/shared/api/orpc";
-import { captureUnexpectedError } from "@/shared/lib/sentry";
+import { authClient } from "@/shared/lib/auth";
+import { captureUnexpectedError, setSentryUser } from "@/shared/lib/sentry";
 import { DialogHost } from "@/shared/ui/dialog-host";
 import { NuqsProvider } from "@/shared/ui/nuqs-provider";
 import { SheetHost } from "@/shared/ui/sheet-host";
@@ -27,26 +28,36 @@ export type RouterAppContext = {
   queryClient: QueryClient;
 };
 
-const RootDocument = () => (
-  <html lang="uk" suppressHydrationWarning>
-    <head>
-      <HeadContent />
-    </head>
-    <body>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        <NuqsProvider>
-          <Outlet />
-          <DialogHost />
-          <SheetHost />
-          <Toaster richColors position="bottom-right" />
-          <TanStackRouterDevtools position="bottom-left" />
-          <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />
-        </NuqsProvider>
-      </ThemeProvider>
-      <Scripts />
-    </body>
-  </html>
-);
+const RootDocument = () => {
+  const { data: session, isPending } = authClient.useSession();
+  const user = session?.user;
+
+  useEffect(() => {
+    if (isPending) return;
+    setSentryUser(user ? { id: user.id, email: user.email, username: user.name } : null);
+  }, [isPending, user]);
+
+  return (
+    <html lang="uk" suppressHydrationWarning>
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <NuqsProvider>
+            <Outlet />
+            <DialogHost />
+            <SheetHost />
+            <Toaster richColors position="bottom-right" />
+            <TanStackRouterDevtools position="bottom-left" />
+            <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />
+          </NuqsProvider>
+        </ThemeProvider>
+        <Scripts />
+      </body>
+    </html>
+  );
+};
 
 const RootError = ({ error }: ErrorComponentProps) => {
   useEffect(() => {

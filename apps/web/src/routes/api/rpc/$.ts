@@ -33,7 +33,7 @@ async function handle({ request }: { request: Request }) {
 
   const context = await createContext({ req: request });
   const user = context.session?.user;
-  setSentryUser(user ? { id: user.id, email: user.email } : null);
+  setSentryUser(user ? { id: user.id, email: user.email, username: user.name } : null);
 
   const rpcResult = await rpcHandler.handle(request, {
     prefix: "/api/rpc",

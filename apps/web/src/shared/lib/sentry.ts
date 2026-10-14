@@ -17,6 +17,7 @@ export const captureUntypedError = (error: unknown) => {
 type SentryUser = {
   id: string;
   email?: string | null;
+  username?: string | null;
 };
 
 export const setSentryUser = (user: SentryUser | null) => {
@@ -28,5 +29,6 @@ export const setSentryUser = (user: SentryUser | null) => {
   Sentry.setUser({
     id: user.id,
     email: user.email ?? undefined,
+    username: user.username ?? undefined,
   });
 };

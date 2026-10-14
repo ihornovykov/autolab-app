@@ -5,6 +5,7 @@ export default defineConfig({
   experimental: {
     asyncContext: true,
   },
+  traceDeps: ["react", "react-dom"],
   modules: [
     evlog({
       env: { service: "autolab-web" },
