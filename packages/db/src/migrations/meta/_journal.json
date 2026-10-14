@@ -36,6 +36,13 @@
       "when": 1783926503767,
       "tag": "0005_service_category_booking_items",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791997343753,
+      "tag": "0006_admin_auth_columns",
+      "breakpoints": true
     }
   ]
 }

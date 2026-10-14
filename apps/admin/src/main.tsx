@@ -1,0 +1,36 @@
+import { Toaster } from "@autolab/ui/components/sonner";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { RouterProvider, createRouter } from "@tanstack/react-router";
+import { ThemeProvider } from "next-themes";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+
+import { routeTree } from "./routeTree.gen";
+import "./shared/styles/index.css";
+
+const queryClient = new QueryClient();
+
+const router = createRouter({
+  routeTree,
+  context: { queryClient },
+});
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+const root = document.getElementById("root");
+if (!root) throw new Error("Root element missing");
+
+createRoot(root).render(
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <RouterProvider router={router} />
+        <Toaster richColors position="bottom-right" />
+      </ThemeProvider>
+    </QueryClientProvider>
+  </StrictMode>,
+);

@@ -14,8 +14,12 @@ import { useGlobalSearchShortcut } from "@/features/search/hooks/use-global-sear
 import { useGlobalSearchStore } from "@/features/search/lib/stores";
 import { useSelectedOrganizationId } from "@/shared/hooks/use-organization";
 
-const EMPTY_ORGANIZATIONS: Array<{ id: string; name: string; logo?: string | null; address?: string | null }> =
-  [];
+const EMPTY_ORGANIZATIONS: Array<{
+  id: string;
+  name: string;
+  logo?: string | null;
+  address?: string | null;
+}> = [];
 
 const DashboardLayout = () => {
   const { data: session } = authClient.useSession();
@@ -57,6 +61,23 @@ const DashboardLayout = () => {
           organizationId={organizationId}
         />
         <div className="flex min-h-0 flex-1 flex-col px-4 pb-6">
+          {session.session.impersonatedBy ? (
+            <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
+              <span>You are signed in as {session.user.name} ({session.user.email}).</span>
+              <button
+                type="button"
+                className="font-medium underline"
+                onClick={() => {
+                  const adminOrigin = import.meta.env.VITE_ADMIN_ORIGIN ?? "http://localhost:3002";
+                  void authClient.admin.stopImpersonating().then(() => {
+                    window.location.href = `${adminOrigin}/users/${session.user.id}`;
+                  });
+                }}
+              >
+                Stop impersonating
+              </button>
+            </div>
+          ) : null}
           <Outlet />
         </div>
       </SidebarInset>

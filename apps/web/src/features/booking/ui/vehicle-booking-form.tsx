@@ -118,6 +118,7 @@ const TotalPriceInput = ({ value, onChange }: TotalPriceInputProps) => {
     <Input
       type="text"
       inputMode="decimal"
+      placeholder="1 200,00"
       className="h-10 tabular-nums"
       value={isEditing ? draft : formatTotalPriceOnBlur(value)}
       onFocus={() => setDraft(formatTotalPriceForEdit(value))}

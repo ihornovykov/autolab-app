@@ -76,6 +76,7 @@ export const SignInForm = () => {
               id="password"
               type="password"
               password
+              placeholder="Мінімум 8 символів"
               value={field.state.value}
               onChange={(e) => field.handleChange(e.target.value)}
               error={formatFieldErrors(field.state.meta.errors)}
